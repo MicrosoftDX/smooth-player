@@ -15,6 +15,7 @@ MediaPlayer.dependencies.SourceBufferExtensions = function () {
     "use strict";
     this.system = undefined;
     this.manifestExt = undefined;
+    this.logger = undefined;
 };
 
 MediaPlayer.dependencies.SourceBufferExtensions.prototype = {
@@ -26,6 +27,7 @@ MediaPlayer.dependencies.SourceBufferExtensions.prototype = {
         var deferred = Q.defer(),
             self = this;
         try {
+            this.logger.info("[SourceBufferExtensions]", "addSourceBuffer(" + codec + ")")
             deferred.resolve(mediaSource.addSourceBuffer(codec));
         } catch(ex) {
             if (!self.manifestExt.getIsTextTrack(codec)) {
@@ -42,6 +44,7 @@ MediaPlayer.dependencies.SourceBufferExtensions.prototype = {
         "use strict";
         var deferred = Q.defer();
         try {
+            this.logger.info("[SourceBufferExtensions]", "removeSourceBuffer()");
             deferred.resolve(mediaSource.removeSourceBuffer(buffer));
         } catch(ex){
             deferred.reject(ex.description);
@@ -68,6 +71,7 @@ MediaPlayer.dependencies.SourceBufferExtensions.prototype = {
             for (i = 0, len = ranges.length; i < len; i += 1) {
                 start = ranges.start(i);
                 end = ranges.end(i);
+                this.logger.debug("[SourceBufferExtensions]", "buffered[" + i + "] range: " + start + " - " + end);
                 if (firstStart === null) {
                     gap = Math.abs(start - time);
                     if (time >= start && time < end) {
@@ -132,6 +136,7 @@ MediaPlayer.dependencies.SourceBufferExtensions.prototype = {
             defer.resolve(true);
         }
         try {
+            this.logger.debug("[SourceBufferExtensions]", "appendBuffer(): " + bytes.byteLength + " bytes");
             if ("append" in buffer) {
                 buffer.append(bytes);
             } else if ("appendBuffer" in buffer) {
@@ -140,6 +145,7 @@ MediaPlayer.dependencies.SourceBufferExtensions.prototype = {
         } catch (err) {
             return Q.when(false);
         }
+        //console.log(buffer);
         return defer.promise;
     },
 
@@ -147,6 +153,7 @@ MediaPlayer.dependencies.SourceBufferExtensions.prototype = {
         "use strict";
         var deferred = Q.defer();
         try {
+            this.logger.info("[SourceBufferExtensions]", "abort()");
             deferred.resolve(buffer.abort());
         } catch(ex){
             deferred.reject(ex.description);

@@ -65,7 +65,7 @@ MediaPlayer.dependencies.FragmentLoader = function () {
                         download = (lastRequest.requestEndDate.getTime() - lastRequest.firstByteDate.getTime()),
                         total = (lastRequest.requestEndDate.getTime() - lastRequest.requestStartDate.getTime());
 
-                    self.debug.log("segment loaded: (" + req.status + ", " + latency + "ms, " + download + "ms, " + total + "ms) " + lastRequest.url);
+                    self.logger.debug("[FragmentLoader]", "segment loaded: (" + req.status + ", " + latency + "ms, " + download + "ms, " + total + "ms) " + lastRequest.url);
 
                     httpRequestMetrics = self.metricsModel.addHttpRequest(lastRequest.streamType,
                                                                           null,
@@ -109,7 +109,7 @@ MediaPlayer.dependencies.FragmentLoader = function () {
                         download = (lastRequest.requestEndDate.getTime() - lastRequest.firstByteDate.getTime()),
                         total = (lastRequest.requestEndDate.getTime() - lastRequest.requestStartDate.getTime());
 
-                    self.debug.log("segment loaded: (" + req.status + ", " + latency + "ms, " + download + "ms, " + total + "ms) " + lastRequest.url);
+                    self.logger.debug("[FragmentLoader]", "segment loaded: (" + req.status + ", " + latency + "ms, " + download + "ms, " + total + "ms) " + lastRequest.url);
 
                     httpRequestMetrics = self.metricsModel.addHttpRequest(lastRequest.streamType,
                                                                           null,
@@ -149,8 +149,8 @@ MediaPlayer.dependencies.FragmentLoader = function () {
         };
 
     return {
+        logger: undefined,
         metricsModel: undefined,
-        debug: undefined,
 
         getLoading: function () {
             return loading;

@@ -65,7 +65,7 @@ MediaPlayer.dependencies.ProtectionExtensions.prototype = {
         } else if (hasMs) {
             return element.msSetMediaKeys(mediaKeys);
         } else {
-            this.debug.log("no setmediakeys function in element");
+            //this.debug.log("no setmediakeys function in element");
         }
     },
 

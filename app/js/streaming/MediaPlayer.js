@@ -56,7 +56,35 @@ MediaPlayer = function (aContext) {
             return (element !== undefined && source !== undefined);
         },
 
+        initLogger = function () {
+            /*var container = document.getElementById("logs");
+            var appender = new log4javascript.InPageAppender(container);
+
+            appender.addEventListener("load", function() {
+                var iframes = document.getElementsByTagName("iframe");
+                for (var i = 0, len = iframes.length; i < len; ++i) {
+                    if (iframes[i].id.indexOf("_InPageAppender_") > -1) {
+                        var iframeDoc = iframes[i].contentDocument || iframes[i].contentWindow.document;
+                        iframeDoc.getElementById("switchesContainer").style.display = "none";
+                        iframeDoc.getElementById("commandLine").style.display = "none";
+                    }
+                }
+            });*/
+
+            var appender = new log4javascript.PopUpAppender();
+            var layout = new log4javascript.PatternLayout("%d{HH:mm:ss.SSS} %-5p - %m%n");
+            appender.setLayout(layout);
+            this.logger.addAppender(appender);
+            this.logger.setLevel(log4javascript.Level.ALL);
+        },
+
         play = function () {
+
+            var self = this;
+            
+            initLogger.call(this);
+
+            this.logger.info("[MediaPlayer]", "play", source);
             if (!initialized) {
                 throw "MediaPlayer not initialized!";
             }
@@ -72,7 +100,7 @@ MediaPlayer = function (aContext) {
             }
 
             playing = true;
-            this.debug.log("Playback initiated!");
+            //this.logger.info("[MediaPlayer] Playback initiated!");
             streamController = system.getObject("streamController");
             streamController.setVideoModel(this.videoModel);
             streamController.setAutoPlay(autoPlay);
@@ -92,7 +120,7 @@ MediaPlayer = function (aContext) {
     system.injectInto(context);
 
     return {
-        debug: undefined,
+        logger: undefined,
         eventBus: undefined,
         capabilities: undefined,
         videoModel: undefined,

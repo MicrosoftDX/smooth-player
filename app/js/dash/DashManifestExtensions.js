@@ -18,6 +18,8 @@ Dash.dependencies.DashManifestExtensions = function () {
 Dash.dependencies.DashManifestExtensions.prototype = {
     constructor: Dash.dependencies.DashManifestExtensions,
 
+    logger: undefined,
+
     getIsAudio: function (adaptation) {
         "use strict";
         var i,
@@ -354,11 +356,13 @@ Dash.dependencies.DashManifestExtensions.prototype = {
         "use strict";
         var representation = data.Representation_asArray[0],
             codec = (representation.mimeType + ';codecs="' + representation.codecs + '"');
+        this.logger.debug("[DashManifestExt]", "Codec for adaptation set '" + data.type + "': " + codec);
         return Q.when(codec);
     },
 
     getMimeType: function (data) {
         "use strict";
+        this.logger.debug("[DashManifestExt]", "MimeType for adaptation set '" + data.type + "': " + data.Representation_asArray[0].mimeType);        
         return Q.when(data.Representation_asArray[0].mimeType);
     },
 
@@ -402,6 +406,8 @@ Dash.dependencies.DashManifestExtensions.prototype = {
             delay = manifest.suggestedPresentationDelay;
         }
 
+        this.logger.debug("[DashManifestExt]", "Live offset = " + delay);
+
         return Q.when(delay);
     },
 
@@ -430,6 +436,7 @@ Dash.dependencies.DashManifestExtensions.prototype = {
             fDuration = list.duration;
 
             time = (((fStart - 1) * fDuration) / fTimescale);
+            this.logger.debug("[DashManifestExt]", "Live start (SegmentList) = " + time + " (startNumber: " + fStart + ", timescale: " + fTimescale + ", duration: " + fDuration + ")");
         }
         else if (representation.hasOwnProperty("SegmentTemplate")) {
             template = representation.SegmentTemplate;
@@ -446,9 +453,11 @@ Dash.dependencies.DashManifestExtensions.prototype = {
                 // This had better exist, or there's bigger problems.
                 // First one must have a time value!
                 time = (template.SegmentTimeline.S_asArray[0].t / fTimescale);
+                this.logger.debug("[DashManifestExt]", "Live start (SegmentTimeline) = " + time + " (t: " + template.SegmentTimeline.S_asArray[0].t + ", timescale: " + fTimescale + ")");
             }
             else {
                 time = (((fStart - 1) * fDuration) / fTimescale);
+                this.logger.debug("[DashManifestExt]", "Live start (SegmentTemplate) = " + time + " (startNumber: " + fStart + ", timescale: " + fTimescale + ", duration: " + fDuration + ")");
             }
         }
 
@@ -471,18 +480,23 @@ Dash.dependencies.DashManifestExtensions.prototype = {
                 if (manifest.hasOwnProperty("availabilityEndTime")) {
                     end = manifest.availabilityEndTime;
                     liveOffset = ((end.getTime() - start.getTime()) / 1000);
+                    self.logger.debug("[DashManifestExt]", "Live edge = " + liveOffset + " (start: " + start.toUTCString() + ", end: " + end.toUTCString() + ")");
                 } else {
                     liveOffset = ((now.getTime() - start.getTime()) / 1000);
+                    self.logger.debug("[DashManifestExt]", "Live edge = " + liveOffset + " (start: " + start.toUTCString() + ", now: " + now.toUTCString() + ")");
                 }
+
 
                 // Find out the between stream start and available start time.
                 self.getLiveStart(manifest, periodIndex).then(
                     function (start) {
                         // get the full time, relative to stream start
                         liveOffset += start;
+                        self.logger.debug("[DashManifestExt]", "Live edge += start (" + start + ") => " + liveOffset);
 
                         // peel off our reserved time
                         liveOffset -= delay;
+                        self.logger.debug("[DashManifestExt]", "Live edge -= delay (" + delay + ") => " + liveOffset);
 
                         deferred.resolve(liveOffset);
                     }
@@ -633,7 +647,10 @@ Dash.dependencies.DashManifestExtensions.prototype = {
         return self.getStartOffsetForPeriod(manifest, periodIndex).then(
             function (time) {
                 var startTime = manifest.Period_asArray[periodIndex].start;
+                self.logger.debug("[DashManifestExt]", "StartOffsetForPeriod = " + time);
+                self.logger.debug("[DashManifestExt]", "PeriodStartTime = " + startTime);
                 if (typeof(startTime) !== "undefined") {
+                    self.logger.debug("[DashManifestExt]", "TimestampOffsetForPeriod = " + (manifest.Period_asArray[periodIndex].start - time));
                     return Q.when(manifest.Period_asArray[periodIndex].start - time);
                 } else {
                     var deferredDurations = [],

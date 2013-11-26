@@ -71,7 +71,7 @@ Dash.dependencies.DashHandler = function () {
                 range = null,
                 self = this;
 
-            self.debug.log("Getting the initialization request.");
+            self.logger.debug("[DashHandler]", "Getting the initialization request for quality " + representation.bandwidth);
 
             if (representation.hasOwnProperty("SegmentTemplate")) {
                 if (representation.SegmentTemplate.hasOwnProperty("initialization")) {
@@ -107,7 +107,7 @@ Dash.dependencies.DashHandler = function () {
                 url = representation.BaseURL;
                 self.baseURLExt.loadInitialization(url).then(
                     function (theRange) {
-                        self.debug.log("Got an initialization.");
+                        self.logger.debug("[DashHandler]", "Got an initialization.");
                         request = new MediaPlayer.vo.SegmentRequest();
                         request.streamType = type;
                         request.type = "Initialization Segment";
@@ -123,12 +123,12 @@ Dash.dependencies.DashHandler = function () {
             }
 
             if (initialization && initialization.length > 0) {
-                self.debug.log("Got an initialization.");
                 request = new MediaPlayer.vo.SegmentRequest();
                 request.streamType = type;
                 request.type = "Initialization Segment";
                 request.url = getRequestUrl(initialization, representation.BaseURL);
                 request.range = range;
+                self.logger.debug("[DashHandler]", "Initialization request url: " + request.url);
                 deferred.resolve(request);
             }
 
@@ -144,13 +144,13 @@ Dash.dependencies.DashHandler = function () {
                 idx,
                 isFinished = false;
 
-            this.debug.log("Checking for stream end...");
+            this.logger.debug("[DashHandler]", "Checking for stream end...");
             if (isLive) {
-                this.debug.log("Live never ends! (TODO)");
+                //this.logger.debug("[DashHandler]", "Live never ends! (TODO)");
                 // TODO : Check the contents of the last box to signal end.
                 isFinished = false;
             } else if (representation.hasOwnProperty("segments") && representation.segments !== null) {
-                this.debug.log("Segments: " + index + " / " + representation.segments.length);
+                this.logger.debug("[DashHandler]", "Segments: " + index + " / " + representation.segments.length);
                 isFinished = (index >= representation.segments.length);
             } else if (representation.hasOwnProperty("SegmentTemplate") && !representation.SegmentTemplate.hasOwnProperty("SegmentTimeline")) {
                 fTimescale = 1;
@@ -170,7 +170,7 @@ Dash.dependencies.DashHandler = function () {
 
                     fLength = (fDuration / fTimescale);
                     idx = index - startNumber;
-                    this.debug.log("SegmentTemplate: " + fLength + " * " + idx + " = " + (fLength * idx) + " / " + sDuration);
+                    this.logger.debug("[DashHandler]", "SegmentTemplate: " + fLength + " * " + idx + " = " + (fLength * idx) + " / " + sDuration);
                     isFinished = ((fLength * idx) >= sDuration);
                 }
             }
@@ -335,9 +335,9 @@ Dash.dependencies.DashHandler = function () {
             }
 
             if (idx === -1) {
-                console.log("Couldn't figure out a time!");
-                console.log("Time: " + time);
-                console.log(segments);
+                this.logger.debug("[DashHandler]", "Couldn't figure out a time!");
+                this.logger.debug("[DashHandler]", "Time: " + time);
+                this.logger.debug("[DashHandler]", segments);
             }
 
             // TODO : This is horrible.
@@ -458,7 +458,7 @@ Dash.dependencies.DashHandler = function () {
                 usingTemplate = false,
                 self = this;
 
-            self.debug.log("Getting the request for time: " + time);
+            self.logger.debug("[DashHandler]", "[" + data.type + "] Getting the request for time: " + time + " (quality: " + quality + ")");
 
             deferred = Q.defer();
 
@@ -466,18 +466,18 @@ Dash.dependencies.DashHandler = function () {
                 function (segments) {
                     var segmentsPromise;
 
-                    self.debug.log("Got segments.");
-                    self.debug.log(segments);
+                    //self.logger.debug("[DashHandler]", "Got segments.");
+                    //self.logger.debug("[DashHandler]", segments);
                     // There's no segments so we *must* have a SegmentTemplate.
                     if (segments === null) {
                         if (!representation.hasOwnProperty("SegmentTemplate")) {
                             throw "Expected SegmentTemplate!";
                         }
                         usingTemplate = true;
-                        self.debug.log("No segments found, so we must be using a SegmentTemplate.");
+                        //self.logger.debug("[DashHandler]", "[getForTime] No segments found, so we must be using a SegmentTemplate.");
                         segmentsPromise = getIndexForTemplate.call(self, time, representation.SegmentTemplate);
                     } else {
-                        self.debug.log("Got a list of segments, so dig deeper.");
+                        self.logger.debug("[DashHandler]", "Got a list of segments, so dig deeper.");
                         representation.segments = segments;
                         usingTemplate = false;
                         segmentsPromise = getIndexForSegments.call(self, time, segments);
@@ -486,7 +486,7 @@ Dash.dependencies.DashHandler = function () {
                 }
             ).then(
                 function (newIndex) {
-                    self.debug.log("Index for time " + time + " is " + newIndex);
+                    self.logger.debug("[DashHandler]", "Index for time " + time + " is " + newIndex);
                     index = newIndex;
 
                     return isMediaFinished.call(self, representation);
@@ -495,12 +495,12 @@ Dash.dependencies.DashHandler = function () {
                 function (finished) {
                     var requestPromise = null;
 
-                    self.debug.log("Stream finished? " + finished);
+                    self.logger.debug("[DashHandler]", "Stream finished? " + finished);
                     if (finished) {
                         request = new MediaPlayer.vo.SegmentRequest();
                         request.action = request.ACTION_COMPLETE;
-                        self.debug.log("Signal complete.");
-                        self.debug.log(request);
+                        self.logger.debug("[DashHandler]", "Signal complete.");
+                        self.logger.debug("[DashHandler]", request);
                         deferred.resolve(request);
                     } else {
                         if (usingTemplate) {
@@ -515,8 +515,8 @@ Dash.dependencies.DashHandler = function () {
                 }
             ).then(
                 function (request) {
-                    self.debug.log("Got a request.");
-                    self.debug.log(request);
+                    self.logger.debug("[DashHandler]", "Got a request: " + request.url);
+                    //self.logger.debug("[DashHandler]", request);
                     deferred.resolve(request);
                 }
             );
@@ -531,39 +531,38 @@ Dash.dependencies.DashHandler = function () {
                 segment,
                 self = this;
 
-            self.debug.log("Getting the next request.");
+            self.logger.debug("[DashHandler]", "[" + data.type + "] Getting the next request (quality: " + quality + ")");
 
             if (index === -1) {
                 throw "You must call getSegmentRequestForTime first.";
             }
 
             index += 1;
-            self.debug.log("New index: " + index);
+            self.logger.debug("[DashHandler]", "New index: " + index);
 
             deferred = Q.defer();
 
             isMediaFinished.call(self, representation).then(
                 function (finished) {
-                    self.debug.log("Stream finished? " + finished);
+                    self.logger.debug("[DashHandler]", "Stream finished? " + finished);
                     if (finished) {
                         request = new MediaPlayer.vo.SegmentRequest();
                         request.action = request.ACTION_COMPLETE;
-                        self.debug.log("Signal complete.");
-                        self.debug.log(request);
+                        self.logger.debug("[DashHandler]", "Signal complete.");
+                        self.logger.debug("[DashHandler]", request);
                         deferred.resolve(request);
                     } else {
                         getSegments.call(self, representation).then(
                             function (segments) {
                                 var segmentsPromise;
 
-                                self.debug.log("Got segments.");
-                                self.debug.log(segments);
+                                //self.logger.debug("[DashHandler]", "Got segments.");
                                 // There's no segments so we *must* have a SegmentTemplate.
                                 if (segments === null) {
                                     if (!representation.hasOwnProperty("SegmentTemplate")) {
                                         throw "Expected SegmentTemplate!";
                                     }
-                                    self.debug.log("No segments found, so we must be using a SegmentTemplate.");
+                                    //self.logger.debug("[DashHandler]", "[getNext] No segments found, so we must be using a SegmentTemplate.");
                                     segmentsPromise = getRequestForTemplate.call(self, index, representation.SegmentTemplate, representation);
                                 } else {
                                     representation.segments = segments;
@@ -574,8 +573,8 @@ Dash.dependencies.DashHandler = function () {
                             }
                         ).then(
                             function (request) {
-                                self.debug.log("Got a request.");
-                                self.debug.log(request);
+                                self.logger.debug("[DashHandler]", "Got a request.");
+                                self.logger.debug("[DashHandler]", request);
                                 deferred.resolve(request);
                             }
                         );
@@ -642,7 +641,7 @@ Dash.dependencies.DashHandler = function () {
         };
 
     return {
-        debug: undefined,
+        logger: undefined,
         baseURLExt: undefined,
         manifestModel: undefined,
         manifestExt:undefined,

@@ -34,7 +34,7 @@ MediaPlayer.dependencies.AbrController = function () {
         };
 
     return {
-        debug: undefined,
+        logger: undefined,
         abrRulesCollection: undefined,
         manifestExt: undefined,
         metricsModel: undefined,
@@ -85,10 +85,10 @@ MediaPlayer.dependencies.AbrController = function () {
 
             quality = getInternalQuality(type);
 
-            self.debug.log("ABR enabled? (" + autoSwitchBitrate + ")");
+            //self.logger.debug("[AbrController]", "ABR enabled? (" + autoSwitchBitrate + ")");
 
             if (autoSwitchBitrate) {
-                self.debug.log("Check ABR rules.");
+                //self.logger.debug("[AbrController]", "Check ABR rules.");
 
                 self.getMetricsFor(data).then(
                     function (metrics) {
@@ -99,7 +99,7 @@ MediaPlayer.dependencies.AbrController = function () {
                                 }
                                 Q.all(funcs).then(
                                     function (results) {
-                                        self.debug.log(results);
+                                        //self.logger.debug("[AbrController]", results);
                                         values = {};
                                         values[MediaPlayer.rules.SwitchRequest.prototype.STRONG] = 999;
                                         values[MediaPlayer.rules.SwitchRequest.prototype.WEAK] = 999;
@@ -140,7 +140,7 @@ MediaPlayer.dependencies.AbrController = function () {
                                                 }
 
                                                 setInternalQuality(type, quality);
-                                                self.debug.log("New quality of " + quality);
+                                                self.logger.debug("[AbrController]", "New quality of " + quality);
 
                                                 deferred.resolve(quality);
                                             }
@@ -152,7 +152,7 @@ MediaPlayer.dependencies.AbrController = function () {
                     }
                 );
             } else {
-                self.debug.log("Unchanged quality of " + quality);
+                self.logger.debug("[AbrController]", "Unchanged quality of " + quality);
                 deferred.resolve(quality);
             }
 
