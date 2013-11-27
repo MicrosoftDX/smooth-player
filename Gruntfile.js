@@ -80,6 +80,7 @@ module.exports = function(grunt) {
             "./app/lib/objectiron.js",
             "./app/lib/Math.js",
             "./app/lib/long.js",
+            "./app/lib/log4javascript-1.4.6/log4javascript.js",
             "./test/js/utils/MPDfiles.js",
             "./test/js/utils/Main.js",
             "./app/lib/kendo/kendo.web.min.js",
