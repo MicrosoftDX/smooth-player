@@ -2,6 +2,7 @@ svn checkout --username webtvportal-ic https://orangeforge.rd.francetelecom.fr/s
 cp -f dash.all.js ./dashjs/
 cp -f dash.min.js ./dashjs/
 cd ./dashjs
-svn commit --username webtvportal-ic --password welcome0 -m "update Dash.min.js" dashjs/dash.min.js
-svn commit --username webtvportal-ic --password welcome0 -m "update Dash.all.js" dashjs/dash.all.js
+
+svn commit --username webtvportal-ic --password welcome0 -m "update Dash.min.js" dash.min.js
+svn commit --username webtvportal-ic --password welcome0 -m "update Dash.all.js" dash.all.js
  
