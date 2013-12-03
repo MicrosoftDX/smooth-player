@@ -20,7 +20,7 @@ MediaPlayer.di.Context = function () {
             this.system.autoMapOutlets = true;
 
             //this.system.mapSingleton('debug', MediaPlayer.utils.Debug);
-            this.system.mapSingleton('logger',  log4javascript.getLogger);
+            this.system.mapSingleton('logger',   MediaPlayer.utils.Logger);
             this.system.mapSingleton('eventBus', MediaPlayer.utils.EventBus);
             this.system.mapSingleton('capabilities', MediaPlayer.utils.Capabilities);
             this.system.mapSingleton('textTrackExtensions', MediaPlayer.utils.TextTrackExtensions);
