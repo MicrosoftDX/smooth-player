@@ -1,6 +1,21 @@
 {
     "items": [
         {
+            "name": "SuperSpeedway (Smooth - VOD)",
+            "url": "http://playready.directtaps.net/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest",
+            "browsers": "cdsbi"
+        },
+        {
+            "name": "SuperSpeedway (Smooth to DASH - VOD)",
+            "url": "http://10.194.60.110/VIDEO/MSS/SuperSpeedway/manifest.mpd",
+            "browsers": "cdsbi"
+        },
+        {
+            "name": "PrinceOfPersia (DASH - VOD - 2 audios)",
+            "url": "http://10.194.60.110/VIDEO/DASH/VOD/PrinceOfPersia/manifest.mpd",
+            "browsers": "cdsbi"
+        },
+        {
             "name": "Caption Test",
             "url": "http://dash.edgesuite.net/akamai/test/caption_test/ElephantsDream/elephants_dream_480p_heaac5_1.mpd",
             "browsers": ""
