@@ -17,23 +17,72 @@ MediaPlayer.utils.Logger = function () {
     //var container = document.querySelector(".dash-video-player video");
     //var container = document.getElementById("logs");
     //console.log(container);
-    var _logger = log4javascript.getLogger();
+    var _logger = ('undefined' !== typeof(log4javascript)) ? log4javascript.getLogger() : null;
+    var appender = null;
+    var logToBrowserConsole = true;
+    var _debug = function(){
+        if(_logger){
+            _logger.debug.apply(_logger,arguments);
+        }else{
+            console.debug.apply(console,arguments);
+        }
+    };
+
+    var _addAppender = function(){
+        if('undefined' !== typeof(log4javascript)){
+            appender = new log4javascript.PopUpAppender();
+            var layout = new log4javascript.PatternLayout("%d{HH:mm:ss.SSS} %-5p - %m%n");
+            appender.setLayout(layout);
+            _logger.addAppender(appender);
+            _logger.setLevel(log4javascript.Level.ALL);
+        }
+    };
+
+    var _info = function(){
+        if(_logger){
+            _logger.info.apply(_logger,arguments);
+        }else{
+            console.info.apply(console,arguments);
+        }
+    };
+
+    var _trace = function(){
+        if(_logger){
+            _logger.trace.apply(_logger,arguments);
+        }else{
+            console.trace.apply(console,arguments);
+        }
+    };
+
     //var appender = new log4javascript.InPageAppender(container);
     //var layout = new log4javascript.PatternLayout("%d{HH:mm:ss.SSS} %-5p - %m%n");
     //appender.setLayout(layout);
     //_logger.addAppender(appender);
-    return _logger;
-
- /*   
     return {
-        logger: function () {
-            var _logger = log4javascript.getLogger();
-            var popUpAppender = new log4javascript.PopUpAppender();
-            var popUpLayout = new log4javascript.PatternLayout("%d{HH:mm:ss} %-5p - %m%n");
-            popUpAppender.setLayout(popUpLayout);
-            _logger.addAppender(popUpAppender);
-            return _logger;
+        debug:_debug,
+        addAppender:_addAppender,
+        info:_info,
+        trace:_trace,
+        eventBus:undefined,
+        setLogToBrowserConsole: function(value) {
+            logToBrowserConsole = value;
+        },
+        getLogToBrowserConsole: function() {
+            return logToBrowserConsole;
+        },
+        log: function (message) {
+            if (logToBrowserConsole){
+                console.log(message);
+            }
+
+            this.eventBus.dispatchEvent({
+                type: "log",
+                message: message
+            });
         }
     };
-    */
+};
+
+MediaPlayer.utils.Logger.prototype = {
+    constructor: MediaPlayer.utils.Logger
 };

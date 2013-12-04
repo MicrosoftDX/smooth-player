@@ -1,3 +1,3 @@
-npm install -g grunt-cli
+cd $PATH;
 npm install
 grunt --config Gruntfile.js --force

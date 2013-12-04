@@ -298,8 +298,9 @@ Dash.dependencies.DashParser = function () {
 
             this.logger.debug("[DashParser]", "Converting from XML.");
             manifest = converter.xml_str2json(data);
-            //console.log(manifest);
+            
 
+            // BBE: gestion erreur de parsing manifest
             if (manifest == null)
             {
                 this.logger.debug("[DashParser]", "Failed to parse manifest!!");

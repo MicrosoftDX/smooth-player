@@ -71,11 +71,11 @@ MediaPlayer = function (aContext) {
                 }
             });*/
 
-            var appender = new log4javascript.PopUpAppender();
-            var layout = new log4javascript.PatternLayout("%d{HH:mm:ss.SSS} %-5p - %m%n");
-            appender.setLayout(layout);
-            this.logger.addAppender(appender);
-            this.logger.setLevel(log4javascript.Level.ALL);
+           // var appender = new log4javascript.PopUpAppender();
+           // var layout = new log4javascript.PatternLayout("%d{HH:mm:ss.SSS} %-5p - %m%n");
+           // appender.setLayout(layout);
+            this.logger.addAppender();
+            //this.logger.setLevel(log4javascript.Level.ALL);
         },
 
         play = function () {
@@ -148,7 +148,7 @@ MediaPlayer = function (aContext) {
         },
 
         getDebug: function () {
-            return this.debug;
+            return this.logger;
         },
 
         getVideoModel: function () {
