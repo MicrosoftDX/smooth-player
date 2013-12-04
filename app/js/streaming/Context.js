@@ -55,6 +55,7 @@ MediaPlayer.di.Context = function () {
             this.system.mapClass('fragmentLoader', MediaPlayer.dependencies.FragmentLoader);
             this.system.mapSingleton('streamController', MediaPlayer.dependencies.StreamController);
             this.system.mapClass('stream', MediaPlayer.dependencies.Stream);
+            this.system.mapClass('mp4Processor', MediaPlayer.dependencies.Mp4Processor);
         }
     };
 };
