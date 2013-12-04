@@ -188,6 +188,9 @@ MediaPlayer.dependencies.BufferController = function () {
                             currentVideoTime = self.videoModel.getCurrentTime(),
                             currentTime = new Date();
 
+                        // BBE - Test mp4lib
+                        self.mp4Processor.processFragment(data);
+
                         self.logger.debug("[BufferController]", "Push (" + type + ") bytes: " + data.byteLength);
 
                         if (playListTraceMetricsClosed === true && state !== WAITING && lastQuality !== -1) {
@@ -489,6 +492,10 @@ MediaPlayer.dependencies.BufferController = function () {
                                             }
 
                                             self.logger.debug("[BufferController]", qualityChanged ? (type + " Quality changed to: " + quality) : "Quality didn't change.");
+
+                                            // BBE - Test mp4lib
+                                            self.mp4Processor.generateInitSegment(data, representation);
+
                                             return loadInitialization.call(self, qualityChanged, quality);
                                         }
                                     ).then(
@@ -535,6 +542,7 @@ MediaPlayer.dependencies.BufferController = function () {
         fragmentExt: undefined,
         fragmentLoader: undefined,
         indexHandler: undefined,
+        mp4Processor: undefined,
         system: undefined,
         errHandler: undefined,
 
@@ -569,6 +577,9 @@ MediaPlayer.dependencies.BufferController = function () {
                     );
                 }
             );
+
+            // BBE - Test mp4lib
+            self.mp4Processor.initialize(periodIndex, data);
 
             ready = true;
             startPlayback.call(this);
