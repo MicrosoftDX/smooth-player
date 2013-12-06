@@ -86,6 +86,52 @@ MediaPlayer.dependencies.Mp4Processor = function () {
             return trak;
         },
 
+        getLanguageCode = function()
+        {
+            //declares the language code for this media. See ISO 639-2/T for the set of three character
+            //codes. Each character is packed as the difference between its ASCII value and 0x60. Since the code
+            //is confined to being three lower-case letters, these values are strictly positive.
+
+            //NAN : dans le cas de la video, le champ contient quelle valeur?
+            //pas défini dans la norme, retourne 0 pour le moment
+            var result = 0;
+
+            //lang member is define, get it. if not language is 'und'
+            // if current adaptation is video type, return 'und'.
+            var language = adaptation.lang ? adaptation.lang : 'und' ;
+
+            //return value is packed on 15 bits, each character is defined on 5 bits
+            // there is a padding value to align on 16 bits
+            var firstLetterCode = (language.charCodeAt(0) - 96) << 10 ; //96 decimal base = 0x60
+            var secondLetterCode = (language.charCodeAt(1) - 96) << 5;
+            var thirdLetterCode = language.charCodeAt(2) - 96;
+
+          
+            result = firstLetterCode | secondLetterCode | thirdLetterCode;
+            
+            return result;
+        },
+
+        createMediaHeaderBox = function () {
+
+            //mdhd : The media header declares overall information that is media-independent, and relevant to characteristics of
+            //the media in a track.
+            var mdhd = new MediaHeaderBox();
+
+            mdhd.version = 1; // version = 1  in order to have 64bits duration value
+            mdhd.creation_time = 0; // the creation time of the presentation => ignore (set to 0)
+            mdhd.modification_time = 0; // the most recent time the presentation was modified => ignore (set to 0)
+            mdhd.timescale = timescale; // the time-scale for the entire presentation => take timescale of current adaptationSet
+            mdhd.duration = Math.round(duration * timescale); //integer that declares the duration of this media (in the scale of the timescale). If the
+                                         //duration cannot be determined then duration is set to all 1s.
+            mdhd.pad = 0; // padding for language value
+            mdhd.language = getLanguageCode();
+            
+            mdhd.pre_defined = 0; // default value
+
+            return mdhd;
+        },
+
         doGenerateInitSegment = function (representation) {
             var manifest = this.manifestModel.getValue(),
                 isLive = this.manifestExt.getIsLive(manifest);
@@ -99,6 +145,12 @@ MediaPlayer.dependencies.Mp4Processor = function () {
 
             // Create and add Track box (trak)
             moov.boxes.push(createTrackBox.call(this, representation));
+
+            //Create container for the media information in a track (mdia)
+            var mdia = new MediaBox();
+            mdia.boxes = new Array();
+
+            mdia.boxes.push(createMediaHeaderBox.call(this));
 
             // Create and add MovieExtends box (trak)
             //moov.boxes.push(createMovieExtendsBox.call(this, representation));
