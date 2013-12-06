@@ -3,8 +3,8 @@
 function File() {}
 
 File.prototype._processFields = function(processor) {
-    processor.eat('boxes',FIELD_CONTAINER_CHILDREN)
-}
+    processor.eat('boxes',FIELD_CONTAINER_CHILDREN);
+};
 
 // ---------- Generic Box -------------------------------
 
@@ -16,17 +16,22 @@ Box.prototype._processFields = function(processor) {
     //console.log('processing box:'+this.boxtype);
     if (this.size==1) {
         processor.eat('largesize',FIELD_INT64);
-    }    
-    if (this.boxtype=='uuid') {
-        processor.eat( 'usertype', ArrayField( FIELD_INT8, 16) );
     }
-}
+    if (this.boxtype=='uuid') {
+        processor.eat('usertype', new ArrayField(FIELD_INT8, 16));
+    }
+};
 
-Box.prototype.boxPrototypes = {}
+Box.prototype.boxPrototypes = {};
+Box.prototype.uuidToBoxTypes = {};
 
 Box.prototype.registerBoxType = function( boxPrototype ) {
     Box.prototype.boxPrototypes[ boxPrototype.prototype.boxtype ] = boxPrototype;
-}
+    if (boxPrototype.prototype.uuid)
+    {
+        Box.prototype.uuidToBoxTypes[JSON.stringify(boxPrototype.prototype.uuid)] = boxPrototype.prototype.boxtype;
+    }
+};
 
 // ---------- Full Box -------------------------------
 
@@ -36,7 +41,7 @@ FullBox.prototype._processFields = function(processor) {
     Box.prototype._processFields.call(this,processor);
     processor.eat('version',FIELD_INT8);
     processor.eat('flags',FIELD_BIT24);
-}
+};
 
 // ----------- Unknown Box -----------------------------
 
@@ -45,8 +50,7 @@ function UnknownBox() {}
 UnknownBox.prototype._processFields = function(processor) {
     Box.prototype._processFields.call(this,processor);
     processor.eat('unrecognized_data',new BoxFillingDataField());
-}
-
+};
 
 
 // --------------------------- ftyp ----------------------------------
@@ -60,177 +64,176 @@ FileTypeBox.prototype._processFields = function(processor) {
     processor.eat('major_brand',FIELD_INT32);
     processor.eat('minor_brand',FIELD_INT32);
     processor.eat('compatible_brands',new BoxFillingArrayField(FIELD_INT32));
-
-}
+};
 
 Box.prototype.registerBoxType( FileTypeBox );
 
 // --------------------------- moov ----------------------------------
 
-function MovieBox() {};
+function MovieBox() {}
 
 MovieBox.prototype.boxtype = 'moov';
 
 MovieBox.prototype._processFields = function(processor) {
    Box.prototype._processFields.call(this,processor);
    processor.eat('boxes',FIELD_CONTAINER_CHILDREN);
-}
+};
 
 Box.prototype.registerBoxType( MovieBox );
 
 // --------------------------- moof ----------------------------------
 
-function MovieFragmentBox() {};
+function MovieFragmentBox() {}
 
 MovieFragmentBox.prototype.boxtype = 'moof';
 
 MovieFragmentBox.prototype._processFields = function(processor) {
    Box.prototype._processFields.call(this,processor);
    processor.eat('boxes',FIELD_CONTAINER_CHILDREN);
-}
+};
 
 Box.prototype.registerBoxType( MovieFragmentBox );
 
 // --------------------------- mfra ----------------------------------
 
-function MovieFragmentRandomAccessBox() {};
+function MovieFragmentRandomAccessBox() {}
 
 MovieFragmentRandomAccessBox.prototype.boxtype = 'mfra';
 
 MovieFragmentRandomAccessBox.prototype._processFields = function(processor) {
    Box.prototype._processFields.call(this,processor);
    processor.eat('boxes',FIELD_CONTAINER_CHILDREN);
-}
+};
 
 Box.prototype.registerBoxType( MovieFragmentRandomAccessBox );
 
 // --------------------------- udta ----------------------------------
 
-function UserDataBox() {};
+function UserDataBox() {}
 
 UserDataBox.prototype.boxtype = 'udta';
 
 UserDataBox.prototype._processFields = function(processor) {
    Box.prototype._processFields.call(this,processor);
    processor.eat('boxes',FIELD_CONTAINER_CHILDREN);
-}
+};
 
 Box.prototype.registerBoxType( UserDataBox );
 
 // --------------------------- trak ----------------------------------
 
-function TrackBox() {};
+function TrackBox() {}
 
 TrackBox.prototype.boxtype = 'trak';
 
 TrackBox.prototype._processFields = function(processor) {
    Box.prototype._processFields.call(this,processor);
    processor.eat('boxes',FIELD_CONTAINER_CHILDREN);
-}
+};
 
 Box.prototype.registerBoxType( TrackBox );
 
 // --------------------------- edts ----------------------------------
 
-function EditBox() {};
+function EditBox() {}
 
 EditBox.prototype.boxtype = 'edts';
 
 EditBox.prototype._processFields = function(processor) {
    Box.prototype._processFields.call(this,processor);
    processor.eat('boxes',FIELD_CONTAINER_CHILDREN);
-}
+};
 
 Box.prototype.registerBoxType( EditBox );
 
 // --------------------------- mdia ----------------------------------
 
-function MediaBox() {};
+function MediaBox() {}
 
 MediaBox.prototype.boxtype = 'mdia';
 
 MediaBox.prototype._processFields = function(processor) {
    Box.prototype._processFields.call(this,processor);
    processor.eat('boxes',FIELD_CONTAINER_CHILDREN);
-}
+};
 
 Box.prototype.registerBoxType( MediaBox );
 
 // --------------------------- minf ----------------------------------
 
-function MediaInformationBox() {};
+function MediaInformationBox() {}
 
 MediaInformationBox.prototype.boxtype = 'minf';
 
 MediaInformationBox.prototype._processFields = function(processor) {
    Box.prototype._processFields.call(this,processor);
    processor.eat('boxes',FIELD_CONTAINER_CHILDREN);
-}
+};
 
 Box.prototype.registerBoxType( MediaInformationBox );
 
 // --------------------------- dinf ----------------------------------
 
-function DataInformationBox() {};
+function DataInformationBox() {}
 
 DataInformationBox.prototype.boxtype = 'dinf';
 
 DataInformationBox.prototype._processFields = function(processor) {
    Box.prototype._processFields.call(this,processor);
    processor.eat('boxes',FIELD_CONTAINER_CHILDREN);
-}
+};
 
 Box.prototype.registerBoxType( DataInformationBox );
 
 // --------------------------- stbl ----------------------------------
 
-function SampleTableBox() {};
+function SampleTableBox() {}
 
 SampleTableBox.prototype.boxtype = 'stbl';
 
 SampleTableBox.prototype._processFields = function(processor) {
    Box.prototype._processFields.call(this,processor);
    processor.eat('boxes',FIELD_CONTAINER_CHILDREN);
-}
+};
 
 Box.prototype.registerBoxType( SampleTableBox );
 
 // --------------------------- mvex ----------------------------------
 
-function MovieExtendsBox() {};
+function MovieExtendsBox() {}
 
 MovieExtendsBox.prototype.boxtype = 'mvex';
 
 MovieExtendsBox.prototype._processFields = function(processor) {
    Box.prototype._processFields.call(this,processor);
    processor.eat('boxes',FIELD_CONTAINER_CHILDREN);
-}
+};
 
 Box.prototype.registerBoxType( MovieExtendsBox );
 
 // --------------------------- traf ----------------------------------
 
-function TrackFragmentBox() {};
+function TrackFragmentBox() {}
 
 TrackFragmentBox.prototype.boxtype = 'traf';
 
 TrackFragmentBox.prototype._processFields = function(processor) {
    Box.prototype._processFields.call(this,processor);
    processor.eat('boxes',FIELD_CONTAINER_CHILDREN);
-}
+};
 
 Box.prototype.registerBoxType( TrackFragmentBox );
 
 // --------------------------- meta ----------------------------------
 
-function MetaBox() {};
+function MetaBox() {}
 
 MetaBox.prototype.boxtype = 'meta';
 
 MetaBox.prototype._processFields = function(processor) {
    FullBox.prototype._processFields.call(this,processor);
    processor.eat('boxes',FIELD_CONTAINER_CHILDREN);
-}
+};
 
 Box.prototype.registerBoxType( MetaBox );
 
@@ -243,7 +246,7 @@ MovieHeaderBox.prototype.boxtype = 'mvhd';
 
 MovieHeaderBox.prototype._processFields = function(processor) {
     FullBox.prototype._processFields.call(this,processor);
-    if (this['version']==1)
+    if (this.version==1)
     {
         processor.eat('creation_time',FIELD_UINT64);
         processor.eat('modification_time',FIELD_UINT64);
@@ -265,8 +268,7 @@ MovieHeaderBox.prototype._processFields = function(processor) {
     processor.eat('matrix',new ArrayField(FIELD_INT32,9));
     processor.eat('pre_defined',new ArrayField(FIELD_BIT32,6));
     processor.eat('next_track_ID',FIELD_UINT32);
-
-}
+};
 
 Box.prototype.registerBoxType( MovieHeaderBox );
 
@@ -281,7 +283,7 @@ MediaDataBox.prototype._processFields = function(processor) {
     Box.prototype._processFields.call(this,processor);
     processor.eat('data',FIELD_BOX_FILLING_DATA);
 
-}
+};
 
 Box.prototype.registerBoxType( MediaDataBox );
 
@@ -295,7 +297,7 @@ FreeSpaceBox.prototype._processFields = function(processor) {
     Box.prototype._processFields.call(this,processor);
     processor.eat('data',FIELD_BOX_FILLING_DATA);
 
-}
+};
 
 Box.prototype.registerBoxType( FreeSpaceBox );
 
@@ -309,14 +311,14 @@ SegmentIndexBox.prototype.boxtype = 'sidx';
 SegmentIndexBox.prototype._processFields = function(processor) {
     FullBox.prototype._processFields.call(this,processor);
     processor.eat('reference_ID',FIELD_UINT32);
-    processor.eat('timescale',FIELD_UINT32);
-    if (this.version==0) {
-	    processor.eat('earliest_presentation_time',FIELD_UINT32);
-	    processor.eat('first_offset',FIELD_UINT32);
+        processor.eat('timescale',FIELD_UINT32);
+    if (this.version==1) {
+        processor.eat('earliest_presentation_time',FIELD_UINT64);
+        processor.eat('first_offset',FIELD_UINT64);
     }
     else {
-	    processor.eat('earliest_presentation_time',FIELD_UINT64);
-	    processor.eat('first_offset',FIELD_UINT64);
+        processor.eat('earliest_presentation_time',FIELD_UINT32);
+        processor.eat('first_offset',FIELD_UINT32);
     }
     processor.eat('reserved',FIELD_UINT16);
 
@@ -327,14 +329,13 @@ SegmentIndexBox.prototype._processFields = function(processor) {
 
     var referenceField = new StructureField(this,SegmentIndexBox.prototype._processReference);
     var a = new ArrayField( referenceField, this.reference_count );
-    processor.eat('references',a);    
-
-}
+    processor.eat('references',a);
+};
 
 SegmentIndexBox.prototype._processReference = function(box,processor) {
     processor.eat('reference_info',FIELD_UINT64);
     processor.eat('SAP',FIELD_UINT32);
-}
+};
 
 Box.prototype.registerBoxType( SegmentIndexBox );
 
@@ -347,7 +348,7 @@ TrackHeaderBox.prototype.boxtype = 'tkhd';
 
 TrackHeaderBox.prototype._processFields = function(processor) {
     FullBox.prototype._processFields.call(this,processor);
-    if (this['version']==1)
+    if (this.version==1)
     {
         processor.eat('creation_time',FIELD_UINT64);
         processor.eat('modification_time',FIELD_UINT64);
@@ -372,8 +373,7 @@ TrackHeaderBox.prototype._processFields = function(processor) {
     processor.eat('matrix',new ArrayField(FIELD_INT32,9));
     processor.eat('width',FIELD_INT32);
     processor.eat('height',FIELD_INT32);
-
-}
+};
 Box.prototype.registerBoxType( TrackHeaderBox );
 
 // --------------------------- mdhd ----------------------------------
@@ -384,7 +384,7 @@ MediaHeaderBox.prototype.boxtype = 'mdhd';
 
 MediaHeaderBox.prototype._processFields = function(processor) {
     FullBox.prototype._processFields.call(this,processor);
-    if (this['version']==1)
+    if (this.version==1)
     {
         processor.eat('creation_time',FIELD_UINT64);
         processor.eat('modification_time',FIELD_UINT64);
@@ -401,8 +401,7 @@ MediaHeaderBox.prototype._processFields = function(processor) {
 
     processor.eat('language',FIELD_UINT16);
     processor.eat('reserved',FIELD_UINT16);
-
-}
+};
 Box.prototype.registerBoxType( MediaHeaderBox );
 
 // --------------------------- mehd ----------------------------------
@@ -413,7 +412,7 @@ MovieExtendsHeaderBox.prototype.boxtype = 'mehd';
 
 MovieExtendsHeaderBox.prototype._processFields = function(processor) {
     FullBox.prototype._processFields.call(this,processor);
-    if (this['version']==1)
+    if (this.version==1)
     {
         processor.eat('fragment_duration',FIELD_UINT64);
     }
@@ -421,8 +420,7 @@ MovieExtendsHeaderBox.prototype._processFields = function(processor) {
     {
         processor.eat('fragment_duration',FIELD_UINT32);
     }
-
-}
+};
 Box.prototype.registerBoxType( MovieExtendsHeaderBox );
 
 // --------------------------- hdlr ----------------------------------
@@ -437,8 +435,7 @@ HandlerBox.prototype._processFields = function(processor) {
     processor.eat('handler_type',FIELD_UINT32);
     processor.eat('reserved',new ArrayField(FIELD_UINT32,3));
     processor.eat('name',FIELD_STRING);
-
-}
+};
 Box.prototype.registerBoxType( HandlerBox );
 
 // --------------------------- dinf ----------------------------------
@@ -479,7 +476,7 @@ Box.prototype.registerBoxType( Box );
 */
 // --------------------------- stts ----------------------------------
 
-function TimeToSampleBox() {};
+function TimeToSampleBox() {}
 
 TimeToSampleBox.prototype.boxtype = 'stts';
 
@@ -492,14 +489,13 @@ TimeToSampleBox.prototype._processFields = function(processor) {
     processor.eat('entry_count',FIELD_UINT_32);
     var entryField = new StructureField(this,TimeToSampleBox.prototype._processEntry);
     var a = new ArrayField( entryField, this.entry_count );
-    processor.eat('entry',a);    
-
-}
+    processor.eat('entry',a);
+};
 
 TimeToSampleBox.prototype._processEntry = function(box,processor) {
     processor.eat('sample_count',FIELD_UINT32);
     processor.eat('sample_delta',FIELD_UINT32);
-}
+};
 
 Box.prototype.registerBoxType( TimeToSampleBox );
 
@@ -519,15 +515,14 @@ SampleToChunkBox.prototype._processFields = function(processor) {
     processor.eat('entry_count',FIELD_UINT32);
     var entryField = new StructureField(this,SampleToChunkBox.prototype._processEntry);
     var a = new ArrayField( entryField, this.entry_count );
-    processor.eat('entry',a);    
-
-}
+    processor.eat('entry',a);
+};
 
 SampleToChunkBox.prototype._processEntry = function(box,processor) {
     processor.eat('first_chunk',FIELD_UINT32);
     processor.eat('samples_per_chunk',FIELD_UINT32);
     processor.eat('samples_description_index',FIELD_UINT32);
-}
+};
 
 Box.prototype.registerBoxType( SampleToChunkBox );
 
@@ -545,9 +540,9 @@ ChunkOffsetBox.prototype._processFields = function(processor) {
 
     processor.eat('entry_count',FIELD_UINT32);
     var a = new ArrayField( FIELD_UINT32, this.entry_count );
-    processor.eat('chunk_offset',a); 
-    
-}
+    processor.eat('chunk_offset',a);
+};
+
 Box.prototype.registerBoxType( ChunkOffsetBox );
 
 // --------------------------- trex ----------------------------------
@@ -563,8 +558,7 @@ TrackExtendsBox.prototype._processFields = function(processor) {
     processor.eat('default_sample_duration',FIELD_UINT32);
     processor.eat('default_sample_size',FIELD_UINT32);
     processor.eat('default_sample_flags',FIELD_UINT32);
-
-}
+};
 Box.prototype.registerBoxType( TrackExtendsBox );
 
 // --------------------------- vmhd ----------------------------------
@@ -577,8 +571,7 @@ VideoMediaHeaderBox.prototype._processFields = function(processor) {
     FullBox.prototype._processFields.call(this,processor);
     processor.eat('graphicsmode',FIELD_INT16);
     processor.eat('opcolor',new ArrayField(FIELD_UINT16,3));
-
-}
+};
 
 Box.prototype.registerBoxType( VideoMediaHeaderBox );
 
@@ -592,8 +585,7 @@ SoundMediaHeaderBox.prototype._processFields = function(processor) {
     FullBox.prototype._processFields.call(this,processor);
     processor.eat('balance',FIELD_INT16);
     processor.eat('reserved',FIELD_UINT16);
-
-}
+};
 
 Box.prototype.registerBoxType( SoundMediaHeaderBox );
 
@@ -611,7 +603,7 @@ DataReferenceBox.prototype._processFields = function(processor) {
 
 	processor.eat('entry_count',FIELD_UINT32);
 	processor.eat('boxes',FIELD_CONTAINER_CHILDREN);
-}
+};
 
 Box.prototype.registerBoxType( DataReferenceBox );
 
@@ -627,17 +619,17 @@ DataEntryUrlBox.prototype._processFields = function(processor) {
     if (processor.isDeserializing)
     {
 		if (this.flags & '0x000001' == 0)
-		    processor.eat('location',FIELD_STRING);
+            processor.eat('location',FIELD_STRING);
     }
     else
     {
         if ('location' in this)
         {
-		    this.flags = this.flags | 1;
+            this.flags = this.flags | 1;
             processor.eat('location',FIELD_STRING);
         }
     }
-}
+};
 
 Box.prototype.registerBoxType( DataEntryUrlBox );
 
@@ -655,8 +647,7 @@ DataEntryUrnBox.prototype._processFields = function(processor) {
 		processor.eat('name',FIELD_STRING);
 		processor.eat('location',FIELD_STRING);
     }
-
-}
+};
 
 Box.prototype.registerBoxType( DataEntryUrnBox );
 
@@ -669,8 +660,7 @@ MovieFragmentHeaderBox.prototype.boxtype = 'mfhd';
 MovieFragmentHeaderBox.prototype._processFields = function(processor) {
     FullBox.prototype._processFields.call(this,processor);
     processor.eat('sequence_number',FIELD_UINT32);
-
-}
+};
 
 Box.prototype.registerBoxType( MovieFragmentHeaderBox );
 
@@ -688,7 +678,7 @@ TrackFragmentHeaderBox.prototype._processFields = function(processor) {
     processor.eat_flagged(this,'flags',0x000008,'default_sample_duration',FIELD_UINT32);
     processor.eat_flagged(this,'flags',0x000010,'default_sample_size',FIELD_UINT32);
     processor.eat_flagged(this,'flags',0x000020,'default_sample_flags',FIELD_UINT32);
-}
+};
 
 Box.prototype.registerBoxType( TrackFragmentHeaderBox );
 
@@ -707,7 +697,7 @@ TrackFragmentBaseMediaDecodeTimeBox.prototype._processFields = function(processo
         processor.eat('baseMediaDecodeTime',FIELD_UINT32);
     }
 
-}
+};
 
 Box.prototype.registerBoxType( TrackFragmentBaseMediaDecodeTimeBox );
 
@@ -731,18 +721,18 @@ TrackFragmentRunBox.prototype._processFields = function(processor) {
     var entryField = new StructureField(this,TrackFragmentRunBox.prototype._processEntry);
     processor.eat('samples_table',new ArrayField( entryField, this.sample_count));
 
-}
+};
 
 TrackFragmentRunBox.prototype._processEntry = function(box,processor) {
     processor.eat_flagged(box,'flags',0x000100,'sample_duration',FIELD_UINT32);
     processor.eat_flagged(box,'flags',0x000200,'sample_size',FIELD_UINT32);
     processor.eat_flagged(box,'flags',0x000400,'sample_flags',FIELD_UINT32);
 
-    if (box.version==0)
+    if (box.version==1)
         processor.eat_flagged(box,'flags',0x000800,'sample_composition_time_offset',FIELD_INT32);
     else
         processor.eat_flagged(box,'flags',0x000800,'sample_composition_time_offset',FIELD_UINT32);
-}
+};
 
 
 
@@ -763,14 +753,13 @@ TimeToSampleBox.prototype._processFields = function(processor) {
     processor.eat('entry_count',FIELD_UINT32);
     var entryField = new StructureField(this,TimeToSampleBox.prototype._processEntry);
     var a = new ArrayField( entryField, this.entry_count );
-    processor.eat('entry',a);    
-
-}
+    processor.eat('entry',a);
+};
 
 TimeToSampleBox.prototype._processEntry = function(box,processor) {
     processor.eat('sample_count',FIELD_UINT32);
     processor.eat('sample_delta',FIELD_UINT32);
-}
+};
 
 Box.prototype.registerBoxType( TimeToSampleBox );
 
@@ -788,8 +777,7 @@ SampleDescriptionBox.prototype._processFields = function(processor) {
 
     processor.eat('entry_count',FIELD_UINT32);
     processor.eat('boxes',FIELD_CONTAINER_CHILDREN);
-
-}
+};
 
 Box.prototype.registerBoxType( SampleDescriptionBox );
 
@@ -804,8 +792,7 @@ SampleDependencyTableBox.prototype._processFields = function(processor) {
     //var entryField = new StructureField(SampleDependencyTableBox.prototype._processEntry);
     //processor.eat('sample_dependency_array',new BoxFillingArrayField( new StructureField( entryField )));
     processor.eat('sample_dependency_array',new BoxFillingArrayField( FIELD_UINT8 ));
-
-}
+};
 /*
 no two-bit integer support yet
 SampleDependencyTableBox.prototype._processEntry = function(processor) {
@@ -826,8 +813,7 @@ SampleEntryBox.prototype._processFields = function(processor) {
     Box.prototype._processFields.call(this,processor);
     processor.eat('reserved',new ArrayField(FIELD_UINT8,6));
     processor.eat('data_reference_index',FIELD_UINT16);
-
-}
+};
 
 // --------------------------- abstract VisualSampleEntry ----------------------------------
 
@@ -848,12 +834,7 @@ VisualSampleEntryBox.prototype._processFields = function(processor) {
     processor.eat('depth',FIELD_UINT16);
     processor.eat('pre_defined_3',FIELD_INT16);
     processor.eat('boxes',FIELD_CONTAINER_CHILDREN);
-
-
-    //console.log('AVC1:');
-    //console.log(this);
-
-}
+};
 
 
 // --------------------------- avc1 ----------------------------------
@@ -864,7 +845,7 @@ AVC1VisualSampleEntryBox.prototype.boxtype = 'avc1';
 
 AVC1VisualSampleEntryBox.prototype._processFields = function(processor) {
     VisualSampleEntryBox.prototype._processFields.call(this,processor);
-}
+};
 
 Box.prototype.registerBoxType( AVC1VisualSampleEntryBox );
 
@@ -882,29 +863,28 @@ AVCConfigurationBox.prototype._processFields = function(processor) {
     processor.eat('AVCLevelIndication',FIELD_UINT8);
     
     if (processor.isDeserializing)
-    {   
+    {
 		processor.eat('temp',FIELD_UINT8);  // 6 bits for reserved =63 and two bits for NAL length = 2-bit length byte size type
         this.lengthSizeMinusOne = this.temp & 3;
-        processor.eat('numOfSequenceParameterSets_tmp',FIELD_UINT8); 
+        processor.eat('numOfSequenceParameterSets_tmp',FIELD_UINT8);
 		this.numOfSequenceParameterSets = this.numOfSequenceParameterSets_tmp & 31;
     }
     else
-    {   	    
+    {
         this.temp = this.lengthSizeMinusOne | 252;
-		processor.eat('temp',FIELD_UINT8);            
+		processor.eat('temp',FIELD_UINT8);
         this.numOfSequenceParameterSets = this.SPS_NAL.length;
 		this.numOfSequenceParameterSets_tmp = this.numOfSequenceParameterSets | 224;
-        processor.eat('numOfSequenceParameterSets_tmp',FIELD_UINT8);     
+        processor.eat('numOfSequenceParameterSets_tmp',FIELD_UINT8);
     }
 
-    processor.eat('SPS_NAL', new VariableElementSizeArrayField( 
+    processor.eat('SPS_NAL', new VariableElementSizeArrayField(
                   new StructureField(this, AVCConfigurationBox.prototype._processNAL), this.numOfSequenceParameterSets ));
 
-    processor.eat('numOfPictureParameterSets',FIELD_UINT8); 
-    processor.eat('PPS_NAL', new VariableElementSizeArrayField( 
-                  new StructureField(this, AVCConfigurationBox.prototype._processNAL), this.numOfPictureParameterSets ));    
+    processor.eat('numOfPictureParameterSets',FIELD_UINT8);
+    processor.eat('PPS_NAL', new VariableElementSizeArrayField(new StructureField(this, AVCConfigurationBox.prototype._processNAL), this.numOfPictureParameterSets ));
 
-}
+};
 
 AVCConfigurationBox.prototype._processNAL = function(box,processor) {
     processor.eat('NAL_length',FIELD_UINT16);
@@ -912,7 +892,7 @@ AVCConfigurationBox.prototype._processNAL = function(box,processor) {
     //console.log('THIS:');
     //console.log(this);
     processor.eat('NAL',new DataField(this.NAL_length));
-}
+};
 
 Box.prototype.registerBoxType( AVCConfigurationBox );
 
@@ -927,7 +907,7 @@ PixelAspectRatioBox.prototype._processFields = function(processor) {
     Box.prototype._processFields.call(this,processor);
     processor.eat('hSpacing',FIELD_INT32);
     processor.eat('vSpacing',FIELD_INT32);
-}
+};
 
 Box.prototype.registerBoxType( PixelAspectRatioBox );
 
@@ -944,7 +924,7 @@ SampleSizeBox.prototype._processFields = function(processor) {
     processor.eat('sample_size',FIELD_UINT32);
     processor.eat('sample_count',FIELD_UINT32);
     var a = new ArrayField( FIELD_UINT32, this.sample_count );
-}
+};
 
 Box.prototype.registerBoxType( SampleSizeBox );
 
@@ -990,3 +970,61 @@ Box.prototype._processFields = function(processor) {
 
 Box.prototype.registerBoxType( Box );
 */
+
+// -------------------------------------------------------------------
+// Microsoft Smooth Streamong specific boxes
+// -------------------------------------------------------------------
+
+// --------------------------- tfdx ----------------------------------
+
+function TfxdBox() {}
+
+TfxdBox.prototype.boxtype = 'tfxd';
+TfxdBox.prototype.uuid = [0x6D, 0x1D, 0x9B, 0x05, 0x42, 0xD5, 0x44, 0xE6, 0x80, 0xE2, 0x14, 0x1D, 0xAF, 0xF7, 0x57, 0xB2];
+
+TfxdBox.prototype._processFields = function(processor) {
+    FullBox.prototype._processFields.call(this,processor);
+    debugger;
+    if (this.version==1)
+    {
+        processor.eat('fragment_absolute_time',FIELD_UINT64);
+        processor.eat('fragment_duration',FIELD_UINT64);
+    }
+    else
+    {
+        processor.eat('fragment_absolute_time',FIELD_UINT32);
+        processor.eat('fragment_duration',FIELD_UINT32);
+    }
+};
+Box.prototype.registerBoxType( TfxdBox );
+
+// --------------------------- tfrf ----------------------------------
+
+function TfrfBox() {}
+
+TfrfBox.prototype.boxtype = 'tfrf';
+TfrfBox.prototype.uuid = [0xD4, 0x80, 0x7E, 0xF2, 0xCA, 0x39, 0x46, 0x95, 0x8E, 0x54, 0x26, 0xCB, 0x9E, 0x46, 0xA7, 0x9F];
+
+TfrfBox.prototype._processFields = function(processor) {
+    FullBox.prototype._processFields.call(this,processor);
+    processor.eat('fragment_count', FIELD_UINT8);
+    var entryField = new StructureField(this, TfrfBox.prototype._processEntry);
+    var a = new ArrayField(entryField, this.fragment_count);
+    processor.eat('entry',a);
+};
+
+TfrfBox.prototype._processEntry = function(box,processor) {
+    if (box.version==1)
+    {
+        processor.eat('fragment_absolute_time',FIELD_UINT64);
+        processor.eat('fragment_duration',FIELD_UINT64);
+    }
+    else
+    {
+        processor.eat('fragment_absolute_time',FIELD_UINT32);
+        processor.eat('fragment_duration',FIELD_UINT32);
+    }
+};
+Box.prototype.registerBoxType( TfrfBox );
+
+
