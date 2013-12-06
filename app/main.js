@@ -313,7 +313,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
     ////////////////////////////////////////
 
     video = document.querySelector(".dash-video-player video");
-    context = new Dash.di.DashContext();
+    context = new Custom.di.CustomContext();
     player = new MediaPlayer(context);
     $scope.version = player.getVersion();
 
