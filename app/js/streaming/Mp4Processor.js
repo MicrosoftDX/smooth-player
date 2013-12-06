@@ -132,6 +132,58 @@ MediaPlayer.dependencies.Mp4Processor = function () {
             return mdhd;
         },
 
+        createHandlerReferenceBox = function () {
+            
+            //This box within a Media Box declares the process by which the media-data in the track is presented, and thus,
+            //the nature of the media in a track. For example, a video track would be handled by a video handler.
+            var hdlr = new HandlerBox();
+
+            debugger;
+            
+            hdlr.version = 0; // default value version = 0 
+            hdlr.pre_defined = 0; //default value.
+            if (adaptation.mimeType !== undefined) 
+            {
+                switch (adaptation.mimeType)
+                {
+                    case "video/mp4" :
+                        hdlr.handler_type = hdlr.HANDLERTYPEVIDEO;
+                        hdlr.name = hdlr.HANDLERVIDEONAME;
+                        break;
+                    case "audio/mp4" :
+                        hdlr.handler_type = hdlr.HANDLERTYPEAUDIO;
+                        hdlr.name = hdlr.HANDLERAUDIONAME;
+                        break;
+                    default :
+                        hdlr.handler_type = hdlr.HANDLERTYPETEXT;
+                        hdlr.name = hdlr.HANDLERTEXTNAME;
+                        break;
+                }
+            }
+            else
+            {
+                switch (adaptation.contentType)
+                {
+                    case "video" :
+                        hdlr.handler_type = hdlr.HANDLERTYPEVIDEO;
+                        hdlr.name = hdlr.HANDLERVIDEONAME;
+                        break;
+                    case "audio" :
+                        hdlr.handler_type = hdlr.HANDLERTYPEAUDIO;
+                        hdlr.name = hdlr.HANDLERAUDIONAME;
+                        break;
+                    default :
+                        hdlr.handler_type = hdlr.HANDLERTYPETEXT;
+                        hdlr.name = hdlr.HANDLERTEXTNAME;
+                        break;
+                }
+            }
+            
+            hdlr.reserved = [0x0, 0x0]; //default value
+
+            return hdlr;
+        },
+
         doGenerateInitSegment = function (representation) {
             var manifest = this.manifestModel.getValue(),
                 isLive = this.manifestExt.getIsLive(manifest);
@@ -150,7 +202,11 @@ MediaPlayer.dependencies.Mp4Processor = function () {
             var mdia = new MediaBox();
             mdia.boxes = new Array();
 
+            //Create and add Media Header Box (mdhd)
             mdia.boxes.push(createMediaHeaderBox.call(this));
+            
+            //Create and add Handler Reference Box (hdlr)
+            mdia.boxes.push(createHandlerReferenceBox.call(this));
 
             // Create and add MovieExtends box (trak)
             //moov.boxes.push(createMovieExtendsBox.call(this, representation));
