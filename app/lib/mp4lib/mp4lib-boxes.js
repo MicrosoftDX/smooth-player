@@ -429,6 +429,14 @@ function HandlerBox() {}
 
 HandlerBox.prototype.boxtype = 'hdlr';
 
+//add NAN
+HandlerBox.prototype.HANDLERTYPEVIDEO = "vide";
+HandlerBox.prototype.HANDLERTYPEAUDIO = "soun";
+HandlerBox.prototype.HANDLERTYPETEXT = "meta";
+HandlerBox.prototype.HANDLERVIDEONAME = "Video Track";
+HandlerBox.prototype.HANDLERAUDIONAME = "Audio Track";
+HandlerBox.prototype.HANDLERTEXTNAME = "Text Track";
+
 HandlerBox.prototype._processFields = function(processor) {
     FullBox.prototype._processFields.call(this,processor);
     processor.eat('pre_defined',FIELD_UINT32);
