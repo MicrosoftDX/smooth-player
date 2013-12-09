@@ -2,7 +2,7 @@ Custom.dependencies.CustomFragmentLoader = function () {
     "use strict";
   console.log("Custom.dependencies.CustomFragmentLoader");
     
-    var rslt = Custom.utils.copyMethods(MediaPlayer.dependencies.FragmentLoader);
+    var rslt = Custom.utils.copyMethods(Custom.dependencies.CustomFragmentLoader);
 
     rslt.load = function(req){
          var deferred = Q.defer();
