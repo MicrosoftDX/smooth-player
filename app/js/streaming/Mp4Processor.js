@@ -19,7 +19,7 @@ MediaPlayer.dependencies.Mp4Processor = function () {
             // Else get segment information of the first representation
             if (segmentInfo === null)
             {
-                segmentInfo = this.getSegmentInfoFor(adaptation.Representation_asArray[index]);
+                segmentInfo = this.manifestExt.getSegmentInfoFor(adaptation.Representation_asArray[0]);
             }
 
             if (segmentInfo !== null && segmentInfo !== undefined && segmentInfo.hasOwnProperty("timescale"))
