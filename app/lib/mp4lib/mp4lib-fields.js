@@ -8,14 +8,14 @@ function readBytes(buf, pos, nbBytes) {
         pos++;
     }
     return value;
-};
+}
 
 function writeBytes(buf, pos, nbBytes, value) {
     for (var i = 0; i < nbBytes; i++) {
         buf[pos + nbBytes - i - 1] = value & 0xFF;
         value = value >> 8;
     }
-};
+}
 
 
 //------------------------------- NumberField -------------------------------
@@ -25,11 +25,11 @@ function NumberField(bits,signed) {
     this.signed = signed;
 }
 
-NumberField.prototype.read = function(buf,pos){
+NumberField.prototype.read = function(buf, pos) {
     return readBytes(buf, pos, this.bits/8);
 };
 
-NumberField.prototype.write = function(buf,pos,val){
+NumberField.prototype.write = function(buf,pos,val) {
     writeBytes(buf, pos, this.bits/8, val);
 };
 
@@ -42,15 +42,13 @@ NumberField.prototype.getLength = function(val) {
 function LongNumberField() {
 }
 
-LongNumberField.prototype.read = function(buf,pos){
-    
+LongNumberField.prototype.read = function(buf, pos) {
     var high = readBytes(buf, pos, 4);
     var low = readBytes(buf, pos + 4, 4);
     return goog.math.Long.fromBits(low, high).toNumber();
 };
 
-LongNumberField.prototype.write = function(buf,pos,val){
-
+LongNumberField.prototype.write = function(buf, pos, val) {
     var longNumber = goog.math.Long.fromNumber(val);
     var low = longNumber.getLowBits();
     var high = longNumber.getHighBits();
@@ -354,15 +352,15 @@ BoxesListField.prototype.read = function(buf,pos,end){
         }
 
         // process to read size
-
 		var p = new DeserializationBoxFieldsProcessor(box,buf,pos,end);
 		box._processFields(p);
         box.__sourceBuffer = buf.subarray(pos,pos+box.size);
         // the sourcebuffer is kept for debug purposes only, it is not used for any data processing        
 
-        //console.log('*** buffer length:'+buf.length+', size:"+bo
+        // (Re)set box type in case of extended type
+        box.boxtype = boxtype;
+
         res.push(box);
-		//console.log(box);
         pos+=box.size;
         if (box.size==0)
         {

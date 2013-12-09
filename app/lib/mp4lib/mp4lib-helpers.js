@@ -217,3 +217,18 @@ function verifySerialization(box,prefix)
 }
 
 
+var getBoxByType = function(box, boxType) {
+    for(var i = 0; i < box.boxes.length; i++) {
+        if(box.boxes[i].boxtype === boxType) {
+            return box.boxes[i];
+        }
+    }
+};
+
+var removeBoxByType = function(box, boxType) {
+    for(var i = 0; i < box.boxes.length; i++) {
+        if(box.boxes[i].boxtype === boxType) {
+            box.boxes.splice(i, 1);
+        }
+    }
+};
