@@ -27,7 +27,7 @@ MediaPlayer.dependencies.SourceBufferExtensions.prototype = {
         var deferred = Q.defer(),
             self = this;
         try {
-            this.logger.info("[SourceBufferExtensions]", "addSourceBuffer(" + codec + ")")
+            this.logger.info("[SourceBufferExtensions]", "addSourceBuffer(" + codec + ")");
             deferred.resolve(mediaSource.addSourceBuffer(codec));
         } catch(ex) {
             if (!self.manifestExt.getIsTextTrack(codec)) {
