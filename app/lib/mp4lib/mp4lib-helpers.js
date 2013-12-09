@@ -223,6 +223,7 @@ var getBoxByType = function(box, boxType) {
             return box.boxes[i];
         }
     }
+    return null;
 };
 
 var removeBoxByType = function(box, boxType) {
