@@ -16,7 +16,7 @@ Custom.di.CustomContext = function () {
 
             // creation of a context manager to plug some specific parts of the code
             this.system.mapSingleton('contextManager', Custom.modules.ContextManager);
-
+            this.system.mapClass('fragmentLoader', Custom.dependencies.CustomFragmentLoader);
             // plug message handler. When th emessage is notify, the contextManager is called
             this.system.mapHandler('setContext', 'contextManager', 'setContext');
             
