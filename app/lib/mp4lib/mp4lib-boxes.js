@@ -919,7 +919,19 @@ PixelAspectRatioBox.prototype._processFields = function(processor) {
 
 Box.prototype.registerBoxType( PixelAspectRatioBox );
 
+// --------------------------- abstract VisualSampleEntry ----------------------------------
 
+function AudioSampleEntryBox() {}
+
+AudioSampleEntryBox.prototype._processFields = function(processor) {
+    SampleEntryBox.prototype._processFields.call(this,processor);
+    processor.eat('reserved_2',new ArrayField(FIELD_UINT32,2));    
+    processor.eat('channelcount',FIELD_UINT16);
+    processor.eat('samplesize',FIELD_UINT16);
+    processor.eat('pre_defined',FIELD_UINT16);
+    processor.eat('reserved_3',FIELD_UINT16);
+    processor.eat('samplerate',FIELD_UINT32);
+};
 
 // --------------------------- stsz ----------------------------------
 
@@ -992,7 +1004,6 @@ TfxdBox.prototype.uuid = [0x6D, 0x1D, 0x9B, 0x05, 0x42, 0xD5, 0x44, 0xE6, 0x80, 
 
 TfxdBox.prototype._processFields = function(processor) {
     FullBox.prototype._processFields.call(this,processor);
-    debugger;
     if (this.version==1)
     {
         processor.eat('fragment_absolute_time',FIELD_UINT64);
