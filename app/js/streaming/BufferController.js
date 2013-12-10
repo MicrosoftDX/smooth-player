@@ -572,9 +572,6 @@ MediaPlayer.dependencies.BufferController = function () {
                 }
             );
 
-            // BBE - Test mp4lib
-            self.mp4Processor.initialize(periodIndex, data);
-
             ready = true;
             startPlayback.call(this);
         },
