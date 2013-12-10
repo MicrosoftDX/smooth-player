@@ -218,7 +218,7 @@ Mss.dependencies.MssParser = function () {
             this.isTransformed = true;
             return {
                 profiles: "urn:mpeg:dash:profile:isoff-live:2011",
-                type: node.isLive ? "dynamic" : "static",
+                type: node.IsLive ? "dynamic" : "static",
                 timeShiftBufferDepth: node.DVRWindowLength,
                 mediaPresentationDuration : node.Duration,
                 BaseURL: node.BaseURL,
@@ -335,7 +335,7 @@ Mss.dependencies.MssParser = function () {
         segmentTemplate.properties = common;
         //here node is QualityLevel
         segmentTemplate.transformFunc = function(node) {
-            //TODO give the right timescale !
+            //TODO put timescale in conf or const !
 
             var mediaUrl = node.Url.replace('{bitrate}','$Bandwidth$');
             mediaUrl = mediaUrl.replace('{start time}','$Time$');
@@ -358,6 +358,36 @@ Mss.dependencies.MssParser = function () {
         segmentTimeline.properties = common;
         //here node is QualityLevel
         segmentTimeline.transformFunc = function(node) {
+            if (node.c_asArray.length>1) {
+                var groupedSegments = [];
+                var segments = node.c_asArray;
+
+                groupedSegments.push({
+                    d : segments[0].d,
+                    r: 0,
+                    t: segments[0].t || 0
+                });
+
+                for (var i=1; i<segments.length; i++) {
+                    if (segments[i].d === segments[i-1].d) {
+                        // incrementation of the 'r' attributes
+                        ++groupedSegments[groupedSegments.length -1].r;
+                    } else {
+                        groupedSegments.push({
+                            d : segments[i].d,
+                            r: 0,
+                            t: segments[i].t || 0
+                        });
+                    }
+                }
+
+                node.c_asArray = groupedSegments;
+                node.c = groupedSegments;
+            }
+
+            
+
+
             return {
                 S: node.c,
                 S_asArray: node.c_asArray
@@ -376,7 +406,8 @@ Mss.dependencies.MssParser = function () {
         segment.transformFunc = function(node) {
             return {
                 d: node.d,
-                r: node.r ? node.r : 0
+                r: node.r ? node.r : 0,
+                t: node.t ? node.t : 0
             };
         };
         segmentTimeline.children.push(segment);
@@ -419,7 +450,7 @@ Mss.dependencies.MssParser = function () {
             manifest.BaseURL = baseUrl;
         } else {
             // Setting manifest's BaseURL to the first BaseURL
-            manifest.BaseURL = manifest.BaseURL_asArray[0];
+            manifest.BaseURL = manifest.BaseURL_asArray && manifest.BaseURL_asArray[0] || manifest.BaseURL;
 
             if (manifest.BaseURL.indexOf("http") !== 0) {
                 manifest.BaseURL = baseUrl + manifest.BaseURL;
