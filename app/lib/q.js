@@ -645,19 +645,27 @@ var rejections = [];
 var errors = [];
 var errorsDisplayed;
 function displayErrors() {
+    
+    /* 
+      HACK MGA :  remove !window.Touch in the condition
+      because window.Touch is defined in Chrome, so errors are never displayed... 
+    */
+
     if (
         !errorsDisplayed &&
         typeof window !== "undefined" &&
-        !window.Touch &&
         window.console
     ) {
         // This promise library consumes exceptions thrown in handlers so
         // they can be handled by a subsequent promise.  The rejected
         // promises get added to this array when they are created, and
         // removed when they are handled.
-        console.log("Should be empty:", errors);
+
+        //HACK MGA : change log level (log to error)
+        console.error("Should be empty:", errors);
     }
-    errorsDisplayed = true;
+    // HACK MGA : remove this affectation to display ALL errors
+    // errorsDisplayed = true;
 }
 
 // Show unhandled rejection if Node exits without handling an outstanding
@@ -699,10 +707,11 @@ function reject(exception) {
     }, function valueOf() {
         return this;
     }, exception, true);
-    // note that the error has not been handled
-    displayErrors();
     rejections.push(rejection);
     errors.push(exception);
+    // note that the error has not been handled
+    // HACK MGA : change call order because in disaplyErrors, we use errors...
+    displayErrors();
     return rejection;
 }
 

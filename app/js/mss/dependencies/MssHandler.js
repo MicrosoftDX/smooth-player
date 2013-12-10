@@ -1,5 +1,5 @@
 Mss.dependencies.MssHandler = function(){
-	var rslt = Custom.utils.copyMethods(Dash.dependencies.DashHandler),
+	var rslt = Custom.utils.copyMethods(Mss.dependencies.MssHandler),
 		getInitData = function(quality, data){
 			// return data in byte format
 			// call MP4 lib to generate the init
