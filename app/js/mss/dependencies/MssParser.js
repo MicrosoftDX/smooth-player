@@ -177,9 +177,26 @@ Mss.dependencies.MssParser = function () {
             period,
             adaptationSet,
             representation,
+            segmentTemplate,
             common;
 
-        common = [];
+        common = [
+            {
+                name: 'BaseURL',
+                merge: true,
+                mergeFunction: function (parentValue, childValue) {
+                    var mergedValue;
+
+                    // child is absolute, don't merge
+                    if (childValue.indexOf("http://") === 0) {
+                        mergedValue = childValue;
+                    } else {
+                        mergedValue = parentValue + childValue;
+                    }
+
+                    return mergedValue;
+                }
+        }];
 
         mpd = {};
         mpd.name = "mpd";
@@ -196,10 +213,11 @@ Mss.dependencies.MssParser = function () {
             return {
                 profiles: "urn:mpeg:dash:profile:isoff-live:2011",
                 type: node.isLive ? "dynamic" : "static",
-                timeShiftBufferDepth: node.SmoothStreamingMedia.DVRWindowLength,
-                mediaPresentationDuration : node.SmoothStreamingMedia.Duration,
-                Period: node.SmoothStreamingMedia,
-                Period_asArray: [node.SmoothStreamingMedia]
+                timeShiftBufferDepth: node.DVRWindowLength,
+                mediaPresentationDuration : node.Duration,
+                BaseURL: node.BaseURL,
+                Period: node,
+                Period_asArray: [node]
             };
         };
         mpd.isTransformed = false;
@@ -215,6 +233,7 @@ Mss.dependencies.MssParser = function () {
         period.transformFunc = function(node) {
             return {
                 duration: node.Duration,
+                BaseURL: node.BaseURL,
                 AdaptationSet: node.StreamIndex,
                 AdaptationSet_asArray: node.StreamIndex_asArray
             };
@@ -237,6 +256,7 @@ Mss.dependencies.MssParser = function () {
                 mimeType: node.Type == "video" ? "video/mp4" : "audio/mp4",
                 maxWidth: node.MaxWidth,
                 maxHeight: node.MaxHeight,
+                BaseURL: node.BaseURL,
                 Representation: node.QualityLevel,
                 Representation_asArray: node.QualityLevel_asArray
             };
@@ -265,11 +285,12 @@ Mss.dependencies.MssParser = function () {
                 height: node.maxHeight,
                 codecs: codecs,
                 audioSamplingRate: node.SamplingRate,
-                codecPrivateData: node.CodecPrivateData
+                codecPrivateData: node.CodecPrivateData,
+                BaseURL: node.BaseURL
             };
         };
         adaptationSet.children.push(representation);
-
+        
         return mpd;
     };
 
@@ -291,7 +312,7 @@ Mss.dependencies.MssParser = function () {
         this.logger.debug("[MssParser]", "Doing parse.");
         
         var manifest = null;
-        var converter = new X2JS(matchers, '', false);
+        var converter = new X2JS(matchers, '', true);
         var iron = new Custom.utils.ObjectIron(getDashMap());
  
         this.logger.debug("[MssParser]", "Converting from XML.");
@@ -300,6 +321,19 @@ Mss.dependencies.MssParser = function () {
         if (manifest === null) {
             this.logger.error("[MssParser]", "Failed to parse manifest!!");
             return Q.when(null);
+        }
+
+        // set the baseUrl
+        if (!manifest.hasOwnProperty("BaseURL")) {
+            this.logger.debug("[DashParser]", "Setting baseURL: " + baseUrl);
+            manifest.BaseURL = baseUrl;
+        } else {
+            // Setting manifest's BaseURL to the first BaseURL
+            manifest.BaseURL = manifest.BaseURL_asArray[0];
+
+            if (manifest.BaseURL.indexOf("http") !== 0) {
+                manifest.BaseURL = baseUrl + manifest.BaseURL;
+            }
         }
 
         this.logger.debug("[MssParser]", "Flatten manifest properties.");
