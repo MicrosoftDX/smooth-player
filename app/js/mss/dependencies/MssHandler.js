@@ -2,7 +2,6 @@
 Mss.dependencies.MssHandler = function() {
 
 	var rslt = Custom.utils.copyMethods(Mss.dependencies.MssHandler),
-
 		getIndex = function (adaptation, manifest) {
 
 			var periods = manifest.Period_asArray,
@@ -48,6 +47,7 @@ Mss.dependencies.MssHandler = function() {
 			return representation;
 		},
 
+
         getTimescale = function (adaptation) {
             var timescale = 1,
                 segmentInfo;
@@ -91,24 +91,32 @@ Mss.dependencies.MssHandler = function() {
 			//rslt.logger.debug("[MssHandler]", "TODO - do the initialization data ",this.manifestModel, quality, data);
 			
 			// Get required media information from manifest  to generate initialisation segment
-			var manifest = rslt.manifestModel.getValue();
-			var isLive = rslt.manifestExt.getIsLive(manifest);
 			var representation = getRepresentationForQuality(quality, adaptation);
+			if(representation){
+				if(!representation.initData){
+					var manifest = rslt.manifestModel.getValue();
+					var isLive = rslt.manifestExt.getIsLive(manifest);
 
-			var media = {}
-			media.type = getType(adaptation);
-			media.trackId = getIndex(adaptation, manifest) + 1; // +1 since track_id shall start from '1'
-			media.timescale = getTimescale(adaptation);
-			media.duration = getDuration(manifest, isLive);
-			media.codecs = representation.codecs;
-			media.codecPrivateData = representation.codecPrivateData;
-			media.width = representation.width;
-			media.height = representation.height;
-			media.language = adaptation.lang ? adaptation.lang : 'und';
+					var media = {}
+					media.type = getType(adaptation);
+					media.trackId = getIndex(adaptation, manifest) + 1; // +1 since track_id shall start from '1'
+					media.timescale = getTimescale(adaptation);
+					media.duration = getDuration(manifest, isLive);
+					media.codecs = representation.codecs;
+					media.codecPrivateData = representation.codecPrivateData;
+					media.width = representation.width || adaptation.maxWidth;
+					media.height = representation.height || adaptation.maxHeight;
+					media.language = adaptation.lang ? adaptation.lang : 'und';
 
-			return rslt.mp4Processor.generateInitSegment(media);
-		};
-
+					representation.initData =  rslt.mp4Processor.generateInitSegment(media);
+				}
+				return representation.initData;
+			}else{
+				return null;
+			}
+			
+	};
+	
 	rslt.manifestModel = undefined;
 	rslt.manifestExt = undefined;
 	rslt.mp4Processor = undefined;
@@ -116,7 +124,6 @@ Mss.dependencies.MssHandler = function() {
 	rslt.getInitRequest = function (quality, data) {
 			var deferred = Q.defer();
             //Mss.dependencies.MssHandler.prototype.getInitRequest.call(this,quality,data).then(onGetInitRequestSuccess);
-
             var request = new MediaPlayer.vo.SegmentRequest();
             request.streamType = this.getType();
             request.type = "Initialization Segment";
