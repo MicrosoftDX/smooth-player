@@ -307,10 +307,14 @@ Mss.dependencies.MssParser = function () {
         segmentTemplate.properties = common;
         //here node is QualityLevel
         segmentTemplate.transformFunc = function(node) {
+            //TODO give the right timescale !
+
+            var mediaUrl = node.Url.replace('{bitrate}','$Bandwidth$');
+            mediaUrl = mediaUrl.replace('{start time}','$Time$');
             return {
-                media: node.Url,
+                media: mediaUrl,
                 duration: node.Duration,
-                timescale: node.timeScale,
+                timescale: "10000000",
                 SegmentTimeline: node
             };
         };
@@ -344,7 +348,7 @@ Mss.dependencies.MssParser = function () {
         segment.transformFunc = function(node) {
             return {
                 d: node.d,
-                r: node.r
+                r: node.r ? node.r : 0
             };
         };
         segmentTimeline.children.push(segment);

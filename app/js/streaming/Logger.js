@@ -28,6 +28,14 @@ MediaPlayer.utils.Logger = function () {
         }
     };
 
+    var _error = function(){
+        if(_logger){
+            _logger.error.apply(_logger,arguments);
+        }else{
+            console.error.apply(console,arguments);
+        }
+    };
+
     var _addAppender = function(){
         if('undefined' !== typeof(log4javascript)){
             appender = new log4javascript.PopUpAppender();
@@ -60,6 +68,7 @@ MediaPlayer.utils.Logger = function () {
     //_logger.addAppender(appender);
     return {
         debug:_debug,
+        error: _error,
         addAppender:_addAppender,
         info:_info,
         trace:_trace,
