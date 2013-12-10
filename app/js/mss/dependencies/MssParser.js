@@ -21,6 +21,7 @@ Mss.dependencies.MssParser = function () {
             subRepresentation,
             common;
 
+        //use by parser to copy all common attributes between adaptation and representation
         common = [
             {
                 name: 'profiles',
@@ -178,6 +179,8 @@ Mss.dependencies.MssParser = function () {
             adaptationSet,
             representation,
             segmentTemplate,
+            segmentTimeline,
+            segment,
             common;
 
         common = [
@@ -258,7 +261,9 @@ Mss.dependencies.MssParser = function () {
                 maxHeight: node.MaxHeight,
                 BaseURL: node.BaseURL,
                 Representation: node.QualityLevel,
-                Representation_asArray: node.QualityLevel_asArray
+                Representation_asArray: node.QualityLevel_asArray,
+                SegmentTemplate : node,
+                SegmentTemplate_asArray : [node]
             };
         };
         period.children.push(adaptationSet);
@@ -278,6 +283,8 @@ Mss.dependencies.MssParser = function () {
             var avcoti = nalHeader && nalHeader[0] ? (node.CodecPrivateData.substr(node.CodecPrivateData.indexOf(nalHeader[0])+10, 6)) : undefined;
             var codecs = avcoti? "avc1."+avcoti : undefined;
 
+            //TODO get the audio codec for an audio representation
+
             return {
                 id: node.Index,
                 bandwidth: node.Bitrate,
@@ -290,6 +297,57 @@ Mss.dependencies.MssParser = function () {
             };
         };
         adaptationSet.children.push(representation);
+
+        segmentTemplate = {};
+        segmentTemplate.name = "SegmentTemplate";
+        segmentTemplate.isRoot = false;
+        segmentTemplate.isArray = false;
+        segmentTemplate.parent = adaptationSet;
+        segmentTemplate.children = [];
+        segmentTemplate.properties = common;
+        //here node is QualityLevel
+        segmentTemplate.transformFunc = function(node) {
+            return {
+                media: node.Url,
+                duration: node.Duration,
+                timescale: node.timeScale,
+                SegmentTimeline: node
+            };
+        };
+        adaptationSet.children.push(segmentTemplate);
+
+
+        segmentTimeline = {};
+        segmentTimeline.name = "SegmentTimeline";
+        segmentTimeline.isRoot = false;
+        segmentTimeline.isArray = false;
+        segmentTimeline.parent = segmentTemplate;
+        segmentTimeline.children = [];
+        segmentTimeline.properties = common;
+        //here node is QualityLevel
+        segmentTimeline.transformFunc = function(node) {
+            return {
+                S: node.c,
+                S_asArray: node.c_asArray
+            };
+        };
+        segmentTemplate.children.push(segmentTimeline);
+
+        segment = {};
+        segment.name = "S";
+        segment.isRoot = false;
+        segment.isArray = true;
+        segment.parent = segmentTimeline;
+        segment.children = [];
+        segment.properties = common;
+        //here node is QualityLevel
+        segment.transformFunc = function(node) {
+            return {
+                d: node.d,
+                r: node.r
+            };
+        };
+        segmentTimeline.children.push(segment);
         
         return mpd;
     };
