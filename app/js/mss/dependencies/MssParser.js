@@ -18,7 +18,6 @@ Mss.dependencies.MssParser = function () {
     var getCommonValuesMap = function () {
         var adaptationSet,
             representation,
-            subRepresentation,
             common;
 
         //use by parser to copy all common attributes between adaptation and representation
@@ -174,12 +173,15 @@ Mss.dependencies.MssParser = function () {
     };
 
     var getBaseUrlValuesMap = function () {
+
+        //the first mapping get tis Map, so we can also make some transformations...
         var mpd,
             period,
             adaptationSet,
             representation,
             segmentTemplate,
             segmentTimeline,
+            audioChannelConfiguration,
             segment,
             common;
 
@@ -212,6 +214,7 @@ Mss.dependencies.MssParser = function () {
             if(this.isTransformed) {
                 return node;
             }
+            //used to not transfor it an other time !
             this.isTransformed = true;
             return {
                 profiles: "urn:mpeg:dash:profile:isoff-live:2011",
@@ -252,11 +255,11 @@ Mss.dependencies.MssParser = function () {
         adaptationSet.properties = common;
         //here node is StreamIndex node
         adaptationSet.transformFunc = function(node) {
-            return {
+            var adaptTransformed = {
                 id: node.Name,
                 lang: node.Language,
                 contenType: node.Type,
-                mimeType: node.Type == "video" ? "video/mp4" : "audio/mp4",
+                mimeType: node.Type === "video" ? "video/mp4" : "audio/mp4",
                 maxWidth: node.MaxWidth,
                 maxHeight: node.MaxHeight,
                 BaseURL: node.BaseURL,
@@ -265,6 +268,13 @@ Mss.dependencies.MssParser = function () {
                 SegmentTemplate : node,
                 SegmentTemplate_asArray : [node]
             };
+
+            if (node.Type === "audio") {
+                adaptTransformed.AudioChannelConfiguration = adaptTransformed;
+                adaptTransformed.Channels = node.QualityLevel && node.QualityLevel.Channels; //used by AudioChannelConfiguration
+            }
+
+            return adaptTransformed;
         };
         period.children.push(adaptationSet);
 
@@ -281,8 +291,8 @@ Mss.dependencies.MssParser = function () {
             var nalHeader = /00000001[0-9]7/.exec(node.CodecPrivateData);
             // find the 6 characters after the first nalHeader (if it exists)
             var avcoti = nalHeader && nalHeader[0] ? (node.CodecPrivateData.substr(node.CodecPrivateData.indexOf(nalHeader[0])+10, 6)) : undefined;
-            var codecs = avcoti? "avc1."+avcoti : undefined;
-
+            // if we don't find nalHeader, we are in audio Representation case...
+            var codecs = avcoti? "avc1."+avcoti : 'mp4a.40.5';
             //TODO get the audio codec for an audio representation
 
             return {
@@ -297,6 +307,24 @@ Mss.dependencies.MssParser = function () {
             };
         };
         adaptationSet.children.push(representation);
+
+
+        //AudioChannelConfiguration for audio tracks
+        audioChannelConfiguration = {};
+        audioChannelConfiguration.name = "AudioChannelConfiguration";
+        audioChannelConfiguration.isRoot = false;
+        audioChannelConfiguration.isArray = false;
+        audioChannelConfiguration.parent = adaptationSet;
+        audioChannelConfiguration.children = [];
+        audioChannelConfiguration.properties = common;
+        audioChannelConfiguration.transformFunc = function(node) {
+            return {
+                schemeIdUri : 'urn:mpeg:dash:23003:3:audio_channel_configuration:2011',
+                value : node.Channels
+            };
+        };
+        adaptationSet.children.push(audioChannelConfiguration);
+
 
         segmentTemplate = {};
         segmentTemplate.name = "SegmentTemplate";
@@ -401,7 +429,7 @@ Mss.dependencies.MssParser = function () {
         this.logger.debug("[MssParser]", "Flatten manifest properties.");
         manifest = iron.run(manifest);
 
-        this.logger.debug("[MssParser]", "Parsing complete.")
+        this.logger.debug("[MssParser]", "Parsing complete.");
         return Q.when(manifest);
     };
 
