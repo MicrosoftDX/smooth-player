@@ -181,15 +181,12 @@ MediaPlayer.dependencies.BufferController = function () {
 
             self.logger.debug("[BufferController]", type + " Bytes finished loading: " + request.url);
 
-            self.fragmentController.process(response.data).then(
+            self.fragmentController.process(response.data, request).then(
                 function (data) {
                     if (data !== null) {
                         var representation = getRepresentationForQuality(lastQuality, self.getData()),
                             currentVideoTime = self.videoModel.getCurrentTime(),
                             currentTime = new Date();
-
-                        // BBE - Test mp4lib
-                        self.mp4Processor.processFragment(data);
 
                         self.logger.debug("[BufferController]", "Push (" + type + ") bytes: " + data.byteLength);
 
@@ -492,9 +489,6 @@ MediaPlayer.dependencies.BufferController = function () {
                                             }
 
                                             self.logger.debug("[BufferController]", qualityChanged ? (type + " Quality changed to: " + quality) : "Quality didn't change.");
-
-                                            // BBE - Test mp4lib
-                                            self.mp4Processor.generateInitSegment(data, representation);
 
                                             return loadInitialization.call(self, qualityChanged, quality);
                                         }

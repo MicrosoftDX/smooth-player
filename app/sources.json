@@ -11,6 +11,16 @@
             "browsers": "cdsbi"
         },
         {
+            "name": "France 24 (Smooth - Live)",
+            "url": "http://2is7server1.rd.francetelecom.com/C4/C4-46_S1.isml/Manifest",
+            "browsers": "cdsbi"
+        },
+        {
+            "name": "France 24 (Smooth to DASH - Live)",
+            "url": "http://10.194.60.110/VIDEO/MSS/France24/manifest.mpd",
+            "browsers": "cdsbi"
+        },
+        {
             "name": "PrinceOfPersia (DASH - VOD - 2 audios)",
             "url": "http://10.194.60.110/VIDEO/DASH/VOD/PrinceOfPersia/manifest.mpd",
             "browsers": "cdsbi"
