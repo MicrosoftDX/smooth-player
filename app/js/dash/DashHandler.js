@@ -398,7 +398,12 @@ Dash.dependencies.DashHandler = function () {
             dur = (fDuration / fTimescale);
             idx = Math.floor(time / dur);
 
-            idx += startNumber; // apply first item offset
+             // MBR modification for live, because of a difference of timestamp
+            if(isLive){
+                idx = startNumber;
+            }else{
+                idx += startNumber; // apply first item offset
+            }
 
             return Q.when(idx);
         },
