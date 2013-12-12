@@ -34,7 +34,7 @@ MediaPlayer.dependencies.ManifestLoader = function () {
                 needFailureReport = true,
                 self = this;
 
-            this.debug.log("[ManifestLoader]", "Start loading manifest: " + url);
+            this.debug.log("Start loading manifest: " + url);
 
             request.open("GET", url, true);
 
@@ -57,23 +57,13 @@ MediaPlayer.dependencies.ManifestLoader = function () {
                                                  null,
                                                  null);
 
-                
-                self.debug.log("[ManifestLoader]", "Manifest:\n", request.responseText);
-
                 self.parser.parse(request.responseText, baseUrl).then(
                     function (manifest) {
-                        if (manifest != null)
-                        {
                         manifest.mpdUrl = url;
                         deferred.resolve(manifest);
                     },
                     function () {
                         deferred.reject(request);
-                    }
-                        else
-                        {
-                            deferred.reject("Error loading Manifest");
-                        }
                     }
                 );
             };
