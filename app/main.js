@@ -319,7 +319,6 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
     $scope.version = player.getVersion();
 
     player.startup();
-    player.getDebug().setLogToBrowserConsole(false);
     player.addEventListener("error", onError.bind(this));
 
     player.attachView(video);
