@@ -52,9 +52,8 @@ Mss.dependencies.MssFragmentController = function () {
         return new_data;
     };
     rslt.mp4Processor = undefined;
-    rslt.internalProcess = function (bytes, request) {
+    rslt.process = function (bytes, request) {
         "use strict";
-
         var self = this;
 
         var result = null;

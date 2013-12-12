@@ -50,7 +50,9 @@ MediaPlayer.dependencies.TextController = function () {
          onBytesLoaded = function (request, response) {
              var self = this;
              self.debug.log(" Text track Bytes finished loading: " + request.url);
-             self.fragmentController.process(response.data).then(
+
+             //MBR : Modif orange pour ajouter la request afin de récupérer startTime et timescale
+             self.fragmentController.process(response.data,request).then(
                  function (data) {
                      if (data !== null) {
                          self.debug.log("Push text track bytes: " + data.byteLength);
@@ -61,6 +63,7 @@ MediaPlayer.dependencies.TextController = function () {
          },
 
          onBytesError = function (/*request*/) {
+            console.error("Error on Byte");
          };
 
     return {
