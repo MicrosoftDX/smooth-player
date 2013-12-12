@@ -34,7 +34,7 @@ MediaPlayer.rules.InsufficientBufferRule = function () {
         DRY_BUFFER_LIMIT = 3;
 
     return {
-        logger: undefined,
+        debug: undefined,
 
 
         checkIndex: function (current, metrics /*, data*/) {
@@ -44,17 +44,17 @@ MediaPlayer.rules.InsufficientBufferRule = function () {
                 shift = false,
                 p = MediaPlayer.rules.SwitchRequest.prototype.DEFAULT;
 
-            self.logger.debug("[InsufficientBufferRules]", " Checking insufficient buffer rule...");
+            self.debug.log("[InsufficientBufferRules]", " Checking insufficient buffer rule...");
 
             if (metrics.PlayList === null || metrics.PlayList === undefined || metrics.PlayList.length === 0) {
-                self.logger.debug("[InsufficientBufferRules]", " Not enough information for rule.");
+                self.debug.log("[InsufficientBufferRules]", " Not enough information for rule.");
                 return Q.when(new MediaPlayer.rules.SwitchRequest());
             }
 
             playlist = metrics.PlayList[metrics.PlayList.length - 1];
 
             if (playlist === null || playlist === undefined || playlist.trace.length === 0) {
-                self.logger.debug("[InsufficientBufferRules]", " Not enough information for rule.");
+                self.debug.log("[InsufficientBufferRules]", " Not enough information for rule.");
                 return Q.when(new MediaPlayer.rules.SwitchRequest());
             }
 
@@ -63,28 +63,28 @@ MediaPlayer.rules.InsufficientBufferRule = function () {
             trace = playlist.trace[playlist.trace.length - 2];
 
             if (trace === null || trace === undefined || trace.stopreason === null || trace.stopreason === undefined) {
-                self.logger.debug("[InsufficientBufferRules]", " Not enough information for rule.");
+                self.debug.log("[InsufficientBufferRules]", " Not enough information for rule.");
                 return Q.when(new MediaPlayer.rules.SwitchRequest());
             }
 
             if (trace.stopreason === MediaPlayer.vo.metrics.PlayList.Trace.REBUFFERING_REASON) {
                 shift = true;
                 dryBufferHits += 1;
-                self.logger.debug("[InsufficientBufferRules]", " Number of times the buffer has run dry: " + dryBufferHits);
+                self.debug.log("[InsufficientBufferRules]", " Number of times the buffer has run dry: " + dryBufferHits);
             }
 
             // if we've hit a dry buffer too many times, become strong to override whatever is
             // causing the stream to switch up
             if (dryBufferHits > DRY_BUFFER_LIMIT) {
                 p = MediaPlayer.rules.SwitchRequest.prototype.STRONG;
-                self.logger.debug("[InsufficientBufferRules]", " Apply STRONG to buffer rule.");
+                self.debug.log("[InsufficientBufferRules]", " Apply STRONG to buffer rule.");
             }
 
             if (shift) {
-                self.logger.debug("[InsufficientBufferRules]", " The buffer ran dry recently, switch down.");
+                self.debug.log("[InsufficientBufferRules]", " The buffer ran dry recently, switch down.");
                 return Q.when(new MediaPlayer.rules.SwitchRequest(current - 1, p));
             } else if (dryBufferHits > DRY_BUFFER_LIMIT) {
-                self.logger.debug("[InsufficientBufferRules]", " Too many dry buffer hits, quit switching bitrates.");
+                self.debug.log("[InsufficientBufferRules]", " Too many dry buffer hits, quit switching bitrates.");
                 return Q.when(new MediaPlayer.rules.SwitchRequest(current, p));
             } else {
                 return Q.when(new MediaPlayer.rules.SwitchRequest(MediaPlayer.rules.SwitchRequest.prototype.NO_CHANGE, p));

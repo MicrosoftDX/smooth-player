@@ -26,7 +26,7 @@ MediaPlayer.rules.LimitSwitchesRule = function () {
         waiting = 0;
 
     return {
-        logger: undefined,
+        debug: undefined,
 
         checkIndex: function (current, metrics /*, data*/) {
             if (waiting > 0) {
@@ -42,26 +42,26 @@ MediaPlayer.rules.LimitSwitchesRule = function () {
                 i,
                 numSwitches = metrics.RepSwitchList.length;
 
-            self.logger.debug("[LimitSwitchesRules]", " Checking limit switches rule...");
+            self.debug.log("[LimitSwitchesRules]", " Checking limit switches rule...");
 
             for (i = numSwitches - 1; i >= 0; i -= 1) {
                 rs = metrics.RepSwitchList[i];
                 delay = now - rs.t.getTime();
 
                 if (delay >= VALIDATION_TIME) {
-                    self.logger.debug("[LimitSwitchesRules]", " Reached time limit, bailing.");
+                    self.debug.log("[LimitSwitchesRules]", " Reached time limit, bailing.");
                     break;
                 }
 
                 if (i >= MAX_SWITCHES) {
-                    self.logger.debug("[LimitSwitchesRules]", " Found too many switches within validation time, force the stream to not change.");
+                    self.debug.log("[LimitSwitchesRules]", " Found too many switches within validation time, force the stream to not change.");
                     panic = true;
                     break;
                 }
             }
 
             if (panic) {
-                self.logger.debug("[LimitSwitchesRules]", " Wait some time before allowing another switch.");
+                self.debug.log("[LimitSwitchesRules]", " Wait some time before allowing another switch.");
                 waiting = WAIT_COUNT;
                 return Q.when(new MediaPlayer.rules.SwitchRequest(current, MediaPlayer.rules.SwitchRequest.prototype.STRONG));
             } else {

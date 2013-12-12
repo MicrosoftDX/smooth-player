@@ -290,25 +290,25 @@ Dash.dependencies.DashParser = function () {
         },
 
         internalParse = function (data, baseUrl) {
-            this.logger.debug("[DashParser]", "Doing parse.");
+            this.debug.log("[DashParser]", "Doing parse.");
 
             var manifest,
                 converter = new X2JS(matchers, '', true),
                 iron = new ObjectIron(getDashMap());
 
-            this.logger.debug("[DashParser]", "Converting from XML.");
+            this.debug.log("[DashParser]", "Converting from XML.");
             manifest = converter.xml_str2json(data);
             
 
             // BBE: gestion erreur de parsing manifest
             if (manifest == null)
             {
-                this.logger.debug("[DashParser]", "Failed to parse manifest!!");
+                this.debug.log("[DashParser]", "Failed to parse manifest!!");
                 return Q.when(null);
             }
 
             if (!manifest.hasOwnProperty("BaseURL")) {
-                this.logger.debug("[DashParser]", "Setting baseURL: " + baseUrl);
+                this.debug.log("[DashParser]", "Setting baseURL: " + baseUrl);
                 manifest.BaseURL = baseUrl;
             } else {
                 // Setting manifest's BaseURL to the first BaseURL
@@ -319,11 +319,11 @@ Dash.dependencies.DashParser = function () {
                 }
             }
 
-            this.logger.debug("[DashParser]", "Flatten manifest properties.");
+            this.debug.log("[DashParser]", "Flatten manifest properties.");
             iron.run(manifest);
 
-            this.logger.debug("[DashParser]", "Parsing complete.")
-            this.logger.debug("[DashParser]", "Parsing complete.");
+            this.debug.log("[DashParser]", "Parsing complete.")
+            this.debug.log("[DashParser]", "Parsing complete.");
 
 
 
@@ -332,7 +332,7 @@ Dash.dependencies.DashParser = function () {
         };
 
     return {
-        logger: undefined,
+        debug: undefined,
         parse: internalParse
     };
 };

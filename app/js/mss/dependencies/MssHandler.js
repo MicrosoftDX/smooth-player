@@ -88,7 +88,6 @@ Mss.dependencies.MssHandler = function() {
 		getInitData = function(quality, adaptation) {
 			// return data in byte format
 			// call MP4 lib to generate the init
-			//rslt.logger.debug("[MssHandler]", "TODO - do the initialization data ",this.manifestModel, quality, data);
 			
 			// Get required media information from manifest  to generate initialisation segment
 			var representation = getRepresentationForQuality(quality, adaptation);

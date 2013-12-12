@@ -29,7 +29,7 @@ MediaPlayer.dependencies.ManifestUpdater = function () {
             clear.call(this);
 
             if (!isNaN(refreshDelay)) {
-                this.logger.debug("Refresh manifest in " + refreshDelay + " seconds.");
+                this.debug.log("Refresh manifest in " + refreshDelay + " seconds.");
                 refreshTimer = setInterval(onRefreshTimer.bind(this), refreshDelay * 1000, this);
             }
         },
@@ -58,12 +58,12 @@ MediaPlayer.dependencies.ManifestUpdater = function () {
             url = manifest.Location;
         }
 
-        self.logger.debug("Refresh manifest @ " + url);
+        self.debug.log("Refresh manifest @ " + url);
 
         self.manifestLoader.load(url).then(
             function (manifestResult) {
                 self.manifestModel.setValue(manifestResult);
-                self.logger.debug("Manifest has been refreshed.");
+                self.debug.log("Manifest has been refreshed.");
                 update.call(self);
                 self.system.notify("manifestUpdated");
             }
@@ -71,7 +71,7 @@ MediaPlayer.dependencies.ManifestUpdater = function () {
     };
 
     return {
-        logger: undefined,
+        debug: undefined,
         system: undefined,
         manifestModel: undefined,
         manifestExt: undefined,

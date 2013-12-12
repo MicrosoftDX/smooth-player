@@ -84,9 +84,9 @@ MediaPlayer = function (aContext) {
 
             var self = this;
             
-            initLogger.call(this);
+           // initLogger.call(this);
 
-            this.logger.info("[MediaPlayer]", "play", source);
+            this.debug.log("[MediaPlayer]", "play", source);
             if (!initialized) {
                 throw "MediaPlayer not initialized!";
             }
@@ -101,7 +101,7 @@ MediaPlayer = function (aContext) {
             }
 
             playing = true;
-            //this.logger.info("[MediaPlayer] Playback initiated!");
+            //this.debug.log("[MediaPlayer] Playback initiated!");
             streamController = system.getObject("streamController");
             streamController.setVideoModel(videoModel);
             streamController.setAutoPlay(autoPlay);

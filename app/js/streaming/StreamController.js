@@ -223,7 +223,7 @@
         abrController: undefined,
         fragmentExt: undefined,
         capabilities: undefined,
-        logger: undefined,
+        debug: undefined,
         metricsExt: undefined,
         errHandler: undefined,
 
@@ -252,7 +252,7 @@
             var self = this,
                 stream;
 
-            self.logger.info("[StreamController]", "load url: " + url);
+            self.debug.log("[StreamController]", "load url: " + url);
 
             self.manifestLoader.load(url).then(
                 function(manifest) {
@@ -262,9 +262,9 @@
                     self.manifestUpdater.init();
                     self.manifestExt.getPeriodCount(manifest).then(
                         function(length) {
-                            self.logger.info("[StreamController]", "Period count: " + length);
+                            self.debug.log("[StreamController]", "Period count: " + length);
                             for (var i = 0; i < length; i++) {
-                                self.logger.info("[StreamController]", "Load stream for period " + i);
+                                self.debug.log("[StreamController]", "Load stream for period " + i);
                                 stream = self.system.getObject("stream");
                                 stream.setVideoModel(i === 0 ? self.videoModel : createVideoModel.call(self));
                                 stream.initProtection();

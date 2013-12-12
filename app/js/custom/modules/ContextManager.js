@@ -3,10 +3,10 @@ Custom.modules.ContextManager = function (){
 
     return {
         system: undefined,
-        logger: undefined,
+        debug: undefined,
 
         setContext: function(ctx) {
-            this.logger.debug("Custom.modules.ContextManager::setContext",ctx);
+            this.debug.log("Custom.modules.ContextManager::setContext",ctx);
             if (ctx === "MSS") {
                 // here we map specific Class
                 this.system.mapClass('indexHandler', Mss.dependencies.MssHandler);
@@ -15,7 +15,7 @@ Custom.modules.ContextManager = function (){
             } else {
                 this.system.mapClass('fragmentLoader', MediaPlayer.dependencies.FragmentLoader);
                 // this.system.mapValue('metricsExt', this.system.getObject('dashMetricsExt'));
-                this.system.mapClass('fragmentController', Mss.dependencies.MssFragmentController);
+                this.system.mapClass('fragmentController', MediaPlayer.dependencies.FragmentController);
             }
         }
     };

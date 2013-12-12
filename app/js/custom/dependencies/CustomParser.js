@@ -21,7 +21,7 @@ Custom.dependencies.CustomParser = function () {
     };
 
     return {
-        logger: undefined,
+        debug: undefined,
         system: undefined,
         dashParser: undefined,
         mssParser: undefined,
