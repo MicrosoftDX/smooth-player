@@ -322,7 +322,7 @@ Dash.dependencies.DashParser = function () {
             this.logger.debug("[DashParser]", "Flatten manifest properties.");
             iron.run(manifest);
 
-            this.logger.debug("[DashParser]", "Parsing complete.")
+            this.logger.debug("[DashParser]", "Parsing complete.");
             return Q.when(manifest);
         };
 
