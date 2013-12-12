@@ -430,13 +430,13 @@ Mss.dependencies.MssParser = function () {
 
 
     var internalParse = function(data, baseUrl) {
-        this.logger.debug("[MssParser]", "Doing parse.");
+        this.debug.log("[MssParser]", "Doing parse.");
         
         var manifest = null;
         var converter = new X2JS(matchers, '', true);
         var iron = new Custom.utils.ObjectIron(getDashMap());
  
-        this.logger.debug("[MssParser]", "Converting from XML.");
+        this.debug.log("[MssParser]", "Converting from XML.");
         manifest = converter.xml_str2json(data);
 
         if (manifest === null) {
@@ -446,7 +446,7 @@ Mss.dependencies.MssParser = function () {
 
         // set the baseUrl
         if (!manifest.hasOwnProperty("BaseURL")) {
-            this.logger.debug("[DashParser]", "Setting baseURL: " + baseUrl);
+            this.debug.log("[DashParser]", "Setting baseURL: " + baseUrl);
             manifest.BaseURL = baseUrl;
         } else {
             // Setting manifest's BaseURL to the first BaseURL
@@ -457,15 +457,15 @@ Mss.dependencies.MssParser = function () {
             }
         }
 
-        this.logger.debug("[MssParser]", "Flatten manifest properties.");
+        this.debug.log("[MssParser]", "Flatten manifest properties.");
         manifest = iron.run(manifest);
 
-        this.logger.debug("[MssParser]", "Parsing complete.");
+        this.debug.log("[MssParser]", "Parsing complete.");
         return Q.when(manifest);
     };
 
     return {
-        logger: undefined,
+        debug: undefined,
                 
         parse: internalParse
     };
