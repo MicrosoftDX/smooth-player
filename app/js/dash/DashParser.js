@@ -290,44 +290,42 @@ Dash.dependencies.DashParser = function () {
         },
 
         internalParse = function (data, baseUrl) {
-            this.logger.debug("[DashParser]", "Doing parse.");
+            this.debug.log("Doing parse.");
 
             var manifest,
                 converter = new X2JS(matchers, '', true),
                 iron = new ObjectIron(getDashMap());
 
-            this.logger.debug("[DashParser]", "Converting from XML.");
-            manifest = converter.xml_str2json(data);
-            
+            try {
+                this.debug.log("Converting from XML.");
+                manifest = converter.xml_str2json(data);
 
-            // BBE: gestion erreur de parsing manifest
-            if (manifest == null)
-            {
-                this.logger.debug("[DashParser]", "Failed to parse manifest!!");
-                return Q.when(null);
-            }
+                if (!manifest.hasOwnProperty("BaseURL")) {
+                    this.debug.log("Setting baseURL: " + baseUrl);
+                    manifest.BaseURL = baseUrl;
+                } else {
+                    // Setting manifest's BaseURL to the first BaseURL
+                    manifest.BaseURL = manifest.BaseURL_asArray[0];
 
-            if (!manifest.hasOwnProperty("BaseURL")) {
-                this.logger.debug("[DashParser]", "Setting baseURL: " + baseUrl);
-                manifest.BaseURL = baseUrl;
-            } else {
-                // Setting manifest's BaseURL to the first BaseURL
-                manifest.BaseURL = manifest.BaseURL_asArray[0];
-
-                if (manifest.BaseURL.indexOf("http") !== 0) {
-                    manifest.BaseURL = baseUrl + manifest.BaseURL;
+                    if (manifest.BaseURL.toString().indexOf("http") !== 0) {
+                        manifest.BaseURL = baseUrl + manifest.BaseURL;
+                    }
                 }
+
+                this.debug.log("Flatten manifest properties.");
+                iron.run(manifest);
+
+                this.debug.log("Parsing complete.");
+            } catch (err) {
+                this.errHandler.manifestError("parsing the manifest failed", "parse", data);
+                return Q.reject(err);
             }
-
-            this.logger.debug("[DashParser]", "Flatten manifest properties.");
-            iron.run(manifest);
-
-            this.logger.debug("[DashParser]", "Parsing complete.")
             return Q.when(manifest);
         };
 
     return {
-        logger: undefined,
+        debug: undefined,
+        errHandler: undefined,
         parse: internalParse
     };
 };

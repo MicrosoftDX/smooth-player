@@ -83,6 +83,10 @@ MediaPlayer.dependencies.ManifestUpdater = function () {
 
         init: function () {
             update.call(this);
+        },
+
+        stop: function() {
+            clear.call(this);
         }
     };
 };

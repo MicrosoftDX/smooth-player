@@ -18,8 +18,6 @@ Dash.dependencies.DashManifestExtensions = function () {
 Dash.dependencies.DashManifestExtensions.prototype = {
     constructor: Dash.dependencies.DashManifestExtensions,
 
-    logger: undefined,
-
     getIsAudio: function (adaptation) {
         "use strict";
         var i,
@@ -356,13 +354,11 @@ Dash.dependencies.DashManifestExtensions.prototype = {
         "use strict";
         var representation = data.Representation_asArray[0],
             codec = (representation.mimeType + ';codecs="' + representation.codecs + '"');
-        this.logger.debug("[DashManifestExt]", "Codec for adaptation set '" + data.type + "': " + codec);
         return Q.when(codec);
     },
 
     getMimeType: function (data) {
         "use strict";
-        this.logger.debug("[DashManifestExt]", "MimeType for adaptation set '" + data.type + "': " + data.Representation_asArray[0].mimeType);        
         return Q.when(data.Representation_asArray[0].mimeType);
     },
 
@@ -406,8 +402,6 @@ Dash.dependencies.DashManifestExtensions.prototype = {
             delay = manifest.suggestedPresentationDelay;
         }
 
-        this.logger.debug("[DashManifestExt]", "Live offset = " + delay);
-
         return Q.when(delay);
     },
 
@@ -436,7 +430,6 @@ Dash.dependencies.DashManifestExtensions.prototype = {
             fDuration = list.duration;
 
             time = (((fStart - 1) * fDuration) / fTimescale);
-            this.logger.debug("[DashManifestExt]", "Live start (SegmentList) = " + time + " (startNumber: " + fStart + ", timescale: " + fTimescale + ", duration: " + fDuration + ")");
         }
         else if (representation.hasOwnProperty("SegmentTemplate")) {
             template = representation.SegmentTemplate;
@@ -453,11 +446,9 @@ Dash.dependencies.DashManifestExtensions.prototype = {
                 // This had better exist, or there's bigger problems.
                 // First one must have a time value!
                 time = (template.SegmentTimeline.S_asArray[0].t / fTimescale);
-                this.logger.debug("[DashManifestExt]", "Live start (SegmentTimeline) = " + time + " (t: " + template.SegmentTimeline.S_asArray[0].t + ", timescale: " + fTimescale + ")");
             }
             else {
                 time = (((fStart - 1) * fDuration) / fTimescale);
-                this.logger.debug("[DashManifestExt]", "Live start (SegmentTemplate) = " + time + " (startNumber: " + fStart + ", timescale: " + fTimescale + ", duration: " + fDuration + ")");
             }
         }
 
@@ -480,23 +471,18 @@ Dash.dependencies.DashManifestExtensions.prototype = {
                 if (manifest.hasOwnProperty("availabilityEndTime")) {
                     end = manifest.availabilityEndTime;
                     liveOffset = ((end.getTime() - start.getTime()) / 1000);
-                    self.logger.debug("[DashManifestExt]", "Live edge = " + liveOffset + " (start: " + start.toUTCString() + ", end: " + end.toUTCString() + ")");
                 } else {
                     liveOffset = ((now.getTime() - start.getTime()) / 1000);
-                    self.logger.debug("[DashManifestExt]", "Live edge = " + liveOffset + " (start: " + start.toUTCString() + ", now: " + now.toUTCString() + ")");
                 }
-
 
                 // Find out the between stream start and available start time.
                 self.getLiveStart(manifest, periodIndex).then(
                     function (start) {
                         // get the full time, relative to stream start
                         liveOffset += start;
-                        self.logger.debug("[DashManifestExt]", "Live edge += start (" + start + ") => " + liveOffset);
 
                         // peel off our reserved time
                         liveOffset -= delay;
-                        self.logger.debug("[DashManifestExt]", "Live edge -= delay (" + delay + ") => " + liveOffset);
 
                         deferred.resolve(liveOffset);
                     }
@@ -507,36 +493,33 @@ Dash.dependencies.DashManifestExtensions.prototype = {
         return deferred.promise;
     },
 
-    getPresentationOffset: function (manifest, periodIndex) {
-        var time = 0,
+    getPresentationOffset: function (quality, data) {
+        var self = this,
+            deferred = Q.defer(),
+            time = 0,
             offset,
             timescale = 1,
-            representation,
             segmentInfo;
 
-        // We don't really care what representation we use; they should all start at the same time.
-        // Just grab the first representation; if this isn't there, we have bigger problems.
-        // TODO : The presentationTimeOffset can be described in each representation...
-        // Can it vary (be different times) between audio/video streams in the same Period?
-        // If it can we're probably ok, there just won't be any content for the difference in time.
-        // THIS WON'T WORK IN THE CURRENT PLAYER THOUGH!
-        // The stream without content will force the player to stall because it thinks it's waiting
-        // for data.  This will have to be fixed on the BufferController.
-        // For now let's assume that the presentationTimeOffset is the same between all representations.
-        representation = manifest.Period_asArray[periodIndex].AdaptationSet_asArray[0].Representation_asArray[0];
-        segmentInfo = this.getSegmentInfoFor(representation);
+        self.getRepresentationFor(quality, data).then(
+            function(representation) {
+                segmentInfo = self.getSegmentInfoFor(representation);
 
-        if (segmentInfo !== null && segmentInfo !== undefined && segmentInfo.hasOwnProperty("presentationTimeOffset")) {
-            offset = segmentInfo.presentationTimeOffset;
+                if (segmentInfo !== null && segmentInfo !== undefined && segmentInfo.hasOwnProperty("presentationTimeOffset")) {
+                    offset = segmentInfo.presentationTimeOffset;
 
-            if (segmentInfo.hasOwnProperty("timescale")) {
-                timescale = segmentInfo.timescale;
+                    if (segmentInfo.hasOwnProperty("timescale")) {
+                        timescale = segmentInfo.timescale;
+                    }
+
+                    time = offset / timescale;
+                }
+
+                deferred.resolve(time);
             }
+        );
 
-            time = offset / timescale;
-        }
-
-        return Q.when(time);
+        return deferred.promise;
     },
 
     getIsLive: function (manifest) {
@@ -642,68 +625,67 @@ Dash.dependencies.DashManifestExtensions.prototype = {
         return Q.when(manifest.Period_asArray.length);
     },
 
-    getTimestampOffsetForPeriod: function (periodIndex, manifest, isLive) {
-        var self = this;
-        return self.getStartOffsetForPeriod(manifest, periodIndex).then(
-            function (time) {
-                var startTime = manifest.Period_asArray[periodIndex].start;
-                self.logger.debug("[DashManifestExt]", "StartOffsetForPeriod = " + time);
-                self.logger.debug("[DashManifestExt]", "PeriodStartTime = " + startTime);
-                if (typeof(startTime) !== "undefined") {
-                    self.logger.debug("[DashManifestExt]", "TimestampOffsetForPeriod = " + (manifest.Period_asArray[periodIndex].start - time));
-                    return Q.when(manifest.Period_asArray[periodIndex].start - time);
-                } else {
-                    var deferredDurations = [],
-                        defferedOffset = Q.defer();
-
-                    for(var i = 0; i < periodIndex; i++) {
-                        deferredDurations.push(self.getDurationForPeriod(i, manifest, isLive));
-                    }
-
-                    Q.all(deferredDurations).then(
-                        function(durationResult) {
-                            if(durationResult) {
-                                var offset = 0;
-                                for (var j = 0, ln = durationResult.length; j < ln; j++) {
-                                    offset += durationResult[j];
-                                }
-                                defferedOffset.resolve(offset - time);
-                            } else {
-                                defferedOffset.reject("Error calculating timestamp offset for period");
-                            }
-                        }
-                    );
-
-                    return defferedOffset.promise;
-                }
-            }
-        );
-    },
-
-    getStartOffsetForPeriod: function (manifest, periodIndex) {
+    getTimestampOffsetForPeriod: function (periodIndex, manifest, quality, data) {
         var self = this,
-            periodArray = manifest.Period_asArray,
-            period = periodArray[periodIndex],
-            time = 0,
-            defer,
-            idx;
+            timestampOffset,
+            deferred = Q.defer();
 
-        for (idx = 0; idx < periodIndex; idx++) {
-            if (period.hasOwnProperty("BaseURL") && (periodArray[idx].BaseURL == period.BaseURL)) {
-                defer = Q.defer();
-                Q.all([self.getLiveStart(manifest, idx), self.getLiveStart(manifest, periodIndex)]).then(
-                    function (liveStartResults) {
-                        if (typeof(liveStartResults) !== "undefined" && !isNaN(liveStartResults[0] && !isNaN(liveStartResults[0]))) {
-                            time = Math.abs(liveStartResults[0] - liveStartResults[1]);
-                        }
-
-                        defer.resolve(time);
+        self.getPresentationOffset(quality, data).then(
+            function(presentationOffset) {
+                self.getPeriodStart(manifest, periodIndex).then(
+                    function(periodStart) {
+                        timestampOffset = periodStart - presentationOffset;
+                        deferred.resolve(timestampOffset);
                     }
                 );
-                break;
             }
+        );
+
+        return deferred.promise;
+    },
+
+    getPeriodStart: function (manifest, periodIndex) {
+        var self = this,
+            isLive = self.getIsLive(manifest),
+            i,
+            p = null,
+            prevStart = null,
+            prevDuration = null,
+            periodStart;
+
+        for (i = 0; i <= periodIndex; i += 1) {
+            p = manifest.Period_asArray[i];
+
+            // If the attribute @start is present in the Period, then the
+            // Period is a regular Period and the PeriodStart is equal
+            // to the value of this attribute.
+            if (p.hasOwnProperty("start")) {
+                periodStart = p.start;
+            }
+
+            // If the @start attribute is absent, but the previous Period
+            // element contains a @duration attribute then then this new
+            // Period is also a regular Period. The start time of the new
+            // Period PeriodStart is the sum of the start time of the previous
+            // Period PeriodStart and the value of the attribute @duration
+            // of the previous Period.
+            else if (prevStart !== null && prevDuration !== null) {
+                periodStart = prevStart + prevDuration;
+            }
+            // If (i) @start attribute is absent, and (ii) the Period element
+            // is the first in the MPD, and (iii) the MPD@type is 'static',
+            // then the PeriodStart time shall be set to zero.
+            else if (i === 0 && !isLive) {
+                periodStart = 0;
+            }
+
+            if (p.hasOwnProperty("duration")) {
+                prevDuration = p.duration;
+            }
+
+            prevStart = periodStart;
         }
 
-        return Q.when(defer ? defer.promise : time);
+        return Q.when(periodStart);
     }
 };

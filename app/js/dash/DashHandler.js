@@ -71,7 +71,11 @@ Dash.dependencies.DashHandler = function () {
                 range = null,
                 self = this;
 
-            self.logger.debug("[DashHandler]", "Getting the initialization request for quality " + representation.bandwidth);
+            if (!representation) {
+                return Q.reject("no represenation");
+            }
+
+            self.debug.log("Getting the initialization request.");
 
             if (representation.hasOwnProperty("SegmentTemplate")) {
                 if (representation.SegmentTemplate.hasOwnProperty("initialization")) {
@@ -107,28 +111,29 @@ Dash.dependencies.DashHandler = function () {
                 url = representation.BaseURL;
                 self.baseURLExt.loadInitialization(url).then(
                     function (theRange) {
-                        self.logger.debug("[DashHandler]", "Got an initialization.");
+                        self.debug.log("Got an initialization.");
                         request = new MediaPlayer.vo.SegmentRequest();
                         request.streamType = type;
                         request.type = "Initialization Segment";
                         request.url = getRequestUrl(url, representation.BaseURL);
                         request.range = theRange;
+                        request.quality = quality;
                         deferred.resolve(request);
                     },
-                    function () {
-                        //alert("Error loading initialization.");
-                        self.errHandler.downloadError("Error loading initialization.");
+                    function (httprequest) {
+                        deferred.reject(httprequest);
                     }
                 );
             }
 
             if (initialization && initialization.length > 0) {
+                self.debug.log("Got an initialization.");
                 request = new MediaPlayer.vo.SegmentRequest();
                 request.streamType = type;
                 request.type = "Initialization Segment";
                 request.url = getRequestUrl(initialization, representation.BaseURL);
                 request.range = range;
-                self.logger.debug("[DashHandler]", "Initialization request url: " + request.url);
+                request.quality = quality;
                 deferred.resolve(request);
             }
 
@@ -144,18 +149,18 @@ Dash.dependencies.DashHandler = function () {
                 idx,
                 isFinished = false;
 
-            this.logger.debug("[DashHandler]", "Checking for stream end...");
+            this.debug.log("Checking for stream end...");
             if (isLive) {
-                //this.logger.debug("[DashHandler]", "Live never ends! (TODO)");
+                this.debug.log("Live never ends! (TODO)");
                 // TODO : Check the contents of the last box to signal end.
                 isFinished = false;
             } else if (representation.hasOwnProperty("segments") && representation.segments !== null) {
-                this.logger.debug("[DashHandler]", "Segments: " + index + " / " + representation.segments.length);
+                this.debug.log("Segments: " + index + " / " + representation.segments.length);
                 isFinished = (index >= representation.segments.length);
             } else if (representation.hasOwnProperty("SegmentTemplate") && !representation.SegmentTemplate.hasOwnProperty("SegmentTimeline")) {
                 fTimescale = 1;
                 startNumber = 1;
-                sDuration = Math.floor(duration); // Disregard fractional seconds.  TODO : Is this ok?  The logic breaks if we don't do this...
+                sDuration = duration;
 
                 if (representation.SegmentTemplate.hasOwnProperty("duration")) {
                     fDuration = representation.SegmentTemplate.duration;
@@ -170,7 +175,7 @@ Dash.dependencies.DashHandler = function () {
 
                     fLength = (fDuration / fTimescale);
                     idx = index - startNumber;
-                    this.logger.debug("[DashHandler]", "SegmentTemplate: " + fLength + " * " + idx + " = " + (fLength * idx) + " / " + sDuration);
+                    this.debug.log("SegmentTemplate: " + fLength + " * " + idx + " = " + (fLength * idx) + " / " + sDuration);
                     isFinished = ((fLength * idx) >= sDuration);
                 }
             }
@@ -218,7 +223,7 @@ Dash.dependencies.DashHandler = function () {
                     seg = new Dash.vo.Segment();
 
                     seg.timescale = fTimescale;
-                    
+
                     //For a repeated S element, t belongs only to the first segment
                     if (j === 0 && frag.hasOwnProperty("t")) {
                         seg.startTime = frag.t;
@@ -327,17 +332,21 @@ Dash.dependencies.DashHandler = function () {
                     frag = segments[i];
                     ft = frag.startTime / frag.timescale;
                     fd = frag.duration / frag.timescale;
-                    if (time >= ft && time <= (ft + fd)) {
+                    if ((time + Dash.dependencies.DashHandler.EPSILON) >= ft &&
+                        (time - Dash.dependencies.DashHandler.EPSILON) <= (ft + fd)) {
                         idx = i;
                         break;
+                    } else if (idx === -1 && (time - Dash.dependencies.DashHandler.EPSILON) > (ft + fd)) {
+                        // time is past the end
+                        idx  = i + 1;
                     }
                 }
             }
 
             if (idx === -1) {
-                this.logger.debug("[DashHandler]", "Couldn't figure out a time!");
-                this.logger.debug("[DashHandler]", "Time: " + time);
-                this.logger.debug("[DashHandler]", segments);
+                console.log("Couldn't figure out a time!");
+                console.log("Time: " + time);
+                console.log(segments);
             }
 
             // TODO : This is horrible.
@@ -389,27 +398,26 @@ Dash.dependencies.DashHandler = function () {
             dur = (fDuration / fTimescale);
             idx = Math.floor(time / dur);
 
-
-            // modification for live, because of a difference of timestamp
-            if(isLive){
-                idx = startNumber;
-            }else{
-                idx += startNumber; // apply first item offset
-            }
-            
+            idx += startNumber; // apply first item offset
 
             return Q.when(idx);
         },
 
-        getRequestForTemplate = function (index, template, representation) {
+        getRequestForTemplate = function (index, template, representation, quality) {
             var request = new MediaPlayer.vo.SegmentRequest(),
                 url,
                 fTimescale = 1,
+                startNumber = 1,
                 time;
 
             // default to 1 if not present
             if (template.hasOwnProperty("timescale")) {
                 fTimescale = template.timescale;
+            }
+
+            // default to 1 if not present
+            if (template.hasOwnProperty("startNumber")) {
+                startNumber = template.startNumber;
             }
 
             time = (template.duration * index) / fTimescale;
@@ -427,12 +435,14 @@ Dash.dependencies.DashHandler = function () {
             request.url = getRequestUrl(url, representation.BaseURL);
             request.duration = template.duration / fTimescale;
             request.timescale = fTimescale;
-            request.startTime = (index * template.duration) / fTimescale;
+            request.startTime = ((index - startNumber) * template.duration) / fTimescale;
+            request.quality = quality;
+            request.index = index;
 
             return Q.when(request);
         },
 
-        getRequestForSegment = function (index, segment, representation) {
+        getRequestForSegment = function (index, segment, representation, quality) {
             if (segment === null || segment === undefined) {
                 return Q.when(null);
             }
@@ -453,6 +463,8 @@ Dash.dependencies.DashHandler = function () {
             request.startTime = segment.startTime / segment.timescale;
             request.duration = segment.duration / segment.timescale;
             request.timescale = segment.timescale;
+            request.quality = quality;
+            request.index = index;
 
             return Q.when(request);
         },
@@ -465,7 +477,11 @@ Dash.dependencies.DashHandler = function () {
                 usingTemplate = false,
                 self = this;
 
-            self.logger.debug("[DashHandler]", "[" + data.type + "] Getting the request for time: " + time + " (quality: " + quality + ")");
+            if (!representation) {
+                return Q.reject("no represenation");
+            }
+
+            self.debug.log("Getting the request for time: " + time);
 
             deferred = Q.defer();
 
@@ -473,27 +489,30 @@ Dash.dependencies.DashHandler = function () {
                 function (segments) {
                     var segmentsPromise;
 
-                    //self.logger.debug("[DashHandler]", "Got segments.");
-                    //self.logger.debug("[DashHandler]", segments);
+                    self.debug.log("Got segments.");
+                    self.debug.log(segments);
                     // There's no segments so we *must* have a SegmentTemplate.
                     if (segments === null) {
                         if (!representation.hasOwnProperty("SegmentTemplate")) {
                             throw "Expected SegmentTemplate!";
                         }
                         usingTemplate = true;
-                        //self.logger.debug("[DashHandler]", "[getForTime] No segments found, so we must be using a SegmentTemplate.");
+                        self.debug.log("No segments found, so we must be using a SegmentTemplate.");
                         segmentsPromise = getIndexForTemplate.call(self, time, representation.SegmentTemplate);
                     } else {
-                        self.logger.debug("[DashHandler]", "Got a list of segments, so dig deeper.");
+                        self.debug.log("Got a list of segments, so dig deeper.");
                         representation.segments = segments;
                         usingTemplate = false;
                         segmentsPromise = getIndexForSegments.call(self, time, segments);
                     }
                     return segmentsPromise;
+                },
+                function () {
+                    deferred.reject();
                 }
             ).then(
                 function (newIndex) {
-                    self.logger.debug("[DashHandler]", "Index for time " + time + " is " + newIndex);
+                    self.debug.log("Index for time " + time + " is " + newIndex);
                     index = newIndex;
 
                     return isMediaFinished.call(self, representation);
@@ -502,19 +521,20 @@ Dash.dependencies.DashHandler = function () {
                 function (finished) {
                     var requestPromise = null;
 
-                    self.logger.debug("[DashHandler]", "Stream finished? " + finished);
+                    self.debug.log("Stream finished? " + finished);
                     if (finished) {
                         request = new MediaPlayer.vo.SegmentRequest();
                         request.action = request.ACTION_COMPLETE;
-                        self.logger.debug("[DashHandler]", "Signal complete.");
-                        self.logger.debug("[DashHandler]", request);
+                        request.index = index;
+                        self.debug.log("Signal complete.");
+                        self.debug.log(request);
                         deferred.resolve(request);
                     } else {
                         if (usingTemplate) {
-                            requestPromise = getRequestForTemplate.call(self, index, representation.SegmentTemplate, representation);
+                            requestPromise = getRequestForTemplate.call(self, index, representation.SegmentTemplate, representation, quality);
                         } else {
                             segment = representation.segments[index];
-                            requestPromise = getRequestForSegment.call(self, index, segment, representation);
+                            requestPromise = getRequestForSegment.call(self, index, segment, representation, quality);
                         }
                     }
 
@@ -522,8 +542,8 @@ Dash.dependencies.DashHandler = function () {
                 }
             ).then(
                 function (request) {
-                    self.logger.debug("[DashHandler]", "Got a request: " + request.url);
-                    //self.logger.debug("[DashHandler]", request);
+                    self.debug.log("Got a request.");
+                    self.debug.log(request);
                     deferred.resolve(request);
                 }
             );
@@ -538,50 +558,59 @@ Dash.dependencies.DashHandler = function () {
                 segment,
                 self = this;
 
-            self.logger.debug("[DashHandler]", "[" + data.type + "] Getting the next request (quality: " + quality + ")");
+            if (!representation) {
+                return Q.reject("no represenation");
+            }
+
+            self.debug.log("Getting the next request.");
 
             if (index === -1) {
                 throw "You must call getSegmentRequestForTime first.";
             }
 
             index += 1;
-            self.logger.debug("[DashHandler]", "New index: " + index);
+            self.debug.log("New index: " + index);
 
             deferred = Q.defer();
 
             isMediaFinished.call(self, representation).then(
                 function (finished) {
-                    self.logger.debug("[DashHandler]", "Stream finished? " + finished);
+                    self.debug.log("Stream finished? " + finished);
                     if (finished) {
                         request = new MediaPlayer.vo.SegmentRequest();
                         request.action = request.ACTION_COMPLETE;
-                        self.logger.debug("[DashHandler]", "Signal complete.");
-                        self.logger.debug("[DashHandler]", request);
+                        request.index = index;
+                        self.debug.log("Signal complete.");
+                        self.debug.log(request);
                         deferred.resolve(request);
                     } else {
                         getSegments.call(self, representation).then(
                             function (segments) {
                                 var segmentsPromise;
 
-                                //self.logger.debug("[DashHandler]", "Got segments.");
+                                self.debug.log("Got segments.");
+                                self.debug.log(segments);
                                 // There's no segments so we *must* have a SegmentTemplate.
                                 if (segments === null) {
                                     if (!representation.hasOwnProperty("SegmentTemplate")) {
                                         throw "Expected SegmentTemplate!";
                                     }
-                                    //self.logger.debug("[DashHandler]", "[getNext] No segments found, so we must be using a SegmentTemplate.");
-                                    segmentsPromise = getRequestForTemplate.call(self, index, representation.SegmentTemplate, representation);
+                                    self.debug.log("No segments found, so we must be using a SegmentTemplate.");
+                                    segmentsPromise = getRequestForTemplate.call(self, index, representation.SegmentTemplate, representation, quality);
                                 } else {
                                     representation.segments = segments;
                                     segment = representation.segments[index];
-                                    segmentsPromise = getRequestForSegment.call(self, index, segment, representation);
+                                    segmentsPromise = getRequestForSegment.call(self, index, segment, representation, quality);
                                 }
                                 return segmentsPromise;
+                            },
+                            function () {
+                                deferred.reject();
                             }
                         ).then(
                             function (request) {
-                                self.logger.debug("[DashHandler]", "Got a request.");
-                                self.logger.debug("[DashHandler]", request);
+                                self.debug.log("Got a request.");
+                                self.debug.log(request);
                                 deferred.resolve(request);
                             }
                         );
@@ -592,23 +621,75 @@ Dash.dependencies.DashHandler = function () {
             return deferred.promise;
         },
 
-        getCurrentTime = function (quality, data) {
-            if (index === -1) {
-                return Q.when(0);
+        getSegmentCountForDuration = function (quality, data, requiredDuration, bufferedDuration) {
+            var self = this,
+                representation = getRepresentationForQuality(quality, data),
+                remainingDuration = Math.max(requiredDuration - bufferedDuration, 0),
+                deferred = Q.defer(),
+                segmentDuration,
+                segmentCount = 0,
+                segment,
+                ft = 1,
+                fd;
+
+            if (!representation) {
+                return Q.reject("no represenation");
             }
 
-            var self,
+            getSegments.call(self, representation).then(
+                function (segments) {
+                    if (segments === null || segments === undefined) {
+                        if (!representation.hasOwnProperty("SegmentTemplate")) {
+                            throw "Expected SegmentTemplate!";
+                        }
+
+                        if (representation.SegmentTemplate.hasOwnProperty("timescale")) {
+                            ft = representation.SegmentTemplate.timescale;
+                        }
+
+                        fd = representation.SegmentTemplate.duration;
+                        segmentDuration = fd / ft;
+                    } else {
+                        // The duration of the segments is supposed to be the same for all segments, so we just grab the first one
+                        segment = segments[0];
+                        if (segment.hasOwnProperty("timescale")) {
+                            ft = segment.timescale;
+                        }
+
+                        fd = segment.duration;
+                        segmentDuration = fd / ft;
+                    }
+
+                    segmentCount = Math.ceil(remainingDuration/segmentDuration);
+                    deferred.resolve(segmentCount);
+                },
+                function () {
+                    deferred.resolve(0);
+                }
+            );
+
+            return deferred.promise;
+        },
+
+        getCurrentTime = function (quality, data) {
+            var self = this,
                 representation = getRepresentationForQuality(quality, data),
                 time,
                 bufferedIndex,
+                useLast = false,
                 fs,
                 fd,
                 ft = 1,
+                startNumber = 1,
                 deferred = Q.defer();
 
-            // get the last time again to be safe
-            bufferedIndex = index; // - 1;
+            if (!representation) {
+                return Q.reject("no represenation");
+            }
+
+            bufferedIndex = index;
             if (bufferedIndex < 0) {
+                useLast = isLive;
                 bufferedIndex = 0;
             }
 
@@ -625,9 +706,15 @@ Dash.dependencies.DashHandler = function () {
                             ft = representation.SegmentTemplate.timescale;
                         }
 
-                        time = (fd / ft) * (bufferedIndex); // + 1);
+                        // bufferedIndex includes startNumber value which must not be taken into account when
+                        // calculating current time, so we should subtract it.
+                        if (representation.SegmentTemplate.hasOwnProperty("startNumber")) {
+                            startNumber = representation.SegmentTemplate.startNumber;
+                        }
+
+                        time = (fd / ft) * Math.max(bufferedIndex - startNumber, 0);
                     } else {
-                        if (bufferedIndex >= segments.length) {
+                        if (useLast || bufferedIndex >= segments.length) {
                             bufferedIndex = segments.length - 1;
                         }
 
@@ -637,10 +724,13 @@ Dash.dependencies.DashHandler = function () {
                             ft = segments[bufferedIndex].timescale;
                         }
 
-                        time = (fs / ft); // + (fd / ft);
+                        time = (fs / ft);
                     }
 
                     deferred.resolve(time);
+                },
+                function () {
+                    deferred.reject();
                 }
             );
 
@@ -648,7 +738,7 @@ Dash.dependencies.DashHandler = function () {
         };
 
     return {
-        logger: undefined,
+        debug: undefined,
         baseURLExt: undefined,
         manifestModel: undefined,
         manifestExt:undefined,
@@ -679,9 +769,12 @@ Dash.dependencies.DashHandler = function () {
         getInitRequest: getInit,
         getSegmentRequestForTime: getForTime,
         getNextSegmentRequest: getNext,
-        getCurrentTime: getCurrentTime
+        getCurrentTime: getCurrentTime,
+        getSegmentCountForDuration: getSegmentCountForDuration
     };
 };
+
+Dash.dependencies.DashHandler.EPSILON = 0.003;
 
 Dash.dependencies.DashHandler.prototype = {
     constructor: Dash.dependencies.DashHandler

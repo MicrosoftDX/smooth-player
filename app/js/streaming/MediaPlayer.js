@@ -46,14 +46,16 @@ MediaPlayer = function (aContext) {
         system,
         element,
         source,
-        model,
         streamController,
+        videoModel,
         initialized = false,
         playing = false,
         autoPlay = true,
+        scheduleWhilePaused = false,
+        bufferMax = MediaPlayer.dependencies.BufferExtensions.BUFFER_SIZE_REQUIRED,
 
         isReady = function () {
-            return (element !== undefined && source !== undefined);
+            return (!!element && !!source);
         },
 
         initLogger = function () {
@@ -90,8 +92,7 @@ MediaPlayer = function (aContext) {
             }
 
             if (!this.capabilities.supportsMediaSource()) {
-                alert("Your browser does not support the MediaSource API.  Please try another browser, such as Chrome.");
-                //throw "Media Source not supported.";
+                this.errHandler.capabilityError("mediasource");
                 return;
             }
 
@@ -102,9 +103,13 @@ MediaPlayer = function (aContext) {
             playing = true;
             //this.logger.info("[MediaPlayer] Playback initiated!");
             streamController = system.getObject("streamController");
-            streamController.setVideoModel(this.videoModel);
+            streamController.setVideoModel(videoModel);
             streamController.setAutoPlay(autoPlay);
             streamController.load(source);
+            system.mapValue("scheduleWhilePaused", scheduleWhilePaused);
+            system.mapOutlet("scheduleWhilePaused", "stream");
+            system.mapValue("bufferMax", bufferMax);
+            system.injectInto(this.bufferExt, "bufferMax");
         },
 
         doAutoPlay = function () {
@@ -123,10 +128,10 @@ MediaPlayer = function (aContext) {
         logger: undefined,
         eventBus: undefined,
         capabilities: undefined,
-        videoModel: undefined,
         abrController: undefined,
         metricsModel: undefined,
         metricsExt: undefined,
+        bufferExt: undefined,
 
         addEventListener: function (type, listener, useCapture) {
             this.eventBus.addEventListener(type, listener, useCapture);
@@ -152,7 +157,7 @@ MediaPlayer = function (aContext) {
         },
 
         getVideoModel: function () {
-            return this.videoModel;
+            return videoModel;
         },
 
         setAutoPlay: function (value) {
@@ -161,6 +166,22 @@ MediaPlayer = function (aContext) {
 
         getAutoPlay: function () {
             return autoPlay;
+        },
+
+        setScheduleWhilePaused: function(value) {
+            scheduleWhilePaused = value;
+        },
+
+        getScheduleWhilePaused: function() {
+            return scheduleWhilePaused;
+        },
+
+        setBufferMax: function(value) {
+            bufferMax = value;
+        },
+
+        getBufferMax: function() {
+            return bufferMax;
         },
 
         getMetricsExt: function () {
@@ -195,12 +216,21 @@ MediaPlayer = function (aContext) {
 
             element = view;
 
-            model = new MediaPlayer.models.VideoModel(element);
-            this.videoModel.setElement(element);
+            videoModel = null;
+            if (element) {
+                videoModel = system.getObject("videoModel");
+                videoModel.setElement(element);
+            }
 
             // TODO : update
 
-            if (!playing) {
+            if (playing && streamController) {
+                streamController.reset();
+                streamController = null;
+                playing = false;
+            }
+
+            if (isReady.call(this)) {
                 doAutoPlay.call(this);
             }
         },
@@ -216,15 +246,24 @@ MediaPlayer = function (aContext) {
 
             // TODO : update
 
-            if (playing) {
+            if (playing && streamController) {
                 streamController.reset();
                 streamController = null;
+                playing = false;
             }
 
-            doAutoPlay.call(this);
+            if (isReady.call(this)) {
+                doAutoPlay.call(this);
+            }
         },
 
-        play: play
+        reset: function() {
+            this.attachSource(null);
+            this.attachView(null);
+        },
+
+        play: play,
+        isReady: isReady
     };
 };
 

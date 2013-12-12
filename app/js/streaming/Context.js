@@ -19,8 +19,7 @@ MediaPlayer.di.Context = function () {
         setup : function () {
             this.system.autoMapOutlets = true;
 
-            //this.system.mapSingleton('debug', MediaPlayer.utils.Debug);
-            this.system.mapSingleton('logger',   MediaPlayer.utils.Logger);
+            this.system.mapSingleton('debug', MediaPlayer.utils.Debug);
             this.system.mapSingleton('eventBus', MediaPlayer.utils.EventBus);
             this.system.mapSingleton('capabilities', MediaPlayer.utils.Capabilities);
             this.system.mapSingleton('textTrackExtensions', MediaPlayer.utils.TextTrackExtensions);
@@ -53,9 +52,12 @@ MediaPlayer.di.Context = function () {
             this.system.mapClass('manifestUpdater', MediaPlayer.dependencies.ManifestUpdater);
             this.system.mapClass('fragmentController', MediaPlayer.dependencies.FragmentController);
             this.system.mapClass('fragmentLoader', MediaPlayer.dependencies.FragmentLoader);
+            this.system.mapClass('fragmentModel', MediaPlayer.dependencies.FragmentModel);
             this.system.mapSingleton('streamController', MediaPlayer.dependencies.StreamController);
             this.system.mapClass('stream', MediaPlayer.dependencies.Stream);
-            this.system.mapClass('mp4Processor', MediaPlayer.dependencies.Mp4Processor);
+            this.system.mapClass('requestScheduler', MediaPlayer.dependencies.RequestScheduler);
+            this.system.mapSingleton('schedulerExt', MediaPlayer.dependencies.SchedulerExtensions);
+            this.system.mapClass('schedulerModel', MediaPlayer.dependencies.SchedulerModel);
         }
     };
 };
