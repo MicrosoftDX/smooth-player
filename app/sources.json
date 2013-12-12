@@ -1,11 +1,6 @@
 {
     "items": [
         {
-            "name": "test flux France 2 prod",
-            "url" : "http://service.trunk.ic.local.orange.fr/manifest.xml",
-            "browsers": "cdsbi"
-        },
-        {
             "name": "SuperSpeedway (Smooth - VOD)",
             "url": "http://playready.directtaps.net/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest",
             "browsers": "cdsbi"
