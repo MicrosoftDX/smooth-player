@@ -268,7 +268,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
     ////////////////////////////////////////
 
     function onError(e) {
-
+        console.error(e);
     }
 
     ////////////////////////////////////////
@@ -315,9 +315,11 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
     video = document.querySelector(".dash-video-player video");
     context = new Custom.di.CustomContext();
     player = new MediaPlayer(context);
+    
     $scope.version = player.getVersion();
 
     player.startup();
+    player.getDebug().setLogToBrowserConsole(false);
     player.addEventListener("error", onError.bind(this));
 
     player.attachView(video);

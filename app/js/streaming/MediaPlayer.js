@@ -153,7 +153,7 @@ MediaPlayer = function (aContext) {
         },
 
         getDebug: function () {
-            return this.logger;
+            return this.debug;
         },
 
         getVideoModel: function () {

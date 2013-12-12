@@ -24,14 +24,14 @@ MediaPlayer.utils.Debug = function () {
         getLogToBrowserConsole: function() {
             return logToBrowserConsole;
         },
-        log: function (message) {
+        log: function () {
             if (logToBrowserConsole){
-                console.log(message);
+                console.log.apply(console,arguments);
             }
 
             this.eventBus.dispatchEvent({
                 type: "log",
-                message: message
+                message: arguments[0]
             });
         }
     };
