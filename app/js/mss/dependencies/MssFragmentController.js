@@ -15,6 +15,9 @@
 Mss.dependencies.MssFragmentController = function () {
     "use strict";
 
+    var rslt = Custom.utils.copyMethods(Mss.dependencies.MssFragmentController);
+
+
     var convertFragment = function (data, request) {
 
         var fragment = new File();
@@ -48,8 +51,8 @@ Mss.dependencies.MssFragmentController = function () {
 
         return new_data;
     };
-
-    var internalProcess = function (bytes, request) {
+    rslt.mp4Processor = undefined;
+    rslt.internalProcess = function (bytes, request) {
         "use strict";
 
         var self = this;
@@ -68,13 +71,8 @@ Mss.dependencies.MssFragmentController = function () {
         return Q.when(result);
     };
 
-    return {
-        mp4Processor: undefined,
-
-        process: internalProcess
-    };
+    return rslt;
 };
 
-Mss.dependencies.MssFragmentController.prototype = {
-    constructor: Mss.dependencies.MssFragmentController
-};
+Mss.dependencies.MssFragmentController.prototype = new MediaPlayer.dependencies.FragmentController();
+Mss.dependencies.MssFragmentController.prototype.constructor= Mss.dependencies.MssFragmentController;

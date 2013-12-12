@@ -9,9 +9,11 @@ Custom.modules.ContextManager = function (){
             this.debug.log("Custom.modules.ContextManager::setContext",ctx);
             if (ctx === "MSS") {
                 // here we map specific Class
+                this.system.mapClass('mp4Processor', MediaPlayer.dependencies.Mp4Processor);
                 this.system.mapClass('indexHandler', Mss.dependencies.MssHandler);
                 // this.system.mapValue('metricsExt', this.system.getObject('mssMetricsExt'));
                 this.system.mapClass('fragmentController', Mss.dependencies.MssFragmentController);
+
             } else {
                 this.system.mapClass('fragmentLoader', MediaPlayer.dependencies.FragmentLoader);
                 // this.system.mapValue('metricsExt', this.system.getObject('dashMetricsExt'));
