@@ -19,9 +19,6 @@ Custom.di.CustomContext = function () {
             this.system.mapClass('fragmentLoader', Custom.dependencies.CustomFragmentLoader);
             // plug message handler. When th emessage is notify, the contextManager is called
             this.system.mapHandler('setContext', 'contextManager', 'setContext');
-            
-            //custom metrics model is used for add manifest in metrics
-            this.system.mapSingleton('metricsModel', Custom.models.CustomMetricsModel);
         }
     };
 };
