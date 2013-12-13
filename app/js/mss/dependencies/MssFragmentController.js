@@ -14,10 +14,7 @@
 
 Mss.dependencies.MssFragmentController = function () {
     "use strict";
-
-    var rslt = Custom.utils.copyMethods(Mss.dependencies.MssFragmentController);
-
-
+    console.debug("Mss.dependencies.MssFragmentController");
     var convertFragment = function (data, request) {
 
         var fragment = new File();
@@ -27,7 +24,7 @@ Mss.dependencies.MssFragmentController = function () {
 
         var moof = getBoxByType(fragment, "moof");
         var traf = getBoxByType(moof, "traf");
-        var tfxd = getBoxByType(traf, "tfxd");
+        //var tfxd = getBoxByType(traf, "tfxd");
 
         // Remove tfxd anf tfrf boxes
         removeBoxByType(traf, "tfxd");
@@ -37,7 +34,7 @@ Mss.dependencies.MssFragmentController = function () {
         var tfdt = getBoxByType(traf, "tfdt");
         if (tfdt === null)
         {
-            var tfdt = new TrackFragmentBaseMediaDecodeTimeBox();
+            tfdt = new TrackFragmentBaseMediaDecodeTimeBox();
             tfdt.version = 1;
             tfdt.baseMediaDecodeTime = Math.floor(request.startTime * request.timescale);
             traf.boxes.push(tfdt);
@@ -45,17 +42,17 @@ Mss.dependencies.MssFragmentController = function () {
 
         var lp = new LengthCounterBoxFieldsProcessor(fragment);
         fragment._processFields(lp);
-        var new_data = new Uint8Array(lp.res);          
+        var new_data = new Uint8Array(lp.res);
         var sp = new SerializationBoxFieldsProcessor(fragment, new_data, 0);
         fragment._processFields(sp);
 
         return new_data;
     };
+    
+    var rslt = Custom.utils.copyMethods(MediaPlayer.dependencies.FragmentController);
+
     rslt.mp4Processor = undefined;
     rslt.process = function (bytes, request) {
-        "use strict";
-        var self = this;
-
         var result = null;
 
         if (bytes !== null && bytes !== undefined && bytes.byteLength > 0) {
@@ -73,5 +70,6 @@ Mss.dependencies.MssFragmentController = function () {
     return rslt;
 };
 
-Mss.dependencies.MssFragmentController.prototype = new MediaPlayer.dependencies.FragmentController();
-Mss.dependencies.MssFragmentController.prototype.constructor= Mss.dependencies.MssFragmentController;
+Mss.dependencies.MssFragmentController.prototype = {
+    constructor: Mss.dependencies.MssFragmentController
+};

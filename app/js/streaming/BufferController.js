@@ -825,7 +825,11 @@ MediaPlayer.dependencies.BufferController = function () {
                                         self.debug.log(request);
                                         self.fragmentController.prepareFragmentForLoading(self, request, onBytesLoadingStart, onBytesLoaded, onBytesError, signalStreamComplete).then(
                                             function() {
-                                                setState.call(self, READY);
+                                                // HACK : request.url is null on MSS InitSegement so do nothing!
+                                                if(request.url){
+                                                    setState.call(self, READY);
+                                                }
+                                                
                                             }
                                         );
                                     }
@@ -876,7 +880,6 @@ MediaPlayer.dependencies.BufferController = function () {
             self.setFragmentController(fragmentController);
 
             self.indexHandler.setIsLive(isLive);
-
             self.manifestExt.getDurationForPeriod(periodIndex, self.manifestModel.getValue()).then(
                 function (durationValue) {
                     duration = durationValue;

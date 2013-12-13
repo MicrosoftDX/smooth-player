@@ -223,7 +223,8 @@ Mss.dependencies.MssParser = function () {
                 mediaPresentationDuration : node.Duration,
                 BaseURL: node.BaseURL,
                 Period: node,
-                Period_asArray: [node]
+                Period_asArray: [node],
+                minBufferTime : 10
             };
         };
         mpd.isTransformed = false;
@@ -298,8 +299,8 @@ Mss.dependencies.MssParser = function () {
             return {
                 id: node.Index,
                 bandwidth: node.Bitrate,
-                width: node.maxWidth,
-                height: node.maxHeight,
+                width: node.MaxWidth,
+                height: node.MaxHeight,
                 codecs: codecs,
                 audioSamplingRate: node.SamplingRate,
                 codecPrivateData: "" + node.CodecPrivateData,

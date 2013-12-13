@@ -17,7 +17,14 @@ Custom.dependencies.CustomParser = function () {
             console.error("manifest cannot be parse, type is unknown !");
             return Q.when(null);
         }
-        return parser.parse(data,baseUrl);
+
+        var callBackAddManifest = function (manifest) {
+            this.metricsModel.setManifest("video",manifest);
+            return Q.when(manifest);
+        };
+
+        // use bind to give the right context to callbackAddManifest
+        return parser.parse(data,baseUrl).then(callBackAddManifest.bind(this));
     };
 
     return {
@@ -25,6 +32,7 @@ Custom.dependencies.CustomParser = function () {
         system: undefined,
         dashParser: undefined,
         mssParser: undefined,
+        metricsModel: undefined,
 
         parse: customParse
     };

@@ -1,8 +1,7 @@
 
 Mss.dependencies.MssHandler = function() {
 
-	var rslt = Custom.utils.copyMethods(Mss.dependencies.MssHandler),
-		getIndex = function (adaptation, manifest) {
+	var getIndex = function (adaptation, manifest) {
 
 			var periods = manifest.Period_asArray,
 				i, j;
@@ -120,7 +119,7 @@ Mss.dependencies.MssHandler = function() {
 					var manifest = rslt.manifestModel.getValue();
 					var isLive = rslt.manifestExt.getIsLive(manifest);
 
-					var media = {}
+					var media = {};
 					media.type = getType(adaptation);
 					media.trackId = getIndex(adaptation, manifest) + 1; // +1 since track_id shall start from '1'
 					media.timescale = getTimescale(adaptation);
@@ -147,6 +146,7 @@ Mss.dependencies.MssHandler = function() {
 			
 	};
 	
+	var rslt = Custom.utils.copyMethods(Dash.dependencies.DashHandler);
 	rslt.manifestModel = undefined;
 	rslt.manifestExt = undefined;
 	rslt.mp4Processor = undefined;
@@ -167,5 +167,6 @@ Mss.dependencies.MssHandler = function() {
 	return rslt;
 };
 
-Mss.dependencies.MssHandler.prototype = new Dash.dependencies.DashHandler();
-Mss.dependencies.MssHandler.prototype.constructor = Mss.dependencies.MssHandler;
+Mss.dependencies.MssHandler.prototype =  {
+	constructor : Mss.dependencies.MssHandler
+};
