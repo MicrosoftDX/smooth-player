@@ -264,7 +264,7 @@ MovieHeaderBox.prototype._processFields = function(processor) {
     processor.eat('rate',FIELD_INT32);
     processor.eat('volume',FIELD_INT16);
     processor.eat('reserved',FIELD_INT16);
-    processor.eat('reserved',new ArrayField(FIELD_INT32,2));
+    processor.eat('reserved_2',new ArrayField(FIELD_INT32,2));
     processor.eat('matrix',new ArrayField(FIELD_INT32,9));
     processor.eat('pre_defined',new ArrayField(FIELD_BIT32,6));
     processor.eat('next_track_ID',FIELD_UINT32);
@@ -365,11 +365,11 @@ TrackHeaderBox.prototype._processFields = function(processor) {
         processor.eat('duration',FIELD_UINT32);
     }
 
-    processor.eat('reserved',new ArrayField(FIELD_UINT32,2));
+    processor.eat('reserved_2',new ArrayField(FIELD_UINT32,2));
     processor.eat('layer',FIELD_INT16);
     processor.eat('alternate_group',FIELD_INT16);
     processor.eat('volume',FIELD_INT16);
-    processor.eat('reserved',FIELD_INT16);
+    processor.eat('reserved_3',FIELD_INT16);
     processor.eat('matrix',new ArrayField(FIELD_INT32,9));
     processor.eat('width',FIELD_INT32);
     processor.eat('height',FIELD_INT32);
@@ -932,6 +932,32 @@ AudioSampleEntryBox.prototype._processFields = function(processor) {
     processor.eat('reserved_3',FIELD_UINT16);
     processor.eat('samplerate',FIELD_UINT32);
 };
+
+
+// --------------------------- mp4a ----------------------------------
+
+function MP4AudioSampleEntryBox() {}
+
+MP4AudioSampleEntryBox.prototype.boxtype = 'mp4a';
+
+MP4AudioSampleEntryBox.prototype._processFields = function(processor) {
+    AudioSampleEntryBox.prototype._processFields.call(this,processor);
+};
+
+Box.prototype.registerBoxType( MP4AudioSampleEntryBox );
+
+// --------------------------- esds ----------------------------------
+
+function ESDBox() {}
+
+ESDBox.prototype.boxtype = 'esds';
+
+ESDBox.prototype._processFields = function(processor) {
+    FullBox.prototype._processFields.call(this,processor);
+    processor.eat('ES', new DataField(this.size - 4));
+};
+
+Box.prototype.registerBoxType( ESDBox );
 
 // --------------------------- stsz ----------------------------------
 

@@ -18,7 +18,8 @@ MediaPlayer.dependencies.Mp4Processor = function () {
             mvhd.duration = Math.round(media.duration * media.timescale); // the length of the presentation (in the indicated timescale) =>  take duration of period
             mvhd.rate = 0x00010000; // 16.16 number, "1.0" = normal playback
             mvhd.volume = 0x0100; // 8.8 number, "1.0" = full volume
-            mvhd.reserved = [0x0, 0x0];
+            mvhd.reserved = 0;
+            mvhd.reserved_2 = [0x0, 0x0];
             mvhd.matrix = [0x00010000, 0x0, 0x0, 0x0, 0x00010000, 0x0, 0x0, 0x0, 0x40000000];   // provides a transformation matrix for the video; (u,v,w) are restricted here to (0,0,1),
                                                                                                 // hex values (0,0,0x40000000)
             mvhd.pre_defined = [0x0, 0x0, 0x0, 0x0, 0x0, 0x0];
@@ -41,21 +42,23 @@ MediaPlayer.dependencies.Mp4Processor = function () {
             var tkhd = new TrackHeaderBox();
 
             tkhd.version = 1; // version = 1  in order to have 64bits duration value
+            tkhd.flags = 0x1 | 0x2 | 0x4; //Track_enabled: Indicates that the track is enabled. Flag value is 0x000001. A disabled track (the low
+                                         //bit is zero) is treated as if it were not present.
+                                         //Track_in_movie: Indicates that the track is used in the presentation. Flag value is 0x000002.
+                                         //Track_in_preview: Indicates that the track is used when previewing the presentation. Flag value is 0x000004.
             tkhd.creation_time = 0; // the creation time of the presentation => ignore (set to 0)
             tkhd.modification_time = 0; // the most recent time the presentation was modified => ignore (set to 0)
             tkhd.track_id = media.trackId; // uniquely identifies this track over the entire life-time of this presentation
             tkhd.reserved = 0;
             tkhd.duration = Math.round(media.duration * media.timescale); // the duration of this track (in the timescale indicated in the Movie Header Box) =>  take duration of period
+            tkhd.reserved_2 = [0x0, 0x0];
             tkhd.layer = 0; // specifies the front-to-back ordering of video tracks; tracks with lower numbers are closer to the viewer => 0 since only one video track
             tkhd.alternate_group = 0; // specifies a group or collection of tracks => ignore
             tkhd.volume = 0x0100; // 8.8 number, "1.0" = full volume
+            tkhd.reserved_3 = 0;
             tkhd.matrix = [0x00010000, 0x0, 0x0, 0x0, 0x00010000, 0x0, 0x0, 0x0, 0x40000000];   // provides a transformation matrix for the video; (u,v,w) are restricted here to (0,0,1),
             tkhd.width = media.width << 16;  // visual presentation size as fixed-point 16.16 values
             tkhd.height = media.height << 16; // visual presentation size as fixed-point 16.16 values
-            tkhd.flags = 0x1 | 0x2 | 0x4; //Track_enabled: Indicates that the track is enabled. Flag value is 0x000001. A disabled track (the low
-                                         //bit is zero) is treated as if it were not present.
-                                         //Track_in_movie: Indicates that the track is used in the presentation. Flag value is 0x000002.
-                                         //Track_in_preview: Indicates that the track is used when previewing the presentation. Flag value is 0x000004.
 
             trak.boxes.push(tkhd);
 
@@ -122,6 +125,16 @@ MediaPlayer.dependencies.Mp4Processor = function () {
             return mdhd;
         },
 
+        stringToCharCode = function (str) {
+
+            var code = 0;
+            for (var i = 0; i < str.length; i++)
+            {
+                code |= str.charCodeAt(i) << ((str.length - i - 1) * 8);
+            }
+            return code;
+        },
+
         createHandlerReferenceBox = function (media) {
             
             //This box within a Media Box declares the process by which the media-data in the track is presented, and thus,
@@ -133,15 +146,15 @@ MediaPlayer.dependencies.Mp4Processor = function () {
             switch (media.type)
             {
                 case "video" :
-                    hdlr.handler_type = hdlr.HANDLERTYPEVIDEO;
+                    hdlr.handler_type = stringToCharCode(hdlr.HANDLERTYPEVIDEO);
                     hdlr.name = hdlr.HANDLERVIDEONAME;
                     break;
                 case "audio" :
-                    hdlr.handler_type = hdlr.HANDLERTYPEAUDIO;
+                    hdlr.handler_type = stringToCharCode(hdlr.HANDLERTYPEAUDIO);
                     hdlr.name = hdlr.HANDLERAUDIONAME;
                     break;
                 default :
-                    hdlr.handler_type = hdlr.HANDLERTYPETEXT;
+                    hdlr.handler_type = stringToCharCode(hdlr.HANDLERTYPETEXT);
                     hdlr.name = hdlr.HANDLERTEXTNAME;
                     break;
             }
@@ -370,23 +383,120 @@ MediaPlayer.dependencies.Mp4Processor = function () {
            
             return avc1;
         },
+
         createVisualSampleEntry = function (media) {
-            debugger;
-            var videoCodec = media.codecs;
-            var reg1=new RegExp("avc","g");
-            if (videoCodec.match(reg1)) {
-                 //create and add AVC Visual Sample Entry (avc1)
+            //debugger;
+            var codec = media.codecs.substring(0, media.codecs.indexOf('.'));
+
+            switch (codec)
+            {
+            case "avc1":
                 return createAVCVisualSampleEntry(media);
+                break;
+            default:
+                break;
+            }          
+        },
+        
+        parseHexString = function (str) { 
+            var bytes = [];
+            while (str.length >= 2) { 
+                bytes.push(parseInt(str.substring(0, 2), 16));
+                str = str.substring(2, str.length);
             }
-            else{
-                //NAN : to do....
-                return null;
-            }            
+
+            return bytes;
+        },
+
+        createMPEG4AACESDescriptor = function (media) {
+
+            // AudioSpecificConfig
+            // defined in ISO/IEC 14496-3, subpart 1
+            // => AudioSpecificConfig corresponds to hex bytes contained in "codecPrivateData" field
+            var audioSpecificConfig = parseHexString(media.codecPrivateData);
+
+            // DecoderSpecificInfo
+            // defined in ISO/IEC 14496-1 (Systems), extends a BaseDescriptor
+            var dsiLength = audioSpecificConfig.length;
+            var decoderSpecificInfo = new Uint8Array(2 + dsiLength); // 2 = tag + size bytes
+            decoderSpecificInfo[0] = 0x05;          // bit(8), tag=0x05 (DecSpecificInfoTag)
+            decoderSpecificInfo[1] = dsiLength;     // bit(8), size
+            decoderSpecificInfo.set(audioSpecificConfig, 2); // AudioSpecificConfig bytes
+
+            // DecoderConfigDescriptor
+            // defined in ISO/IEC 14496-1 (Systems), extends a BaseDescriptor
+            var dcdLength = 13 + decoderSpecificInfo.length; // 2 = tag + size bytes
+            var decoderConfigDescriptor = new Uint8Array(2 + dcdLength);
+            decoderConfigDescriptor[0] = 0x04;      // bit(8), tag=0x04 (DecoderConfigDescrTag)
+            decoderConfigDescriptor[1] = dcdLength; // bit(8), size
+            decoderConfigDescriptor[2] = 0x40;      // bit(8), objectTypeIndication=0x40 (MPEG-4 AAC)
+            decoderConfigDescriptor[3] = 0x05 << 2; // bit(6), streamType=0x05 (Visualstream)
+            decoderConfigDescriptor[3] |= 0 << 1;   // bit(1), upStream=0
+            decoderConfigDescriptor[3] |= 1;        // bit(1), reserved=1
+            decoderConfigDescriptor[4] = 0xFF;      // bit(24), buffersizeDB=undefined
+            decoderConfigDescriptor[5] = 0xFF;      // ''
+            decoderConfigDescriptor[6] = 0xFF;      // ''
+            decoderConfigDescriptor[7] = 0xFF;      // bit(32), maxBitrate=undefined
+            decoderConfigDescriptor[8] = 0xFF;      // ''
+            decoderConfigDescriptor[9] = 0xFF;      // ''
+            decoderConfigDescriptor[10] = 0xFF;     // ''
+            decoderConfigDescriptor[11] = (media.bandwidth & 0xFF000000) >> 24; // bit(32), avgbitrate
+            decoderConfigDescriptor[12] |= (media.bandwidth & 0x00FF0000) >> 16;// '' 
+            decoderConfigDescriptor[13] |= (media.bandwidth & 0x0000FF00) >> 8; // ''
+            decoderConfigDescriptor[14] |= (media.bandwidth & 0x000000FF);      // ''
+            decoderConfigDescriptor.set(decoderSpecificInfo, 15); // DecoderSpecificInfo bytes
+
+            // ES_Descriptor
+            // defined in ISO/IEC 14496-1 (Systems), extends a BaseDescriptor
+            var  esdLength = 3 + decoderConfigDescriptor.length;
+            var esDescriptor = new Uint8Array(2 + esdLength); // 2 = tag + size bytes
+            esDescriptor[0] = 0x03;                 // bit(8), tag=0x03 (ES_DescrTag)
+            esDescriptor[1] = esdLength;            // bit(8), size
+            esDescriptor[2] = (media.trackId & 0xFF00) >> 8;    // bit(16), ES_ID=track_id
+            esDescriptor[3] = (media.trackId & 0x00FF);         // ''
+            esDescriptor[4] = 0;                    // bit(8), flags and streamPriority
+            esDescriptor.set(decoderConfigDescriptor, 5); // decoderConfigDescriptor bytes
+
+            return esDescriptor;
+        },
+
+        createMP4AudioSampleEntry = function (media) {
+            var mp4a = new MP4AudioSampleEntryBox();
+            mp4a.boxes = [];
+
+            // SampleEntry fields
+            mp4a.reserved = [0x0, 0x0, 0x0, 0x0, 0x0, 0x0];
+            mp4a.data_reference_index = 1;              // ??
+            
+            // AudioSampleEntry fields
+            mp4a.reserved_2 = [0x0, 0x0];               // default value = 0
+            mp4a.channelcount = media.channels;         // number of channels
+            mp4a.samplesize = 16;                       // default value = 16
+            mp4a.pre_defined = 0;                       // default value = 0
+            mp4a.reserved_3 = 0;                        // default value = 0
+            mp4a.samplerate = media.samplingRate << 16; // sampling rate, as fixed-point 16.16 values
+
+            var esdBox = new ESDBox();
+            esdBox.ES = createMPEG4AACESDescriptor(media);
+
+            // MP4AudioSampleEntry fields
+            mp4a.boxes.push(esdBox);
+
+            return mp4a;
         },
         
         createAudioSampleEntry = function (media) {
-          //representation.codecs pour savoir le type de codec audio
-          return null;
+            //debugger;
+            var codec = media.codecs.substring(0, media.codecs.indexOf('.'));
+
+            switch (codec)
+            {
+            case "mp4a":
+                return createMP4AudioSampleEntry(media);
+                break;
+            default:
+                break;
+            }   
         },
         
         createSampleDescriptionBox = function (media) {
@@ -546,7 +656,7 @@ MediaPlayer.dependencies.Mp4Processor = function () {
             moov_file.boxes.push(moov);
 
             var lp = new LengthCounterBoxFieldsProcessor(moov_file);
-            moov._processFields(lp);
+            moov_file._processFields(lp);
             var data = new Uint8Array(lp.res);       
             var sp = new SerializationBoxFieldsProcessor(moov_file, data, 0);
             moov_file._processFields(sp);

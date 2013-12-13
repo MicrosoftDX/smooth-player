@@ -302,7 +302,7 @@ Mss.dependencies.MssParser = function () {
                 height: node.maxHeight,
                 codecs: codecs,
                 audioSamplingRate: node.SamplingRate,
-                codecPrivateData: node.CodecPrivateData,
+                codecPrivateData: "" + node.CodecPrivateData,
                 BaseURL: node.BaseURL
             };
         };
