@@ -20,11 +20,8 @@ Custom.di.CustomContext = function () {
             // plug message handler. When th emessage is notify, the contextManager is called
             this.system.mapHandler('setContext', 'contextManager', 'setContext');
             
-
-
-            // for testing purpose only : show how Inheritance works and remapping in dijon object
-            // this.system.mapSingleton('mssMetricsExt', Mss.dependencies.MssMetricsExtensions);
-            // this.system.mapSingleton('dashMetricsExt', Dash.dependencies.DashMetricsExtensions);        
+            //custom metrics model is used for add manifest in metrics
+            this.system.mapSingleton('metricsModel', Custom.models.CustomMetricsModel);
         }
     };
 };

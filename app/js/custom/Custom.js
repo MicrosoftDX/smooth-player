@@ -3,9 +3,10 @@ Custom = (function () {
     "use strict";
 
     return {
-        modules: {},
         dependencies: {},
         di: {},
+        models: {},
+        modules: {},
         utils: {}
     };
 }());

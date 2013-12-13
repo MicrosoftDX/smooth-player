@@ -1,7 +1,5 @@
 Custom.dependencies.CustomFragmentLoader = function () {
     "use strict";
-  console.log("Custom.dependencies.CustomFragmentLoader");
-    
     var rslt = Custom.utils.copyMethods(MediaPlayer.dependencies.FragmentLoader);
 
     rslt.load = function(req){
