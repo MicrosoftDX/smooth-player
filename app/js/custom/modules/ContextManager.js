@@ -18,6 +18,7 @@ Custom.modules.ContextManager = function (){
                 this.system.mapClass('fragmentLoader', MediaPlayer.dependencies.FragmentLoader);
                 // this.system.mapValue('metricsExt', this.system.getObject('dashMetricsExt'));
                 this.system.mapClass('fragmentController', MediaPlayer.dependencies.FragmentController);
+                this.system.mapClass('indexHandler', Dash.dependencies.DashHandler);
             }
         }
     };
