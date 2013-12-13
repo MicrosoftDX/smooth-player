@@ -35,7 +35,7 @@ MediaPlayer.dependencies.Mp4Processor = function () {
 
             // Create Track box (trak)
             var trak = new TrackBox();
-            trak.boxes = new Array();
+            trak.boxes = [];
 
             // Create and add TrackHeader box (trak)
             var tkhd = new TrackHeaderBox();
@@ -58,6 +58,21 @@ MediaPlayer.dependencies.Mp4Processor = function () {
                                          //Track_in_preview: Indicates that the track is used when previewing the presentation. Flag value is 0x000004.
 
             trak.boxes.push(tkhd);
+
+            //Create container for the media information in a track (mdia)
+            var mdia = new MediaBox();
+            mdia.boxes = [];
+
+            //Create and add Media Header Box (mdhd)
+            mdia.boxes.push(createMediaHeaderBox(media));
+            
+            //Create and add Handler Reference Box (hdlr)
+            mdia.boxes.push(createHandlerReferenceBox(media));
+
+            //Create and add Media Information Box (minf)
+            mdia.boxes.push(createMediaInformationBox(media));
+
+            trak.boxes.push(mdia);
 
             return trak;
         },
@@ -140,7 +155,7 @@ MediaPlayer.dependencies.Mp4Processor = function () {
 
             //This box contains all the objects that declare characteristic information of the media in the track.
             var minf = new MediaInformationBox();
-            minf.boxes = new Array();
+            minf.boxes = [];
             
             //Create and add the adapted media header box (vmhd, smhd or nmhd) for audio, video or text.
             switch(media.type)
@@ -206,6 +221,8 @@ MediaPlayer.dependencies.Mp4Processor = function () {
                                   //content 
             stts.flags = 0; //default value = 0
 
+            stts.entry = [];
+
             return stts;
         },
 
@@ -217,6 +234,8 @@ MediaPlayer.dependencies.Mp4Processor = function () {
             stsc.version = 0; //is an integer that specifies the version of this box. default value = 0.
             stsc.entry_count = 0; //is an integer that gives the number of entries in the following table
             
+            stsc.entry = [];
+
             return stsc;
         },
 
@@ -228,6 +247,8 @@ MediaPlayer.dependencies.Mp4Processor = function () {
             stco.version = 0; //is an integer that specifies the version of this box. default value = 0
             stco.entry_count = 0;//is an integer that gives the number of entries in the following table
             stco.flags = 0; //default value
+
+            stco.chunk_offset = [];
             
             return stco;
         },
@@ -247,20 +268,125 @@ MediaPlayer.dependencies.Mp4Processor = function () {
             return stsz;
         },
 
-        createVisualSampleEntry = function (media) {
-            //representation.codecs pour savoir le type de codec video
-            /*this.manifestExt.getCodec(adaptation).then(
-            function(codec){
-                switch (codec) {
-                    case "avc" :
-                        break;
-                        //NAN : To do complete with other codec than H264
+        _hexstringtoBuffer = function (a) {
+            var res = new Uint8Array(a.length/2);
+
+            for (var i=0;i<a.length/2;i++)
+                res[i] = parseInt( ""+a[i*2]+a[i*2+1], 16);
+            return res;
+        },
+
+        _mergeArrays = function (oldBuffer,newPart) {
+            var res = new Uint8Array(oldBuffer.length+newPart.length);
+            res.set(oldBuffer,0);
+            res.set(newPart,oldBuffer.length);
+            return res;
+        },
+
+        createAVCConfigurationBox = function (media) {
+
+            //Create an AVC Configuration Box
+            var avcC = new AVCConfigurationBox();
+
+            avcC.configurationVersion = 1; //unsigned int(8) configurationVersion = 1;
+            avcC.lengthSizeMinusOne = 3; //indicates the length in bytes of the NALUnitLength field in an AVC video
+                                         //sample or AVC parameter set sample of the associated stream minus one
+          
+            avcC.reserved = 0x3F; //bit(6) reserved = ‘111111’b;
+            
+            avcC.SPS_NAL= []; //SPS NAL Array
+            avcC.PPS_NAL= []; //PPS NAL Array
+
+            var NALDatabuffer = new Uint8Array(0);           
+
+            var codecPrivateData = media.codecPrivateData;
+
+            var NALArray = codecPrivateData.split("00000001");
+
+            NALArray.splice(0,1);
+            
+            for (var j=0;j<NALArray.length;j++)
+            {
+                var regexp7 = new RegExp("^[A-Z0-9]7", "gi");           //SPS
+                var regexp8 = new RegExp("^[A-Z0-9]8", "gi");           //PPS
+                var SPS_index = 0;
+                var PPS_index = 0;
+                var NALBuffer = _hexstringtoBuffer(NALArray[j]);
+
+                if (NALArray[j].match(regexp7))
+                {
+                    avcC.SPS_NAL[SPS_index++] = { "NAL_length":NALBuffer.length, "NAL":NALBuffer };
+                    avcC.AVCProfileIndication = parseInt(NALArray[j].substr(2,2),16); //contains the profile code as defined in ISO/IEC 14496-10.
+                    avcC.profile_compatibility = parseInt(NALArray[j].substr(4,2),16); //is a byte defined exactly the same as the byte which occurs between the
+                                                                                       //profile_IDC and level_IDC in a sequence parameter set (SPS), as defined in ISO/IEC 14496-10.
+                    avcC.AVCLevelIndication = parseInt(NALArray[j].substr(6,2),16); //contains the level code as defined in ISO/IEC 14496-10.
                 }
-            });*/
+                if (NALArray[j].match(regexp8))
+                {
+                    avcC.PPS_NAL[PPS_index++] =  { "NAL_length":NALBuffer.length, "NAL":NALBuffer };                    
+                }
+
+                var tempBuffer = new Uint8Array(NALBuffer.length+4);
+                tempBuffer[3] = NALBuffer.length;
+                tempBuffer.set(NALBuffer,4);
+
+                NALDatabuffer = _mergeArrays(NALDatabuffer,tempBuffer);
+            }
+            avcC.numOfSequenceParameterSets = SPS_index; //of SPSs that are used as the initial set of SPSs
+                                                         //for decoding the AVC elementary stream.
+            avcC.numOfPictureParameterSets = PPS_index; //indicates the number of picture parameter sets (PPSs) that are used
+                                                        //as the initial set of PPSs for decoding the AVC elementary stream.
+
+            return avcC;
+        },
+
+        createAVCVisualSampleEntry = function (media) {
+
+            //An AVC visual sample entry shall contain an AVC Configuration Box
+            var avc1 = new AVC1VisualSampleEntryBox();
+            avc1.boxes = [];
+
+            avc1.data_reference_index = 1; //To DO... ??
+            avc1.compressorname = "AVC Coding";//is a name, for informative purposes. It is formatted in a fixed 32-byte field, with the first
+                                               //byte set to the number of bytes to be displayed, followed by that number of bytes of displayable data,
+                                               //and then padding to complete 32 bytes total (including the size byte). The field may be set to 0.
+            avc1.depth = 0x0018;//takes one of the following values 0x0018 – images are in colour with no alpha.
+            avc1.reserved =[0x0,0x0,0x0,0x0,0x0,0x0];//default value = 0
+            avc1.reserved_2 = 0;//default value = 0
+            avc1.reserved_3 = 0;//default value = 0
+            avc1.pre_defined = 0;//unsigned int(16) pre_defined = 0;
+            avc1.pre_defined_2 = [0x0,0x0,0x0];//unsigned int(32)[3] pre_defined = 0;
+            avc1.pre_defined_3 = 65535;//int(16) pre_defined = -1;
+            avc1.frame_count = 1;//template unsigned int(16) frame_count = 1;indicates how many frames of compressed video are stored in each sample. The default is
+                                 //1, for one frame per sample; it may be more than 1 for multiple frames per sample
+            avc1.horizresolution = 0x00480000;// 72 dpi
+            avc1.vertresolution = 0x00480000;// 72 dpi
+
+            avc1.height = media.height;//are the maximum visual width and height of the stream described by this sample
+            avc1.width = media.width;//description, in pixels
+            
+            //create and add AVC Configuration Box (avcC)
+            avc1.boxes.push(createAVCConfigurationBox(media));
+           
+            return avc1;
+        },
+        createVisualSampleEntry = function (media) {
+            debugger;
+            var videoCodec = media.codecs;
+            var reg1=new RegExp("avc","g");
+            if (videoCodec.match(reg1)) {
+                 //create and add AVC Visual Sample Entry (avc1)
+                return createAVCVisualSampleEntry(media);
+            }
+            else{
+                //NAN : to do....
+                return null;
+            }            
         },
         
         createAudioSampleEntry = function (media) {
           //representation.codecs pour savoir le type de codec audio
+          return null;
         },
         
         createSampleDescriptionBox = function (media) {
@@ -269,11 +395,7 @@ MediaPlayer.dependencies.Mp4Processor = function () {
             //information needed for that coding.
             var stsd = new SampleDescriptionBox();
             stsd.boxes = [];
-                /*NAN : ajouter ici les boxes
-                 *       -stsd :
-                 *           -avc1 :
-                 *               -avcC
-                 */
+             
             switch(media.type)
             {
                 case "video" :
@@ -351,15 +473,64 @@ MediaPlayer.dependencies.Mp4Processor = function () {
             //return nmhd;
         },
 
+        createFileTypeBox = function () {
+
+            //create a File Type Box
+            var ftyp = new FileTypeBox();
+
+            ftyp.major_brand = 1769172790; //is a brand identifier iso6 => decimal ASCII value for iso6
+            ftyp.minor_brand = 1; //is an informative integer for the minor version of the major brand
+            ftyp.compatible_brands = []; //is a list, to the end of the box, of brands isom, iso6 and msdh
+            ftyp.compatible_brands[0] = 1769172845; // =>decimal ASCII value for isom
+            ftyp.compatible_brands[1] = 1769172790; // => decimal ASCII value for iso6
+            ftyp.compatible_brands[2] = 1836278888; // => decimal ASCII value for msdh
+
+            return ftyp;
+        },
+
+        createMovieExtendsBox = function (media) {
+            
+            //NAN : To do Expliquer le contenu de ces box!
+
+            //create Movie Extends Box (mvex) 
+            //This box warns readers that there might be Movie Fragment Boxes in this file
+            var mvex = new MovieExtendsBox();
+            mvex.boxes = [];
+            
+            //create Movie Extends Header Box (mehd)
+            /*var mehd = new MovieExtendsHeaderBox(); //may be omited in live streams
+            mehd.fragment_duration = 2000; 
+            mehd.version = 1;
+            mehd.flags = 0;// default value flags = 0
+            
+            //add mehd box in mvex box
+            mvex.boxes.push(mehd);*/
+                
+            // create Track Extend Box (trex), exactly one for each track in the movie box
+            // This sets up default values used by the movie fragments. By setting defaults in this way, space and
+            // complexity can be saved in each Track Fragment Box.
+            var trex = new TrackExtendsBox();
+            trex.track_ID = 1; //identifies the track; this shall be the track ID of a track in the Movie Box
+            trex.default_sample_description_index = 1;  //? 
+            trex.default_sample_duration = 562491;
+            trex.default_sample_flags = 65536;          //?
+            trex.default_sample_size = 0;           //?
+            
+            // add trex box in mvex box
+            mvex.boxes.push(trex);
+
+            return mvex;
+        },
+
         doGenerateInitSegment = function (media) {
 
             // Create file
             var moov_file = new File();
-            moov_file.boxes = new Array();
+            moov_file.boxes = [];
 
             // Create Movie box (moov) 
             var moov = new MovieBox();
-            moov.boxes = new Array();
+            moov.boxes = [];
 
             // Create and add MovieHeader box (mvhd)
             moov.boxes.push(createMovieHeaderBox(media));
@@ -367,31 +538,20 @@ MediaPlayer.dependencies.Mp4Processor = function () {
             // Create and add Track box (trak)
             moov.boxes.push(createTrackBox(media));
 
-            //Create container for the media information in a track (mdia)
-            var mdia = new MediaBox();
-            mdia.boxes = new Array();
+            // Create and add MovieExtends box (mvex)
+            moov.boxes.push(createMovieExtendsBox(media));
 
-            //Create and add Media Header Box (mdhd)
-            mdia.boxes.push(createMediaHeaderBox(media));
-            
-            //Create and add Handler Reference Box (hdlr)
-            mdia.boxes.push(createHandlerReferenceBox(media));
-
-            //Create and add Media Information Box (minf)
-            mdia.boxes.push(createMediaInformationBox(media));
-
-            // Create and add MovieExtends box (trak)
-            //moov.boxes.push(createMovieExtendsBox.call(this, representation));
+            moov_file.boxes.push(createFileTypeBox());
 
             moov_file.boxes.push(moov);
 
             var lp = new LengthCounterBoxFieldsProcessor(moov_file);
             moov._processFields(lp);
-            var data = new Uint8Array(lp.res);          
+            var data = new Uint8Array(lp.res);       
             var sp = new SerializationBoxFieldsProcessor(moov_file, data, 0);
             moov_file._processFields(sp);
 
-            return data;
+            return data;            
         };
 
     return {
