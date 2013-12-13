@@ -85,6 +85,30 @@ Mss.dependencies.MssHandler = function() {
 			return duration;
 		},
 
+		getAudioChannels = function (adaptation, representation) {
+			var channels = 1;
+
+			if (adaptation.AudioChannelConfiguration) {
+				channels = adaptation.AudioChannelConfiguration.value;
+			} else if (representation.AudioChannelConfiguration) {
+				channels = representation.AudioChannelConfiguration.value;
+			}
+
+			return channels;
+		},
+
+		getAudioSamplingRate = function (adaptation, representation) {
+			var samplingRate = 1;
+
+			if (adaptation.audioSamplingRate) {
+				samplingRate = adaptation.audioSamplingRate;
+			} else {
+				samplingRate = representation.audioSamplingRate;
+			}
+
+			return samplingRate;
+		},
+
 		getInitData = function(quality, adaptation) {
 			// return data in byte format
 			// call MP4 lib to generate the init
@@ -103,9 +127,16 @@ Mss.dependencies.MssHandler = function() {
 					media.duration = getDuration(manifest, isLive);
 					media.codecs = representation.codecs;
 					media.codecPrivateData = representation.codecPrivateData;
+					media.bandwidth = representation.bandwidth;
+
+					// Video related informations
 					media.width = representation.width || adaptation.maxWidth;
 					media.height = representation.height || adaptation.maxHeight;
+
+					// Audio related informations
 					media.language = adaptation.lang ? adaptation.lang : 'und';
+					media.channels = getAudioChannels(adaptation, representation);
+					media.samplingRate = getAudioSamplingRate(adaptation, representation);
 
 					representation.initData =  rslt.mp4Processor.generateInitSegment(media);
 				}
