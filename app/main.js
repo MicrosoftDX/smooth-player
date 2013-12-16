@@ -127,13 +127,15 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
 
     $scope.getVideoTreeMetrics = function () {
         var metrics = player.getMetricsFor("video");
-        $scope.videoMetrics = converter.toTreeViewDataSource(metrics);
-    }
+        var metricsExt = player.getMetricsExt();
+        $scope.videoMetrics = converter.toTreeViewDataSource(metrics,metricsExt);
+    };
 
     $scope.getAudioTreeMetrics = function () {
         var metrics = player.getMetricsFor("audio");
-        $scope.audioMetrics = converter.toTreeViewDataSource(metrics);
-    }
+        var metricsExt = player.getMetricsExt();
+        $scope.audioMetrics = converter.toTreeViewDataSource(metrics,metricsExt);
+    };
 
     function getCribbedMetricsFor(type) {
         var metrics = player.getMetricsFor(type),
@@ -147,10 +149,10 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
             pendingValue,
             numBitratesValue,
             bufferLengthValue = 0,
-            point,
             lastFragmentDuration,
             lastFragmentDownloadTime,
-            droppedFramesValue = 0;
+            droppedFramesValue = 0,
+            currentCodecs;
 
         if (metrics && metricsExt) {
             repSwitch = metricsExt.getCurrentRepresentationSwitch(metrics);
@@ -160,6 +162,16 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
 
             if (repSwitch !== null) {
                 bitrateIndexValue = metricsExt.getIndexForRepresentation(repSwitch.to);
+                try {
+                    var representations = metricsExt.manifestModel.getValue().Period_asArray[0].AdaptationSet_asArray[0].Representation_asArray;
+                    for (var i=0;i<representations.length;i++) {
+                        var rep = representations[i];
+                        if (rep.id == repSwitch.to) {
+                            currentCodecs = rep.codecs;
+                            break;
+                        }
+                    }
+                } catch(e) {currentCodecs = "Error:"+e.getMessage();}
                 bandwidthValue = metricsExt.getBandwidthForRepresentation(repSwitch.to);
                 bandwidthValue = bandwidthValue / 1000;
                 bandwidthValue = Math.round(bandwidthValue);
@@ -208,8 +220,9 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
                 pendingIndex: (pendingValue !== bitrateIndexValue) ? "(-> " + (pendingValue + 1) + ")" : "",
                 numBitratesValue: numBitratesValue,
                 bufferLengthValue: bufferLengthValue,
-                droppedFramesValue: droppedFramesValue
-            }
+                droppedFramesValue: droppedFramesValue,
+                currentCodecs: currentCodecs
+            };
         }
         else {
             return null;
@@ -229,6 +242,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
             $scope.videoMaxIndex = metrics.numBitratesValue;
             $scope.videoBufferLength = metrics.bufferLengthValue;
             $scope.videoDroppedFrames = metrics.droppedFramesValue;
+            $scope.currentCodecs = metrics.currentCodecs;
 
             point = [parseFloat(video.currentTime), Math.round(parseFloat(metrics.bufferLengthValue))];
             videoSeries.push(point);

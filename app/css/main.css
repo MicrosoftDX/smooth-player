@@ -102,10 +102,10 @@ chart {
 }
 
 .tree {
-    height: 300px;
+    /*height: 300px;
     max-height: 300px;
+    overflow: scroll;*/
     margin-top: 20px;
-    overflow: scroll;
 }
 
 #notes {

@@ -441,14 +441,14 @@ MetricsTreeConverter = function () {
             return treeMetrics;
         },
 
-        toTreeViewDataSource = function (metrics) {
+        toTreeViewDataSource = function (metrics,metricsExt) {
             var bufferTreeMetrics = bufferLevelMetricToTreeMetric(metrics.BufferLevel),
                 playListMetrics = playListMetricToTreeMetric(metrics.PlayList),
                 representationSwitchMetrics = representationSwitchToTreeMetrics(metrics.RepSwitchList),
                 droppedFramesMetrics = droppedFramesToTreeMetrics(metrics.DroppedFrames),
                 httpRequestMetrics = httpRequestToTreeMetric(metrics.HttpList),
                 tcpConnectionMetrics = tcpConnectionToTreeMetric(metrics.TcpList),
-                manifestTreeMetrics = manifesfToTreeMetrics(metrics.manifest),
+                manifestTreeMetrics = manifesfToTreeMetrics(metricsExt.manifestModel.getValue()),
                 dataSource;
 
             dataSource = [
