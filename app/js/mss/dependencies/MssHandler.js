@@ -158,6 +158,7 @@ Mss.dependencies.MssHandler = function() {
             request.streamType = this.getType();
             request.type = "Initialization Segment";
             request.data = getInitData(quality, data);
+			//console.saveBinArray(request.data, data.type + "_" + quality + ".mp4");
             //request.action = "complete"; //needed to avoid to execute request
             request.quality = quality;
             deferred.resolve(request);

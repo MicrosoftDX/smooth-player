@@ -16,7 +16,6 @@ Mss.dependencies.MssFragmentController = function () {
     "use strict";
     console.debug("Mss.dependencies.MssFragmentController");
     var convertFragment = function (data, request) {
-
         var fragment = new File();
         var processor = new DeserializationBoxFieldsProcessor(fragment, data, 0, data.length);
         fragment._processFields(processor);
@@ -24,7 +23,11 @@ Mss.dependencies.MssFragmentController = function () {
 
         var moof = getBoxByType(fragment, "moof");
         var traf = getBoxByType(moof, "traf");
-        //var tfxd = getBoxByType(traf, "tfxd");
+        var trun = getBoxByType(traf, "trun");
+        var tfhd = getBoxByType(traf, "tfhd");
+
+        // BBE: récupérer l'index de l'adaptation (=data) et faire +1 pour obtenir le track id, comme dans MssHandler
+        tfhd.track_ID = 1;
 
         // Remove tfxd anf tfrf boxes
         removeBoxByType(traf, "tfxd");
@@ -43,6 +46,11 @@ Mss.dependencies.MssFragmentController = function () {
         var lp = new LengthCounterBoxFieldsProcessor(fragment);
         fragment._processFields(lp);
         var new_data = new Uint8Array(lp.res);
+
+        // Update trun.dataOffset field
+        var diff = lp.res - data.length;
+        trun.data_offset += diff;
+
         var sp = new SerializationBoxFieldsProcessor(fragment, new_data, 0);
         fragment._processFields(sp);
 
@@ -62,6 +70,7 @@ Mss.dependencies.MssFragmentController = function () {
         if (request && (request.type === "Media Segment"))
         {
             result = convertFragment(result, request);
+            //console.saveBinArray(result, request.streamType + "_" + request.quality + "_" + request.index + ".mp4");
         }
 
         return Q.when(result);
