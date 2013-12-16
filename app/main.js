@@ -121,6 +121,19 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
     $scope.audioBufferLength = 0;
     $scope.audioDroppedFrames = 0;
 
+    // quality switcher
+    $('#bitrateSlider').labeledslider({ 
+        min:0,
+        max: 5,
+        values:[0,5],
+        range: true,
+        slide: function(evt,ui) {
+            console.log(ui);
+            player.getMetricsExt().setMinBitrateIdx(ui.values[0]);
+            player.getMetricsExt().setMaxBitrateIdx(ui.values[1]);
+        }
+    });
+
     var converter = new MetricsTreeConverter();
     $scope.videoMetrics = null;
     $scope.audioMetrics = null;
@@ -458,28 +471,28 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
     }
 
     // Get initial stream if it was passed in.
-	var paramUrl = null;
+    var paramUrl = null;
 
     if (vars && vars.hasOwnProperty("url")) {
-    	paramUrl = vars.url;
+        paramUrl = vars.url;
     }
 
     if (vars && vars.hasOwnProperty("mpd")) {
-    	paramUrl = vars.mpd;
+        paramUrl = vars.mpd;
     }
 
     if (paramUrl !== null) {
-    	var startPlayback = true;
+        var startPlayback = true;
     
-    	$scope.selectedItem = {};
+        $scope.selectedItem = {};
         $scope.selectedItem.url = paramUrl;
 
         if (vars.hasOwnProperty("autoplay")) {
-        	startPlayback = (vars.autoplay === 'true');
+            startPlayback = (vars.autoplay === 'true');
         }
 
-    	if (startPlayback) {
-	    	$scope.doLoad();
-		}
+        if (startPlayback) {
+            $scope.doLoad();
+        }
     }
 });

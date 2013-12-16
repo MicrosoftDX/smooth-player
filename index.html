@@ -10,10 +10,13 @@
     <link rel="stylesheet" href="app/lib/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="app/lib/bootstrap/css/bootstrap-glyphicons.css">
     <link rel="stylesheet" href="app/lib/angular.treeview/css/angular.treeview.css">
+    <link rel="stylesheet" href="app/lib/jquery.ui/jquery-ui-1.10.3.custom.min.css">
+    <link rel="stylesheet" href="app/lib/jquery.ui.labeledSlider/jquery.ui.labeledslider.css">
     <link rel="stylesheet" href="app/css/main.css">
 
     <!-- http://jquery.com/ -->
     <script src="app/lib/jquery/jquery-1.10.2.min.js"></script>
+    <script src="app/lib/jquery.ui/jquery-ui-1.10.3.custom.min.js"></script>
 
     <!-- http://angularjs.org/ -->
     <script src="app/lib/angular/angular.min.js"></script>
@@ -42,6 +45,8 @@
 
     <!-- https://github.com/eu81273/angular.treeview -->
     <script src="app/lib/angular.treeview/angular.treeview.min.js"></script>
+    <!-- http://bseth99.github.io/jquery-ui-extensions/index.html -->
+    <script src="app/lib/jquery.ui.labeledslider/jquery.ui.labeledslider.js"></script>
 
     <!-- http://log4javascript.org/ -->
     <script src="app/lib/log4javascript-1.4.6/log4javascript.js"></script>
@@ -131,6 +136,7 @@
     <script src="app/js/custom/utils/CopyMethods.js"></script>
     <script src="app/js/custom/utils/CustomObjectIron.js"></script>
     <script src="app/js/custom/dependencies/CustomMetricsExtensions.js"></script>
+    <script src="app/js/custom/rules/CustomDownloadRatioRule.js"></script>
     
     <!-- App -->
     <script src="app/metrics.js"></script>
@@ -232,6 +238,7 @@
                         </div>
                     </div>
                     <div class="panel-body panel-stats">
+                        <div id="bitrateSlider"></div>
                         <p class="text-warning">{{videoBitrate}} kbps</p>
                         <p class="text-primary">codecs : {{currentCodecs}}</p>
                         <p class="text-primary">Rep Index: <span class="text-success">{{videoIndex}}</span><span class="text-warning">{{videoPendingIndex}}</span>/<span class="text-success">{{videoMaxIndex}}</span></p>
