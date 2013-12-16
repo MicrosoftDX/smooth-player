@@ -159,7 +159,7 @@ Mss.dependencies.MssHandler = function() {
             request.type = "Initialization Segment";
             request.data = getInitData(quality, data);
 
-            //console.saveBinArray(request.data, "moov.bin");
+            //console.saveBinArray(request.data, data.type + "_" + quality + ".mp4");
 			deferred.resolve(request);
 
             return deferred.promise;

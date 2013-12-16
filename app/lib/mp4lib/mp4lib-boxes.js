@@ -931,6 +931,7 @@ AudioSampleEntryBox.prototype._processFields = function(processor) {
     processor.eat('pre_defined',FIELD_UINT16);
     processor.eat('reserved_3',FIELD_UINT16);
     processor.eat('samplerate',FIELD_UINT32);
+    processor.eat('boxes',FIELD_CONTAINER_CHILDREN);
 };
 
 
@@ -954,7 +955,9 @@ ESDBox.prototype.boxtype = 'esds';
 
 ESDBox.prototype._processFields = function(processor) {
     FullBox.prototype._processFields.call(this,processor);
-    processor.eat('ES', new DataField(this.size - 4));
+    processor.eat("ES_tag", FIELD_UINT8);
+    processor.eat("ES_length", FIELD_UINT8);
+    processor.eat('ES_data', new DataField(this.ES_length));
 };
 
 Box.prototype.registerBoxType( ESDBox );
