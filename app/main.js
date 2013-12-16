@@ -163,15 +163,18 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
             if (repSwitch !== null) {
                 bitrateIndexValue = metricsExt.getIndexForRepresentation(repSwitch.to);
                 try {
-                    var representations = metricsExt.manifestModel.getValue().Period_asArray[0].AdaptationSet_asArray[0].Representation_asArray;
-                    for (var i=0;i<representations.length;i++) {
-                        var rep = representations[i];
-                        if (rep.id == repSwitch.to) {
-                            currentCodecs = rep.codecs;
-                            break;
-                        }
-                    }
-                } catch(e) {currentCodecs = "Error:"+e.getMessage();}
+                    // var representations = metricsExt.manifestModel.getValue().Period_asArray[0].AdaptationSet_asArray[0].Representation_asArray;
+                    // for (var i=0;i<representations.length;i++) {
+                    //     var rep = representations[i];
+                    //     if (rep.id == repSwitch.to) {
+                    //         currentCodecs = rep.codecs;
+                    //         break;
+                    //     }
+                    // }
+
+                    var rep = metricsExt.findRepresentionInPeriodArray(metricsExt.manifestModel.getValue().Period_asArray,repSwitch.to);
+                    currentCodecs = rep.codecs;
+                } catch(e) {currentCodecs = "Error:"+e.message;}
                 bandwidthValue = metricsExt.getBandwidthForRepresentation(repSwitch.to);
                 bandwidthValue = bandwidthValue / 1000;
                 bandwidthValue = Math.round(bandwidthValue);
