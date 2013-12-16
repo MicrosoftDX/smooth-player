@@ -825,11 +825,7 @@ MediaPlayer.dependencies.BufferController = function () {
                                         self.debug.log(request);
                                         self.fragmentController.prepareFragmentForLoading(self, request, onBytesLoadingStart, onBytesLoaded, onBytesError, signalStreamComplete).then(
                                             function() {
-                                                // HACK : request.url is null on MSS InitSegement so do nothing!
-                                                if(request.url){
-                                                    setState.call(self, READY);
-                                                }
-                                                
+                                                setState.call(self, READY);
                                             }
                                         );
                                     }
