@@ -7,6 +7,7 @@ Custom = (function () {
         di: {},
         models: {},
         modules: {},
-        utils: {}
+        utils: {},
+        rules: {}
     };
 }());

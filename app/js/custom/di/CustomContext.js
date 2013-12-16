@@ -20,6 +20,7 @@ Custom.di.CustomContext = function () {
             // here replace dash or streaming modules by ours
             this.system.mapClass('fragmentLoader', Custom.dependencies.CustomFragmentLoader);
             this.system.mapSingleton('metricsExt', Custom.dependencies.CustomMetricsExtensions);
+            this.system.mapClass('downloadRatioRule', Custom.rules.CustomDownloadRatioRule);
 
             // plug message handler. When the message is notify, the contextManager is called
             this.system.mapHandler('setContext', 'contextManager', 'setContext');

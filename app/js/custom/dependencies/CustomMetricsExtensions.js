@@ -1,5 +1,9 @@
 Custom.dependencies.CustomMetricsExtensions = function () {
     "use strict";
+
+    var minBitrateIdx= null;
+    var maxBitrateIdx= null;
+
     var findRepresentionInPeriodArray = function (periodArray, representationId) {
             var period,
                 adaptationSet,
@@ -31,6 +35,24 @@ Custom.dependencies.CustomMetricsExtensions = function () {
 
 
     var returnValue = Custom.utils.copyMethods(Dash.dependencies.DashMetricsExtensions);
+
+    returnValue.setMinBitrateIdx = function(minBR) {
+        minBitrateIdx = minBR;
+    };
+
+    returnValue.getMinBitrateIdx = function() {
+        return minBitrateIdx;
+    };
+
+    returnValue.setMaxBitrateIdx = function(maxBR) {
+        maxBitrateIdx = maxBR;
+    };
+
+    returnValue.getMaxBitrateIdx = function() {
+        return maxBitrateIdx;
+    };
+    
+
     returnValue.getRepresentationForId = function(repId) {
         return findRepresentionInPeriodArray(this.manifestModel.getValue().Period_asArray,repId);
     };
