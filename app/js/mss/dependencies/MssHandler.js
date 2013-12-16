@@ -158,7 +158,9 @@ Mss.dependencies.MssHandler = function() {
             request.streamType = this.getType();
             request.type = "Initialization Segment";
             request.data = getInitData(quality, data);
-            request.action = "complete"; // needed to avoid to execute request
+            //request.action = "complete"; //needed to avoid to execute request
+            request.quality = quality;
+            deferred.resolve(request);
             return deferred.promise;
         };
 	return rslt;
