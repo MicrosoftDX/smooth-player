@@ -9,7 +9,7 @@ Mss.dependencies.MssHandler = function() {
 			for (i = 0; i < periods.length; i += 1) {
 				var adaptations = periods[i].AdaptationSet_asArray;
 				for (j = 0; j < adaptations.length; j += 1) {
-					if (adaptations[i] === adaptation) {
+					if (adaptations[j] === adaptation) {
 						return j;
 					}
 				}
@@ -159,7 +159,7 @@ Mss.dependencies.MssHandler = function() {
             request.type = "Initialization Segment";
             request.data = getInitData(quality, data);
 
-            //console.saveBinArray(request.data, data.type + "_" + quality + ".mp4");
+            console.saveBinArray(request.data, data.type + "_" + quality + ".mp4");
 			deferred.resolve(request);
 
             return deferred.promise;

@@ -591,10 +591,10 @@ MediaPlayer.dependencies.Mp4Processor = function () {
             //create a File Type Box
             var ftyp = new FileTypeBox();
 
-            ftyp.major_brand = 1769172790; //is a brand identifier iso6 => decimal ASCII value for iso6
-            ftyp.minor_brand = 1; //is an informative integer for the minor version of the major brand
+            ftyp.major_brand = 1769172790; // is a brand identifier iso6 => decimal ASCII value for iso6
+            ftyp.minor_brand = 1; // is an informative integer for the minor version of the major brand
             ftyp.compatible_brands = []; //is a list, to the end of the box, of brands isom, iso6 and msdh
-            ftyp.compatible_brands[0] = 1769172845; // =>decimal ASCII value for isom
+            ftyp.compatible_brands[0] = 1769172845; // => decimal ASCII value for isom
             ftyp.compatible_brands[1] = 1769172790; // => decimal ASCII value for iso6
             ftyp.compatible_brands[2] = 1836278888; // => decimal ASCII value for msdh
 
@@ -603,31 +603,34 @@ MediaPlayer.dependencies.Mp4Processor = function () {
 
         createMovieExtendsBox = function (media) {
             
-            //NAN : To do Expliquer le contenu de ces box!
-
-            //create Movie Extends Box (mvex) 
-            //This box warns readers that there might be Movie Fragment Boxes in this file
+            // Create Movie Extends Box (mvex) 
+            // This box warns readers that there might be Movie Fragment Boxes in this file
             var mvex = new MovieExtendsBox();
             mvex.boxes = [];
             
-            //create Movie Extends Header Box (mehd)
-            /*var mehd = new MovieExtendsHeaderBox(); //may be omited in live streams
-            mehd.fragment_duration = 2000; 
-            mehd.version = 1;
-            mehd.flags = 0;// default value flags = 0
-            
-            //add mehd box in mvex box
-            mvex.boxes.push(mehd);*/
+            // Create Movie Extends Header Box (mehd)
+            // The Movie Extends Header is optional, and provides the overall duration, including fragments, of a fragmented
+            // movie. If this box is not present, the overall duration must be computed by examining each fragment.
+            if (media.duration !== Number.POSITIVE_INFINITY)
+            {
+                var mehd = new MovieExtendsHeaderBox();
+                mehd.version = 1;
+                mehd.flags = 0;
+                mehd.fragment_duration = Math.round(media.duration * media.timescale); // declares length of the presentation of the whole movie including fragments
                 
-            // create Track Extend Box (trex), exactly one for each track in the movie box
+                //add mehd box in mvex box
+                mvex.boxes.push(mehd);
+            }
+                
+            // Create Track Extend Box (trex), exactly one for each track in the movie box
             // This sets up default values used by the movie fragments. By setting defaults in this way, space and
             // complexity can be saved in each Track Fragment Box.
             var trex = new TrackExtendsBox();
-            trex.track_ID = 1; //identifies the track; this shall be the track ID of a track in the Movie Box
-            trex.default_sample_description_index = 1;  //? 
-            trex.default_sample_duration = 562491;
-            trex.default_sample_flags = 65536;          //?
-            trex.default_sample_size = 0;           //?
+            trex.track_ID = media.trackId;              // identifies the track; this shall be the track ID of a track in the Movie Box
+            trex.default_sample_description_index = 1;  // Set default value 
+            trex.default_sample_duration = 0;           // ''
+            trex.default_sample_flags = 0;              // ''
+            trex.default_sample_size = 0;               // ''
             
             // add trex box in mvex box
             mvex.boxes.push(trex);
