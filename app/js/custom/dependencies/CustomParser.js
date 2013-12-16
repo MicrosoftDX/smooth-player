@@ -18,13 +18,7 @@ Custom.dependencies.CustomParser = function () {
             return Q.when(null);
         }
 
-        var callBackAddManifest = function (manifest) {
-            this.metricsModel.setManifest("video",manifest);
-            return Q.when(manifest);
-        };
-
-        // use bind to give the right context to callbackAddManifest
-        return parser.parse(data,baseUrl).then(callBackAddManifest.bind(this));
+        return parser.parse(data,baseUrl);
     };
 
     return {
