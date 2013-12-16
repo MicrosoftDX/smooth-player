@@ -16,8 +16,12 @@ Custom.di.CustomContext = function () {
 
             // creation of a context manager to plug some specific parts of the code
             this.system.mapSingleton('contextManager', Custom.modules.ContextManager);
+            
+            // here replace dash or streaming modules by ours
             this.system.mapClass('fragmentLoader', Custom.dependencies.CustomFragmentLoader);
-            // plug message handler. When th emessage is notify, the contextManager is called
+            this.system.mapSingleton('metricsExt', Custom.dependencies.CustomMetricsExtensions);
+
+            // plug message handler. When the message is notify, the contextManager is called
             this.system.mapHandler('setContext', 'contextManager', 'setContext');
         }
     };

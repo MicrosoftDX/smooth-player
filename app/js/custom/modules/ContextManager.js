@@ -11,12 +11,10 @@ Custom.modules.ContextManager = function (){
                 // here we map specific Class
                 this.system.mapClass('mp4Processor', MediaPlayer.dependencies.Mp4Processor);
                 this.system.mapClass('indexHandler', Mss.dependencies.MssHandler);
-                // this.system.mapValue('metricsExt', this.system.getObject('mssMetricsExt'));
                 this.system.mapClass('fragmentController', Mss.dependencies.MssFragmentController);
 
             } else {
                 this.system.mapClass('fragmentLoader', MediaPlayer.dependencies.FragmentLoader);
-                // this.system.mapValue('metricsExt', this.system.getObject('dashMetricsExt'));
                 this.system.mapClass('fragmentController', MediaPlayer.dependencies.FragmentController);
                 this.system.mapClass('indexHandler', Dash.dependencies.DashHandler);
             }
