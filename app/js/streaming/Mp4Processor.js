@@ -385,7 +385,6 @@ MediaPlayer.dependencies.Mp4Processor = function () {
         },
 
         createVisualSampleEntry = function (media) {
-            //debugger;
             var codec = media.codecs.substring(0, media.codecs.indexOf('.'));
 
             switch (codec)
@@ -477,7 +476,10 @@ MediaPlayer.dependencies.Mp4Processor = function () {
             mp4a.samplerate = media.samplingRate << 16; // sampling rate, as fixed-point 16.16 values
 
             var esdBox = new ESDBox();
-            esdBox.ES = createMPEG4AACESDescriptor(media);
+            var ES_Descriptor = createMPEG4AACESDescriptor(media);
+            esdBox.ES_tag = ES_Descriptor[0];
+            esdBox.ES_length = ES_Descriptor[1];
+            esdBox.ES_data = ES_Descriptor.subarray(2, ES_Descriptor.length);
 
             // MP4AudioSampleEntry fields
             mp4a.boxes.push(esdBox);
@@ -486,7 +488,6 @@ MediaPlayer.dependencies.Mp4Processor = function () {
         },
         
         createAudioSampleEntry = function (media) {
-            //debugger;
             var codec = media.codecs.substring(0, media.codecs.indexOf('.'));
 
             switch (codec)
@@ -496,7 +497,9 @@ MediaPlayer.dependencies.Mp4Processor = function () {
                 break;
             default:
                 break;
-            }   
+            }
+
+            return null;   
         },
         
         createSampleDescriptionBox = function (media) {
