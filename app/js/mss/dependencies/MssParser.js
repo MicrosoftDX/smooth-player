@@ -290,13 +290,33 @@ Mss.dependencies.MssParser = function () {
         representation.properties = common;
         //here node is QualityLevel
         representation.transformFunc = function(node) {
-            // extraction of the codec find the first 00000001x7
-            var nalHeader = /00000001[0-9]7/.exec(node.CodecPrivateData);
-            // find the 6 characters after the first nalHeader (if it exists)
-            var avcoti = nalHeader && nalHeader[0] ? (node.CodecPrivateData.substr(node.CodecPrivateData.indexOf(nalHeader[0])+10, 6)) : undefined;
-            // if we don't find nalHeader, we are in audio Representation case...
-            var codecs = avcoti? "avc1."+avcoti : 'mp4a.40.5';
-            //TODO get the audio codec for an audio representation
+
+            var mimeType = "";
+            var avcoti = "";
+
+            if (node.FourCC === "H264")
+            {
+                mimeType = "avc1";
+                // Extract from the CodecPrivateData field the hexadecimal representation of the following
+                // three bytes in the sequence parameter set NAL unit.
+                // => Find the SPS nal header
+                var nalHeader = /00000001[0-9]7/.exec(node.CodecPrivateData);
+                // => Find the 6 characters after the SPS nalHeader (if it exists)
+                avcoti = nalHeader && nalHeader[0] ? (node.CodecPrivateData.substr(node.CodecPrivateData.indexOf(nalHeader[0])+10, 6)) : undefined;
+
+            }
+            else
+            if (node.FourCC === "AACL")
+            {
+                debugger;
+                mimeType = "mp4a";
+                avcoti = "40";
+                // Extract objectType from the CodecPrivateData field
+                var objectType = (parseInt(node.CodecPrivateData.toString().substr(0, 2), 16) & 0xF8) >> 3;
+                avcoti += "." + objectType;
+            }
+
+            var codecs = mimeType + "." + avcoti;
 
             return {
                 id: node.Index,
