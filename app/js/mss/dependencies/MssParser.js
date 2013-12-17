@@ -294,7 +294,7 @@ Mss.dependencies.MssParser = function () {
             var mimeType = "";
             var avcoti = "";
 
-            if (node.FourCC === "H264")
+            if (node.FourCC === "H264" || node.FourCC === "AVC1")
             {
                 mimeType = "avc1";
                 // Extract from the CodecPrivateData field the hexadecimal representation of the following
