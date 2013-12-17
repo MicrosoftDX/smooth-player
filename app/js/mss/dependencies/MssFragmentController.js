@@ -15,44 +15,81 @@
 Mss.dependencies.MssFragmentController = function () {
     "use strict";
     console.debug("Mss.dependencies.MssFragmentController");
-    var convertFragment = function (data, request) {
+    var getIndex = function (adaptation, manifest) {
 
-        var fragment = new File();
-        var processor = new DeserializationBoxFieldsProcessor(fragment, data, 0, data.length);
-        fragment._processFields(processor);
-        console.log(fragment);
+            var periods = manifest.Period_asArray,
+                i, j;
 
-        var moof = getBoxByType(fragment, "moof");
-        var traf = getBoxByType(moof, "traf");
-        //var tfxd = getBoxByType(traf, "tfxd");
+            for (i = 0; i < periods.length; i += 1) {
+                var adaptations = periods[i].AdaptationSet_asArray;
+                for (j = 0; j < adaptations.length; j += 1) {
+                    if (adaptations[j] === adaptation) {
+                        return j;
+                    }
+                }
+            }
 
-        // Remove tfxd anf tfrf boxes
-        removeBoxByType(traf, "tfxd");
-        removeBoxByType(traf, "tfrf");
+            return -1;
+        },
 
-        // Create and add tfdt box
-        var tfdt = getBoxByType(traf, "tfdt");
-        if (tfdt === null)
-        {
-            tfdt = new TrackFragmentBaseMediaDecodeTimeBox();
-            tfdt.version = 1;
-            tfdt.baseMediaDecodeTime = Math.floor(request.startTime * request.timescale);
-            traf.boxes.push(tfdt);
-        }
+        convertFragment = function (data, request, adaptation) {
 
-        var lp = new LengthCounterBoxFieldsProcessor(fragment);
-        fragment._processFields(lp);
-        var new_data = new Uint8Array(lp.res);
-        var sp = new SerializationBoxFieldsProcessor(fragment, new_data, 0);
-        fragment._processFields(sp);
+            // Get track id corresponding to adaptation set
+            var manifest = rslt.manifestModel.getValue();
+            var trackId = getIndex(adaptation, manifest) + 1; // +1 since track_id shall start from '1'
 
-        return new_data;
-    };
+            // Create new fragment
+            var fragment = new File();
+            var processor = new DeserializationBoxFieldsProcessor(fragment, data, 0, data.length);
+            fragment._processFields(processor);
+            //console.log(fragment);
+
+            // Get references en boxes
+            var moof = getBoxByType(fragment, "moof");
+            var traf = getBoxByType(moof, "traf");
+            var trun = getBoxByType(traf, "trun");
+            var tfhd = getBoxByType(traf, "tfhd");
+
+            // Update tfhd.track_ID field
+            tfhd.track_ID = trackId;
+
+            // Remove tfxd anf tfrf boxes
+            removeBoxByType(traf, "tfxd");
+            removeBoxByType(traf, "tfrf");
+
+            // Create and add tfdt box
+            var tfdt = getBoxByType(traf, "tfdt");
+            if (tfdt === null)
+            {
+                tfdt = new TrackFragmentBaseMediaDecodeTimeBox();
+                tfdt.version = 1;
+                tfdt.baseMediaDecodeTime = Math.floor(request.startTime * request.timescale);
+                traf.boxes.push(tfdt);
+            }
+
+            // determine new size of the converted fragment
+            // and allocate new data buffer
+            var lp = new LengthCounterBoxFieldsProcessor(fragment);
+            fragment._processFields(lp);
+            var new_data = new Uint8Array(lp.res);
+
+            // Update trun.dataOffset field
+            var diff = lp.res - data.length;
+            trun.data_offset += diff;
+
+            // Serialize converted fragment into output data buffer
+            var sp = new SerializationBoxFieldsProcessor(fragment, new_data, 0);
+            fragment._processFields(sp);
+
+            return new_data;
+        };
     
     var rslt = Custom.utils.copyMethods(MediaPlayer.dependencies.FragmentController);
 
+    rslt.manifestModel = undefined;
     rslt.mp4Processor = undefined;
-    rslt.process = function (bytes, request) {
+
+    rslt.process = function (bytes, request, adaptation) {
         var result = null;
 
         if (bytes !== null && bytes !== undefined && bytes.byteLength > 0) {
@@ -61,7 +98,8 @@ Mss.dependencies.MssFragmentController = function () {
 
         if (request && (request.type === "Media Segment"))
         {
-            result = convertFragment(result, request);
+            result = convertFragment(result, request, adaptation);
+            //console.saveBinArray(result, request.streamType + "_" + request.quality + "_" + request.index + ".mp4");
         }
 
         return Q.when(result);

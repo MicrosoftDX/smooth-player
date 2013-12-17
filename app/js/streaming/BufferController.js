@@ -226,7 +226,7 @@ MediaPlayer.dependencies.BufferController = function () {
             }
         
             //MBR : Modif orange pour ajouter la request afin de récupérer startTime et timescale
-			self.fragmentController.process(response.data,request).then(
+			self.fragmentController.process(response.data, request, self.getData()).then(
 				function (data) {
 					if (data !== null && deferredInitAppend !== null) {
 

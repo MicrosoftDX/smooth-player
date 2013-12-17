@@ -52,7 +52,6 @@ Custom.rules.CustomDownloadRatioRule = function () {
                 maxBitrateIdx = this.metricsExt.getMaxBitrateIdx(),
                 DOWNLOAD_RATIO_SAFETY_FACTOR = 0.75;
 
-            console.debug("current : "+current);
             self.debug.log("[DownloadRatioRules]", " Checking download ratio rule...");
             if (!metrics) {
                 self.debug.log("[DownloadRatioRules]", " No metrics, bailing.");

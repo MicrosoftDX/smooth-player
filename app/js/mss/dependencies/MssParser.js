@@ -1,6 +1,8 @@
 Mss.dependencies.MssParser = function () {
     "use strict";
 
+    var TIME_SCALE_100_NANOSECOND_UNIT = 10000000.0;
+
     var numericRegex = /^[-+]?[0-9]+[.]?[0-9]*([eE][-+]?[0-9]+)?$/;
 
     var matchers = [
@@ -220,7 +222,7 @@ Mss.dependencies.MssParser = function () {
                 profiles: "urn:mpeg:dash:profile:isoff-live:2011",
                 type: node.IsLive ? "dynamic" : "static",
                 timeShiftBufferDepth: node.DVRWindowLength,
-                mediaPresentationDuration : node.Duration,
+                mediaPresentationDuration : parseFloat(node.Duration) / TIME_SCALE_100_NANOSECOND_UNIT,
                 BaseURL: node.BaseURL,
                 Period: node,
                 Period_asArray: [node],
@@ -239,7 +241,7 @@ Mss.dependencies.MssParser = function () {
         // here node is SmoothStreamingMedia node
         period.transformFunc = function(node) {
             return {
-                duration: node.Duration,
+                duration: parseFloat(node.Duration) / TIME_SCALE_100_NANOSECOND_UNIT,
                 BaseURL: node.BaseURL,
                 AdaptationSet: node.StreamIndex,
                 AdaptationSet_asArray: node.StreamIndex_asArray
@@ -342,7 +344,7 @@ Mss.dependencies.MssParser = function () {
             mediaUrl = mediaUrl.replace('{start time}','$Time$');
             return {
                 media: mediaUrl,
-                duration: node.Duration,
+                //duration: node.Duration,
                 timescale: "10000000",
                 SegmentTimeline: node
             };
@@ -363,13 +365,16 @@ Mss.dependencies.MssParser = function () {
                 var groupedSegments = [];
                 var segments = node.c_asArray;
 
+                segments[0].t = segments[0].t || 0;
+
                 groupedSegments.push({
                     d : segments[0].d,
                     r: 0,
-                    t: segments[0].t || 0
+                    t: segments[0].t
                 });
 
                 for (var i=1; i<segments.length; i++) {
+                    segments[i].t = segments[i].t || (segments[i-1].t + segments[i-1].d);
                     if (segments[i].d === segments[i-1].d) {
                         // incrementation of the 'r' attributes
                         ++groupedSegments[groupedSegments.length -1].r;
@@ -377,7 +382,7 @@ Mss.dependencies.MssParser = function () {
                         groupedSegments.push({
                             d : segments[i].d,
                             r: 0,
-                            t: segments[i].t || 0
+                            t: segments[i].t
                         });
                     }
                 }
@@ -462,6 +467,7 @@ Mss.dependencies.MssParser = function () {
         manifest = iron.run(manifest);
 
         this.debug.log("[MssParser]", "Parsing complete.");
+        console.log(manifest);
         return Q.when(manifest);
     };
 
