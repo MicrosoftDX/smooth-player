@@ -308,7 +308,6 @@ Mss.dependencies.MssParser = function () {
             else
             if (node.FourCC === "AACL")
             {
-                debugger;
                 mimeType = "mp4a";
                 avcoti = "40";
                 // Extract objectType from the CodecPrivateData field
