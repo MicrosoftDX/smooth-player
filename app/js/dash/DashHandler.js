@@ -339,7 +339,11 @@ Dash.dependencies.DashHandler = function () {
                     } else if (idx === -1 && (time - Dash.dependencies.DashHandler.EPSILON) > (ft + fd)) {
                         // time is past the end
                         idx  = i + 1;
+                    } else {
+                        // time is prior to begin
+                        idx = 0;
                     }
+
                 }
             }
 
