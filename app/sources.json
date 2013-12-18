@@ -1,6 +1,16 @@
 {
     "items": [
         {
+            "name": "Arte (Smooth - VOD)",
+            "url": "http://161.105.176.12/VOD/Arte/C4-51_S1.ism/manifest",
+            "browsers": "cdsbi"
+        },
+        {
+            "name": "VIF Steph Richard (Smooth - VOD)",
+            "url": "http://161.105.176.12/VIF/srichard2.ism/Manifest",
+            "browsers": "cdsbi"
+        },
+        {
             "name": "SuperSpeedway (Smooth - VOD)",
             "url": "http://playready.directtaps.net/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest",
             "browsers": "cdsbi"
