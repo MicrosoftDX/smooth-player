@@ -17,6 +17,12 @@ Mss.dependencies.MssParser = function () {
         }
     ];
 
+    var mimeTypeMap = {
+        "video" : "video/mp4",
+        "audio" : "audio/mp4",
+        "text"  : "text/mp4"
+    };
+
     var getCommonValuesMap = function () {
         var adaptationSet,
             representation,
@@ -262,7 +268,7 @@ Mss.dependencies.MssParser = function () {
                 id: node.Name,
                 lang: node.Language,
                 contenType: node.Type,
-                mimeType: node.Type === "video" ? "video/mp4" : "audio/mp4",
+                mimeType: mimeTypeMap[node.Type],
                 maxWidth: node.MaxWidth,
                 maxHeight: node.MaxHeight,
                 BaseURL: node.BaseURL,
