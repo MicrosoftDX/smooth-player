@@ -46,6 +46,7 @@ Mss.dependencies.MssFragmentController = function () {
 
             // Get references en boxes
             var moof = getBoxByType(fragment, "moof");
+            var mdat = getBoxByType(fragment, "mdat");
             var traf = getBoxByType(moof, "traf");
             var trun = getBoxByType(traf, "trun");
             var tfhd = getBoxByType(traf, "tfhd");
@@ -67,15 +68,17 @@ Mss.dependencies.MssFragmentController = function () {
                 traf.boxes.push(tfdt);
             }
 
-            // determine new size of the converted fragment
+            // Determine new size of the converted fragment
             // and allocate new data buffer
             var lp = new LengthCounterBoxFieldsProcessor(fragment);
             fragment._processFields(lp);
             var new_data = new Uint8Array(lp.res);
 
             // Update trun.dataOffset field
-            var diff = lp.res - data.length;
-            trun.data_offset += diff;
+            // We also modified the tfhd.flags in order to specify that base-dataoffset for the track fragment
+            // is the position of the first byte of the enclosing Movie Fragment Box
+            tfhd.flags |= 0x020000;
+            trun.data_offset = lp.res - mdat.size + 8; // 8 = 'size' + 'type' mdat fields length
 
             // Serialize converted fragment into output data buffer
             var sp = new SerializationBoxFieldsProcessor(fragment, new_data, 0);
