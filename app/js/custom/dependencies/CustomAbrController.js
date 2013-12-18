@@ -36,11 +36,11 @@ Custom.dependencies.CustomAbrController = function () {
         );
 
         return deferred.promise;
-    }
+    };
 
     return rslt;
 };
 
-Custom.dependencies.CustomFragmentLoader.prototype = {
-    constructor: Custom.dependencies.CustomFragmentLoader
+Custom.dependencies.CustomAbrController.prototype = {
+    constructor: Custom.dependencies.CustomAbrController
 };
