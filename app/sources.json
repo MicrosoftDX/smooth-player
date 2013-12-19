@@ -1,6 +1,11 @@
 {
     "items": [
         {
+            "name": "TF1 Live DASH",
+            "url": "http://apache1.rd.francetelecom.com/DASH/ch1/manifest.mpd",
+            "browsers": "cdsbi"
+        },
+        {
             "name": "Arte (Smooth - VOD)",
             "url": "http://161.105.176.12/VOD/Arte/C4-51_S1.ism/manifest",
             "browsers": "cdsbi"

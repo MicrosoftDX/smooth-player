@@ -876,7 +876,7 @@ MediaPlayer.dependencies.BufferController = function () {
             self.setFragmentController(fragmentController);
 
             self.indexHandler.setIsLive(isLive);
-            self.manifestExt.getDurationForPeriod(periodIndex, self.manifestModel.getValue()).then(
+            self.manifestExt.getDurationForPeriod(periodIndex, self.manifestModel.getValue(),isLive).then(
                 function (durationValue) {
                     duration = durationValue;
                     self.indexHandler.setDuration(durationValue);
