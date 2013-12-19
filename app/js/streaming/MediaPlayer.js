@@ -209,6 +209,11 @@ MediaPlayer = function (aContext) {
             this.abrController.setAutoSwitchBitrate(value);
         },
 
+        // ORANGE: add function to set manually representation boundaries for a media
+        setQualityBoundariesFor: function (type, min, max) {
+            this.metricsModel.addRepresentationBoundaries(type, new Date(), min, max);
+        },
+
         attachView: function (view) {
             if (!initialized) {
                 throw "MediaPlayer not initialized!";

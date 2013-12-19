@@ -11,21 +11,14 @@
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-MediaPlayer.models.MetricsList = function () {
+MediaPlayer.vo.metrics.RepresentationBoundaries = function () {
     "use strict";
 
-    return {
-        TcpList: [],
-        HttpList: [],
-        RepSwitchList: [],
-        // ORANGE: add representation boundaries in metrcis
-        RepBoundariesList: [],
-        BufferLevel: [],
-        PlayList: [],
-        DroppedFrames: []
-    };
+    this.t = null;      // Real-Time | Time of the event.
+    this.min = null;    // value of the minimum representation index
+    this.max = null;    // value of the maximum representation index
 };
 
-MediaPlayer.models.MetricsList.prototype = {
-    constructor: MediaPlayer.models.MetricsList
+MediaPlayer.vo.metrics.RepresentationBoundaries.prototype = {
+    constructor: MediaPlayer.vo.metrics.RepresentationBoundaries
 };

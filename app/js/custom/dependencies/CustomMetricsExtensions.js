@@ -1,62 +1,66 @@
 Custom.dependencies.CustomMetricsExtensions = function () {
     "use strict";
 
-    var minBitrateIdx= null;
-    var maxBitrateIdx= null;
-
     var findRepresentionInPeriodArray = function (periodArray, representationId) {
-            var period,
-                adaptationSet,
-                adaptationSetArray,
-                representation,
-                representationArray,
-                periodArrayIndex,
-                adaptationSetArrayIndex,
-                representationArrayIndex;
+        var period,
+            adaptationSet,
+            adaptationSetArray,
+            representation,
+            representationArray,
+            periodArrayIndex,
+            adaptationSetArrayIndex,
+            representationArrayIndex;
 
-            for (periodArrayIndex = 0; periodArrayIndex < periodArray.length; periodArrayIndex = periodArrayIndex + 1) {
-                period = periodArray[periodArrayIndex];
-                adaptationSetArray = period.AdaptationSet_asArray;
-                for (adaptationSetArrayIndex = 0; adaptationSetArrayIndex < adaptationSetArray.length; adaptationSetArrayIndex = adaptationSetArrayIndex + 1) {
-                    adaptationSet = adaptationSetArray[adaptationSetArrayIndex];
-                    representationArray = adaptationSet.Representation_asArray;
-                    for (representationArrayIndex = 0; representationArrayIndex < representationArray.length; representationArrayIndex = representationArrayIndex + 1) {
-                        representation = representationArray[representationArrayIndex];
-                        if (representationId === representation.id) {
-                            return representation;
-                        }
+        for (periodArrayIndex = 0; periodArrayIndex < periodArray.length; periodArrayIndex = periodArrayIndex + 1) {
+            period = periodArray[periodArrayIndex];
+            adaptationSetArray = period.AdaptationSet_asArray;
+            for (adaptationSetArrayIndex = 0; adaptationSetArrayIndex < adaptationSetArray.length; adaptationSetArrayIndex = adaptationSetArrayIndex + 1) {
+                adaptationSet = adaptationSetArray[adaptationSetArrayIndex];
+                representationArray = adaptationSet.Representation_asArray;
+                for (representationArrayIndex = 0; representationArrayIndex < representationArray.length; representationArrayIndex = representationArrayIndex + 1) {
+                    representation = representationArray[representationArrayIndex];
+                    if (representationId === representation.id) {
+                        return representation;
                     }
                 }
             }
+        }
 
+        return null;
+    };
+        
+    var rslt = Custom.utils.copyMethods(Dash.dependencies.DashMetricsExtensions);
+
+    rslt.getCodecsForRepresentation = function (representationId) {
+        var self = this,
+            manifest = self.manifestModel.getValue(),
+            representation,
+            periodArray = manifest.Period_asArray;
+
+        representation = findRepresentionInPeriodArray.call(self, periodArray, representationId);
+
+        if (representation === null) {
             return null;
-        };
+        }
 
-
-
-    var returnValue = Custom.utils.copyMethods(Dash.dependencies.DashMetricsExtensions);
-
-    returnValue.setMinBitrateIdx = function(minBR) {
-        minBitrateIdx = minBR;
+        return representation.codecs;
     };
 
-    returnValue.getMinBitrateIdx = function() {
-        return minBitrateIdx;
+    rslt.getCurrentRepresentationBoundaries = function (metrics) {
+        if (metrics === null) {
+            return null;
+        }
+
+        var repBoundaries = metrics.RepBoundariesList;
+
+        if (repBoundaries === null || repBoundaries.length <= 0) {
+            return null;
+        }
+
+        return repBoundaries[repBoundaries.length - 1];
     };
 
-    returnValue.setMaxBitrateIdx = function(maxBR) {
-        maxBitrateIdx = maxBR;
-    };
-
-    returnValue.getMaxBitrateIdx = function() {
-        return maxBitrateIdx;
-    };
-    
-
-    returnValue.getRepresentationForId = function(repId) {
-        return findRepresentionInPeriodArray(this.manifestModel.getValue().Period_asArray,repId);
-    };
-    return returnValue;
+    return rslt;
 };
 
 Custom.dependencies.CustomMetricsExtensions.prototype = {

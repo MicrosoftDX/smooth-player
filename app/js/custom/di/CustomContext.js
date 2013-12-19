@@ -19,6 +19,7 @@ Custom.di.CustomContext = function () {
             
             // here replace dash or streaming modules by ours
             this.system.mapClass('fragmentLoader', Custom.dependencies.CustomFragmentLoader);
+            this.system.mapSingleton('metricsModel', Custom.models.CustomMetricsModel);
             this.system.mapSingleton('metricsExt', Custom.dependencies.CustomMetricsExtensions);
             this.system.mapSingleton('abrController', Custom.dependencies.CustomAbrController);
 

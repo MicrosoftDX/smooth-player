@@ -128,9 +128,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
         values:[0,5],
         range: true,
         slide: function(evt,ui) {
-            console.log(ui);
-            player.getMetricsExt().setMinBitrateIdx(ui.values[0]);
-            player.getMetricsExt().setMaxBitrateIdx(ui.values[1]);
+            player.setQualityBoundariesFor("video", ui.values[0], ui.values[1]);
         }
     });
 
@@ -165,7 +163,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
             lastFragmentDuration,
             lastFragmentDownloadTime,
             droppedFramesValue = 0,
-            currentCodecs;
+            codecsValue;
 
         if (metrics && metricsExt) {
             repSwitch = metricsExt.getCurrentRepresentationSwitch(metrics);
@@ -175,11 +173,10 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
 
             if (repSwitch !== null) {
                 bitrateIndexValue = metricsExt.getIndexForRepresentation(repSwitch.to);
-                var rep = metricsExt.getRepresentationForId(repSwitch.to);
-                currentCodecs = rep && rep.codecs; //in case of rep is null
                 bandwidthValue = metricsExt.getBandwidthForRepresentation(repSwitch.to);
                 bandwidthValue = bandwidthValue / 1000;
                 bandwidthValue = Math.round(bandwidthValue);
+                codecsValue = metricsExt.getCodecsForRepresentation(repSwitch.to);
             }
 
             numBitratesValue = metricsExt.getMaxIndexForBufferType(type);
@@ -226,7 +223,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
                 numBitratesValue: numBitratesValue,
                 bufferLengthValue: bufferLengthValue,
                 droppedFramesValue: droppedFramesValue,
-                currentCodecs: currentCodecs
+                codecsValue: codecsValue
             };
         }
         else {
@@ -247,7 +244,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
             $scope.videoMaxIndex = metrics.numBitratesValue;
             $scope.videoBufferLength = metrics.bufferLengthValue;
             $scope.videoDroppedFrames = metrics.droppedFramesValue;
-            $scope.currentCodecs = metrics.currentCodecs;
+            $scope.videoCodecs = metrics.codecsValue;
 
             point = [parseFloat(video.currentTime), Math.round(parseFloat(metrics.bufferLengthValue))];
             videoSeries.push(point);
@@ -265,6 +262,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
             $scope.audioMaxIndex = metrics.numBitratesValue;
             $scope.audioBufferLength = metrics.bufferLengthValue;
             $scope.audioDroppedFrames = metrics.droppedFramesValue;
+            $scope.audioCodecs = metrics.codecsValue;
 
             point = [parseFloat(video.currentTime), Math.round(parseFloat(metrics.bufferLengthValue))];
             audioSeries.push(point);
