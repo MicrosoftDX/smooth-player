@@ -28,8 +28,40 @@ Custom.dependencies.CustomMetricsExtensions = function () {
 
         return null;
     };
-        
+
     var rslt = Custom.utils.copyMethods(Dash.dependencies.DashMetricsExtensions);
+
+    rslt.getVideoWidthForRepresentation = function (representationId) {
+        var self = this,
+            manifest = self.manifestModel.getValue(),
+            representation,
+            periodArray = manifest.Period_asArray;
+
+        representation = findRepresentionInPeriodArray.call(self, periodArray, representationId);
+
+        if (representation === null) {
+            return null;
+        }
+
+        return representation.width;
+    };
+
+    rslt.getVideoHeightForRepresentation = function (representationId) {
+        var self = this,
+            manifest = self.manifestModel.getValue(),
+            representation,
+            periodArray = manifest.Period_asArray;
+
+        representation = findRepresentionInPeriodArray.call(self, periodArray, representationId);
+
+        if (representation === null) {
+            return null;
+        }
+
+        return representation.height;
+    };
+
+
 
     rslt.getCodecsForRepresentation = function (representationId) {
         var self = this,

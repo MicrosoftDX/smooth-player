@@ -242,7 +242,8 @@
                     <div class="panel-body panel-stats">
                         <div id="bitrateSlider"></div>
                         <p class="text-warning">{{videoBitrate}} kbps</p>
-                        <p class="text-primary">codecs : {{videoCodecs}}</p>
+                        <p class="text-warning">{{videoWidth}}x{{videoHeight}}</p>
+                        <p class="text-primary">Codecs : {{videoCodecs}}</p>
                         <p class="text-primary">Rep Index: <span class="text-success">{{videoIndex}}</span><span class="text-warning">{{videoPendingIndex}}</span>/<span class="text-success">{{videoMaxIndex}}</span></p>
                         <p class="text-primary">Buffer Length: <span class="text-success">{{videoBufferLength}}</span></p>
                     </div>
@@ -267,7 +268,7 @@
                     </div>
                     <div class="panel-body panel-stats">
                         <p class="text-warning">{{audioBitrate}} kbps</p>
-                        <p class="text-primary">codecs : {{audioCodecs}}</p>
+                        <p class="text-primary">Codecs : {{audioCodecs}}</p>
                         <p class="text-primary">Rep Index: <span class="text-success">{{audioIndex}}</span><span class="text-warning">{{audioPendingIndex}}</span>/<span class="text-success">{{audioMaxIndex}}</span></p>
                         <p class="text-primary">Buffer Length: <span class="text-success">{{audioBufferLength}}</span></p>
                     </div>

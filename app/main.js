@@ -163,6 +163,8 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
             lastFragmentDuration,
             lastFragmentDownloadTime,
             droppedFramesValue = 0,
+            videoWidthValue = 0,
+            videoHeightValue = 0,
             codecsValue;
 
         if (metrics && metricsExt) {
@@ -176,6 +178,8 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
                 bandwidthValue = metricsExt.getBandwidthForRepresentation(repSwitch.to);
                 bandwidthValue = bandwidthValue / 1000;
                 bandwidthValue = Math.round(bandwidthValue);
+                videoWidthValue = metricsExt.getVideoWidthForRepresentation(repSwitch.to);
+                videoHeightValue = metricsExt.getVideoHeightForRepresentation(repSwitch.to);
                 codecsValue = metricsExt.getCodecsForRepresentation(repSwitch.to);
             }
 
@@ -223,6 +227,8 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
                 numBitratesValue: numBitratesValue,
                 bufferLengthValue: bufferLengthValue,
                 droppedFramesValue: droppedFramesValue,
+                videoWidthValue: videoWidthValue,
+                videoHeightValue: videoHeightValue,
                 codecsValue: codecsValue
             };
         }
@@ -245,6 +251,8 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
             $scope.videoBufferLength = metrics.bufferLengthValue;
             $scope.videoDroppedFrames = metrics.droppedFramesValue;
             $scope.videoCodecs = metrics.codecsValue;
+            $scope.videoWidth = metrics.videoWidthValue;
+            $scope.videoHeight = metrics.videoHeightValue;
 
             point = [parseFloat(video.currentTime), Math.round(parseFloat(metrics.bufferLengthValue))];
             videoSeries.push(point);
