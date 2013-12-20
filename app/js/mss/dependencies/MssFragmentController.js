@@ -32,6 +32,40 @@ Mss.dependencies.MssFragmentController = function () {
             return -1;
         },
 
+        processTfrf = function(tfrf, adaptation) {
+
+            // Get last timestamp of current timeline
+            var segments = adaptation.SegmentTemplate.SegmentTimeline.S;
+
+            // Go through entries
+            var entries = tfrf.entry;
+            for (var i = 0; i < entries.length; i++)
+            {
+                var fragment_absolute_time = entries[i].fragment_absolute_time;
+                var fragment_duration = entries[i].fragment_duration;
+
+                // Get timestamp of the last segment
+                var lastSegment = segments[segments.length-1];
+                var r = (lastSegment.r === undefined)?0:lastSegment.r;
+                var t = lastSegment.t + (lastSegment.d * r);
+
+                if (fragment_absolute_time > t)
+                {
+                    if (fragment_duration === lastSegment.d)
+                    {
+                        lastSegment.r = r + 1;
+                    }
+                    else
+                    {
+                        segments.push({
+                            't': fragment_absolute_time,
+                            'd': fragment_duration
+                        });
+                    }
+                }
+            }
+        },
+
         convertFragment = function (data, request, adaptation) {
 
             // Get track id corresponding to adaptation set
@@ -54,9 +88,9 @@ Mss.dependencies.MssFragmentController = function () {
             // Update tfhd.track_ID field
             tfhd.track_ID = trackId;
 
-            // Remove tfxd anf tfrf boxes
+            // Process tfxd boxes
+            // This box provide absolute timestamp but we take the segment start time for tfdt
             removeBoxByType(traf, "tfxd");
-            removeBoxByType(traf, "tfrf");
 
             // Create and add tfdt box
             var tfdt = getBoxByType(traf, "tfdt");
@@ -66,6 +100,14 @@ Mss.dependencies.MssFragmentController = function () {
                 tfdt.version = 1;
                 tfdt.baseMediaDecodeTime = Math.floor(request.startTime * request.timescale);
                 traf.boxes.push(tfdt);
+            }
+
+            // Process tfrf box
+            var tfrf = getBoxByType(traf, "tfrf");
+            if (tfrf !== null)
+            {
+                processTfrf(tfrf, adaptation);
+                removeBoxByType(traf, "tfrf");                
             }
 
             // Determine new size of the converted fragment
