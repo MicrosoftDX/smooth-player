@@ -1,6 +1,16 @@
 {
     "items": [
         {
+            "name": "anevia Smooth - Red Bull",
+            "url": "http://demo.anevia.com:3128/vod/disk1/content1/ss-ss/Manifest",
+            "browsers": "cdsbi"
+        },
+        {
+            "name": "anevia Smooth - Sintel",
+            "url": "http://demo.anevia.com:3128/vod/disk1/content2/ss-ss/Manifest",
+            "browsers": "cdsbi"
+        },
+        {
             "name": "TF1 Live DASH",
             "url": "http://apache1.rd.francetelecom.com/DASH/ch1/manifest.mpd",
             "browsers": "cdsbi"
