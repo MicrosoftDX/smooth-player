@@ -283,6 +283,12 @@ Mss.dependencies.MssParser = function () {
                 adaptTransformed.Channels = node.QualityLevel && node.QualityLevel.Channels; //used by AudioChannelConfiguration
             }
 
+            // Add 'Id'  field on representations
+            for (var i = 0; i < adaptTransformed.Representation_asArray.length; i++) {
+                var rep = adaptTransformed.Representation_asArray[i];
+                rep.Id = adaptTransformed.id + "_" + rep.Index;
+            }
+
             return adaptTransformed;
         };
         period.children.push(adaptationSet);
@@ -324,7 +330,7 @@ Mss.dependencies.MssParser = function () {
             var codecs = mimeType + "." + avcoti;
 
             return {
-                id: node.Index,
+                id: node.Id,
                 bandwidth: node.Bitrate,
                 width: node.MaxWidth,
                 height: node.MaxHeight,

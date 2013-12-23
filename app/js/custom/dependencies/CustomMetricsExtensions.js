@@ -1,6 +1,13 @@
 Custom.dependencies.CustomMetricsExtensions = function () {
     "use strict";
 
+    var h264ProfileMap = {
+        "42": "Baseline",
+        "4D": "Main",
+        "58": "Extended",
+        "64": "High"
+    };
+
     var findRepresentionInPeriodArray = function (periodArray, representationId) {
         var period,
             adaptationSet,
@@ -107,6 +114,19 @@ Custom.dependencies.CustomMetricsExtensions = function () {
         }
 
         return representation.codecs;
+    };
+
+
+    rslt.getH264ProfileLevel = function (codecs) {
+
+        if (codecs.indexOf("avc1") < 0)
+        {
+            return "";
+        }
+        var profile = h264ProfileMap[codecs.substr(5, 2)];
+        var level = parseInt(codecs.substr(9, 2), 16) / 10.0;
+
+        return profile + "@" + level.toString();
     };
 
     rslt.getBitratesForType = function (type) {

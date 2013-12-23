@@ -159,6 +159,12 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
                 videoWidthValue = metricsExt.getVideoWidthForRepresentation(repSwitch.to);
                 videoHeightValue = metricsExt.getVideoHeightForRepresentation(repSwitch.to);
                 codecsValue = metricsExt.getCodecsForRepresentation(repSwitch.to);
+
+                var codecsInfo = metricsExt.getH264ProfileLevel(codecsValue);
+                if (codecsInfo !== "")
+                {
+                    codecsValue += " (" + codecsInfo + ")";
+                }
             }
 
             numBitratesValue = metricsExt.getMaxIndexForBufferType(type);
@@ -227,6 +233,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
         $scope.videoDroppedFrames = 0;
         $scope.videoWidth = 0;
         $scope.videoHeight = 0;
+        $scope.videoCodecs = "-";
 
         $scope.audioBitrate = 0;
         $scope.audioIndex = 0;
@@ -234,6 +241,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
         $scope.audioMaxIndex = 0;
         $scope.audioBufferLength = 0;
         $scope.audioDroppedFrames = 0;
+        $scope.audioCodecs = "-";
 
         $('#sliderBitrate').labeledslider({
             max: 0,
