@@ -224,7 +224,7 @@
                 <div class="panel">
                     <div class="panel-heading panel-top">
                         <span class="panel-title">Video</span>
-                        <div class="btn-group">
+                        <!--div class="btn-group">
                             <button
                                 type="button"
                                 class="btn btn-default"
@@ -237,13 +237,13 @@
                                 ng-click="abrUp('video')">
                                 <span class="glyphicon glyphicon-plus"></span>
                             </button>
-                        </div>
+                        </div-->
+                        <div class="btn-group"><div id="sliderBitrate"></div></div>
                     </div>
                     <div class="panel-body panel-stats">
-                        <div id="bitrateSlider"></div>
                         <p class="text-warning">{{videoBitrate}} kbps</p>
                         <p class="text-warning">{{videoWidth}}x{{videoHeight}}</p>
-                        <p class="text-primary">Codecs : {{videoCodecs}}</p>
+                        <p class="text-warning">{{videoCodecs}}</p>
                         <p class="text-primary">Rep Index: <span class="text-success">{{videoIndex}}</span><span class="text-warning">{{videoPendingIndex}}</span>/<span class="text-success">{{videoMaxIndex}}</span></p>
                         <p class="text-primary">Buffer Length: <span class="text-success">{{videoBufferLength}}</span></p>
                     </div>
@@ -251,7 +251,7 @@
                 <div class="panel">
                     <div class="panel-heading panel-top">
                         <span class="panel-title">Audio</span>
-                        <div class="btn-group">
+                        <!--div class="btn-group">
                             <button
                                 type="button"
                                 class="btn btn-default"
@@ -264,11 +264,11 @@
                                 ng-click="abrUp('audio')">
                                 <span class="glyphicon glyphicon-plus"></span>
                             </button>
-                        </div>
+                        </div-->
                     </div>
                     <div class="panel-body panel-stats">
                         <p class="text-warning">{{audioBitrate}} kbps</p>
-                        <p class="text-primary">Codecs : {{audioCodecs}}</p>
+                        <p class="text-warning">{{audioCodecs}}</p>
                         <p class="text-primary">Rep Index: <span class="text-success">{{audioIndex}}</span><span class="text-warning">{{audioPendingIndex}}</span>/<span class="text-success">{{audioMaxIndex}}</span></p>
                         <p class="text-primary">Buffer Length: <span class="text-success">{{audioBufferLength}}</span></p>
                     </div>

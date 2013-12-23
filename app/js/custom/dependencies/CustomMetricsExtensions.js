@@ -29,6 +29,37 @@ Custom.dependencies.CustomMetricsExtensions = function () {
         return null;
     };
 
+    var adaptationIsType = function (adaptation, bufferType) {
+        var found = false;
+
+        // TODO : HACK ATTACK
+        // Below we call getIsVideo and getIsAudio and then check the adaptation set for a 'type' property.
+        // getIsVideo and getIsAudio are adding this 'type' property and SHOULD NOT BE.
+        // This method expects getIsVideo and getIsAudio to be sync, but they are async (returns a promise).
+        // This is a bad workaround!
+        // The metrics extensions should have every method use promises.
+
+        if (bufferType === "video") {
+            //found = this.manifestExt.getIsVideo(adaptation);
+            this.manifestExt.getIsVideo(adaptation);
+            if (adaptation.type === "video") {
+                found = true;
+            }
+        }
+        else if (bufferType === "audio") {
+            //found = this.manifestExt.getIsAudio(adaptation); // TODO : Have to be sure it's the *active* audio track.
+            this.manifestExt.getIsAudio(adaptation);
+            if (adaptation.type === "audio") {
+                found = true;
+            }
+        }
+        else {
+            found = false;
+        }
+
+        return found;
+    };
+
     var rslt = Custom.utils.copyMethods(Dash.dependencies.DashMetricsExtensions);
 
     rslt.getVideoWidthForRepresentation = function (representationId) {
@@ -76,6 +107,39 @@ Custom.dependencies.CustomMetricsExtensions = function () {
         }
 
         return representation.codecs;
+    };
+
+    rslt.getBitratesForType = function (type) {
+        var self = this,
+            manifest = self.manifestModel.getValue(),
+            periodArray = manifest.Period_asArray,
+            period,
+            periodArrayIndex,
+            adaptationSet,
+            adaptationSetArray,
+            representation,
+            representationArray,
+            adaptationSetArrayIndex,
+            representationArrayIndex,
+            bitrateArray = new Array();
+
+        for (periodArrayIndex = 0; periodArrayIndex < periodArray.length; periodArrayIndex = periodArrayIndex + 1) {
+            period = periodArray[periodArrayIndex];
+            adaptationSetArray = period.AdaptationSet_asArray;
+            for (adaptationSetArrayIndex = 0; adaptationSetArrayIndex < adaptationSetArray.length; adaptationSetArrayIndex = adaptationSetArrayIndex + 1) {
+                adaptationSet = adaptationSetArray[adaptationSetArrayIndex];
+                if (adaptationIsType.call(self, adaptationSet, type)) {
+                    representationArray = adaptationSet.Representation_asArray;
+                    for (representationArrayIndex = 0; representationArrayIndex < representationArray.length; representationArrayIndex = representationArrayIndex + 1) {
+                        representation = representationArray[representationArrayIndex];
+                        bitrateArray.push(representation.bandwidth);
+                    }
+                    return bitrateArray;
+                }
+            }
+        }
+
+        return bitrateArray;
     };
 
     rslt.getCurrentRepresentationBoundaries = function (metrics) {

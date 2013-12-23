@@ -107,30 +107,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
     //
     ////////////////////////////////////////
 
-    $scope.videoBitrate = 0;
-    $scope.videoIndex = 0;
-    $scope.videoPendingIndex = "";
-    $scope.videoMaxIndex = 0;
-    $scope.videoBufferLength = 0;
-    $scope.videoDroppedFrames = 0;
-
-    $scope.audioBitrate = 0;
-    $scope.audioIndex = 0;
-    $scope.audioPendingIndex = "";
-    $scope.audioMaxIndex = 0;
-    $scope.audioBufferLength = 0;
-    $scope.audioDroppedFrames = 0;
-
-    // quality switcher
-    $('#bitrateSlider').labeledslider({ 
-        min:0,
-        max: 5,
-        values:[0,5],
-        range: true,
-        slide: function(evt,ui) {
-            player.setQualityBoundariesFor("video", ui.values[0], ui.values[1]);
-        }
-    });
+    initMetrics();
 
     var converter = new MetricsTreeConverter();
     $scope.videoMetrics = null;
@@ -159,6 +136,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
             bandwidthValue,
             pendingValue,
             numBitratesValue,
+            bitrateValues,
             bufferLengthValue = 0,
             lastFragmentDuration,
             lastFragmentDownloadTime,
@@ -184,6 +162,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
             }
 
             numBitratesValue = metricsExt.getMaxIndexForBufferType(type);
+            bitrateValues = metricsExt.getBitratesForType(type);
 
             if (bufferLevel !== null) {
                 bufferLengthValue = bufferLevel.level.toPrecision(5);
@@ -225,6 +204,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
                 bitrateIndexValue: bitrateIndexValue + 1,
                 pendingIndex: (pendingValue !== bitrateIndexValue) ? "(-> " + (pendingValue + 1) + ")" : "",
                 numBitratesValue: numBitratesValue,
+                bitrateValues : bitrateValues,
                 bufferLengthValue: bufferLengthValue,
                 droppedFramesValue: droppedFramesValue,
                 videoWidthValue: videoWidthValue,
@@ -235,6 +215,37 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
         else {
             return null;
         }
+    }
+
+    function initMetrics() {
+
+        $scope.videoBitrate = 0;
+        $scope.videoIndex = 0;
+        $scope.videoPendingIndex = "";
+        $scope.videoMaxIndex = 0;
+        $scope.videoBufferLength = 0;
+        $scope.videoDroppedFrames = 0;
+        $scope.videoWidth = 0;
+        $scope.videoHeight = 0;
+
+        $scope.audioBitrate = 0;
+        $scope.audioIndex = 0;
+        $scope.audioPendingIndex = "";
+        $scope.audioMaxIndex = 0;
+        $scope.audioBufferLength = 0;
+        $scope.audioDroppedFrames = 0;
+
+        $('#sliderBitrate').labeledslider({
+            max: 0,
+            step: 1,
+            values: [0],
+            tickLabels: [],
+            orientation: 'vertical',
+            range: true,
+            stop: function(evt, ui) {
+                //player.setQualityBoundariesFor("video", ui.values[0], ui.values[1]);
+            }
+        });
     }
 
     function update() {
@@ -253,6 +264,20 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
             $scope.videoCodecs = metrics.codecsValue;
             $scope.videoWidth = metrics.videoWidthValue;
             $scope.videoHeight = metrics.videoHeightValue;
+
+            // Update bitrates slider
+            if ($('#sliderBitrate').labeledslider( "option", "max" ) == 0)
+            {
+                var labels = [];
+                for (var i = 0; i < metrics.bitrateValues.length; i++)
+                {
+                    labels.push(Math.round(metrics.bitrateValues[i] / 1000) + "k");
+                }
+                $('#sliderBitrate').labeledslider({ max: (metrics.numBitratesValue - 1), step: 1, values: [ 0, (metrics.numBitratesValue - 1 )], tickLabels: labels});
+                $('#sliderBitrate').labeledslider({stop: function( event, ui ) {
+                    player.setQualityBoundariesFor("video", ui.values[0], ui.values[1]);
+                }});
+            }
 
             point = [parseFloat(video.currentTime), Math.round(parseFloat(metrics.bufferLengthValue))];
             videoSeries.push(point);
@@ -465,6 +490,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
     }
 
     $scope.doLoad = function () {
+        initMetrics();
         player.attachSource($scope.selectedItem.url);
         setTimeout(update, updateInterval);
     }
