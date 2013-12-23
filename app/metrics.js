@@ -253,6 +253,37 @@ MetricsTreeConverter = function () {
             return treeMetrics;
         },
 
+        representationBoundariesToTreeMetrics = function (representationBoundaries) {
+            var treeMetrics = [],
+                treeMetric,
+                repBoundariesMetric,
+                minMetric,
+                maxMetric,
+                i;
+
+            for (i = 0; i < representationBoundaries.length; i += 1) {
+                repBoundariesMetric = representationBoundaries[i];
+
+                treeMetric = {};
+                treeMetric.text = "Representation Boundaries: " + (i + 1);
+                treeMetric.items = [];
+                treeMetric.collapsed = true;
+
+                minMetric = {};
+                minMetric.text = "min: " + repBoundariesMetric.min;
+
+                maxMetric = {};
+                maxMetric.text = "max: " + repBoundariesMetric.max;
+
+                treeMetric.items.push(minMetric);
+                treeMetric.items.push(maxMetric);
+
+                treeMetrics.push(treeMetric);
+            }
+
+            return treeMetrics;
+        },
+
         droppedFramesToTreeMetrics = function (droppedFrames) {
             var treeMetrics = [],
                 treeMetric,
@@ -445,6 +476,7 @@ MetricsTreeConverter = function () {
             var bufferTreeMetrics = bufferLevelMetricToTreeMetric(metrics.BufferLevel),
                 playListMetrics = playListMetricToTreeMetric(metrics.PlayList),
                 representationSwitchMetrics = representationSwitchToTreeMetrics(metrics.RepSwitchList),
+                representationBoundariesMetrics = representationBoundariesToTreeMetrics(metrics.RepBoundariesList),
                 droppedFramesMetrics = droppedFramesToTreeMetrics(metrics.DroppedFrames),
                 httpRequestMetrics = httpRequestToTreeMetric(metrics.HttpList),
                 tcpConnectionMetrics = tcpConnectionToTreeMetric(metrics.TcpList),
@@ -460,6 +492,11 @@ MetricsTreeConverter = function () {
                 {
                     text: "Representation Switch",
                     items: representationSwitchMetrics,
+                    collapsed: true
+                },
+                {
+                    text: "Representation Boundaries",
+                    items: representationBoundariesMetrics,
                     collapsed: true
                 },
                 {
