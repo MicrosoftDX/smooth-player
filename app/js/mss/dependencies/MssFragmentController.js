@@ -14,7 +14,7 @@
 
 Mss.dependencies.MssFragmentController = function () {
     "use strict";
-    console.debug("Mss.dependencies.MssFragmentController");
+
     var getIndex = function (adaptation, manifest) {
 
             var periods = manifest.Period_asArray,
