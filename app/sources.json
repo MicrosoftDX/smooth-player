@@ -16,6 +16,11 @@
             "browsers": "cdsbi"
         },
         {
+            "name": "Big Buck Bunny (Smooth - VOD - gzipped - AAC-HE)",
+            "url": "http://2is7server1.rd.francetelecom.com/VOD/gzip/bbb.ism/Manifest",
+            "browsers": "cdsbi"
+        },
+        {
             "name": "Arte (Smooth - VOD)",
             "url": "http://161.105.176.12/VOD/Arte/C4-51_S1.ism/manifest",
             "browsers": "cdsbi"

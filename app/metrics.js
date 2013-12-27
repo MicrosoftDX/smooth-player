@@ -257,6 +257,7 @@ MetricsTreeConverter = function () {
             var treeMetrics = [],
                 treeMetric,
                 repBoundariesMetric,
+                tMetric,
                 minMetric,
                 maxMetric,
                 i;
@@ -269,12 +270,16 @@ MetricsTreeConverter = function () {
                 treeMetric.items = [];
                 treeMetric.collapsed = true;
 
+                tMetric = {};
+                tMetric.text = "t: " + repBoundariesMetric.t;
+
                 minMetric = {};
                 minMetric.text = "min: " + repBoundariesMetric.min;
 
                 maxMetric = {};
                 maxMetric.text = "max: " + repBoundariesMetric.max;
 
+                treeMetric.items.push(tMetric);
                 treeMetric.items.push(minMetric);
                 treeMetric.items.push(maxMetric);
 

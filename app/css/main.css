@@ -154,3 +154,7 @@ chart {
     font-size: 22px;
     color: #555;
 }
+
+.ui-slider {
+    height: 180px;
+}
