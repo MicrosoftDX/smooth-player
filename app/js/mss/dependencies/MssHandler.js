@@ -1,7 +1,8 @@
 
 Mss.dependencies.MssHandler = function() {
 
-	var getIndex = function (adaptation, manifest) {
+	var isDynamic=false,
+		getIndex = function (adaptation, manifest) {
 
 			var periods = manifest.Period_asArray,
 				i, j;
@@ -68,10 +69,10 @@ Mss.dependencies.MssHandler = function() {
             return timescale;
         },
 
-		getDuration = function (manifest, isLive) {
+		getDuration = function (manifest, isDynamic) {
 			var duration = NaN;
 
-			if (isLive) {
+			if (isDynamic) {
 				duration = Number.POSITIVE_INFINITY;
 			} else {
 				if (manifest.mediaPresentationDuration) {
@@ -108,34 +109,35 @@ Mss.dependencies.MssHandler = function() {
 			return samplingRate;
 		},
 
-		getInitData = function(quality, adaptation) {
+		getInitData = function(representation) {
 			// return data in byte format
 			// call MP4 lib to generate the init
 			
 			// Get required media information from manifest  to generate initialisation segment
-			var representation = getRepresentationForQuality(quality, adaptation);
+			//var representation = getRepresentationForQuality(quality, adaptation);
 			if(representation){
 				if(!representation.initData){
 					var manifest = rslt.manifestModel.getValue();
-					var isLive = rslt.manifestExt.getIsLive(manifest);
-
+					var adaptation = representation.adaptation;
+					var realAdaptation = manifest.Period_asArray[adaptation.period.index].AdaptationSet_asArray[adaptation.index];
+					var realRepresentation = realAdaptation.Representation_asArray[representation.index];
 					var media = {};
-					media.type = getType(adaptation);
-					media.trackId = getIndex(adaptation, manifest) + 1; // +1 since track_id shall start from '1'
-					media.timescale = getTimescale(adaptation);
-					media.duration = getDuration(manifest, isLive);
-					media.codecs = representation.codecs;
-					media.codecPrivateData = representation.codecPrivateData;
-					media.bandwidth = representation.bandwidth;
+					media.type = rslt.getType() || 'und';
+					media.trackId = adaptation.index + 1; // +1 since track_id shall start from '1'
+					media.timescale = representation.timescale;
+					media.duration = representation.adaptation.period.duration;
+					media.codecs = realRepresentation.codecs;
+					media.codecPrivateData = realRepresentation.codecPrivateData;
+					media.bandwidth = realRepresentation.bandwidth;
 
 					// Video related informations
-					media.width = representation.width || adaptation.maxWidth;
-					media.height = representation.height || adaptation.maxHeight;
+					media.width = realRepresentation.width || realAdaptation.maxWidth;
+					media.height = realRepresentation.height || realAdaptation.maxHeight;
 
 					// Audio related informations
-					media.language = adaptation.lang ? adaptation.lang : 'und';
-					media.channels = getAudioChannels(adaptation, representation);
-					media.samplingRate = getAudioSamplingRate(adaptation, representation);
+					media.language = realAdaptation.lang ? realAdaptation.lang : 'und';
+					media.channels = getAudioChannels(realAdaptation, realRepresentation);
+					media.samplingRate = getAudioSamplingRate(realAdaptation, realRepresentation);
 
 					representation.initData =  rslt.mp4Processor.generateInitSegment(media);
 				}
@@ -147,20 +149,35 @@ Mss.dependencies.MssHandler = function() {
 	};
 	
 	var rslt = Custom.utils.copyMethods(Dash.dependencies.DashHandler);
-	rslt.manifestModel = undefined;
-	rslt.manifestExt = undefined;
 	rslt.mp4Processor = undefined;
 
-	rslt.getInitRequest = function (quality, data) {
+	rslt.getInitRequest = function (representation,streamType) {
+			var period = null;
+			var self = this; 
+			var presentationStartTime = null;
 			var deferred = Q.defer();
             //Mss.dependencies.MssHandler.prototype.getInitRequest.call(this,quality,data).then(onGetInitRequestSuccess);
+            // get the period and startTime
+            period = representation.adaptation.period;
+            presentationStartTime = period.start;
+
+            var manifest = rslt.manifestModel.getValue();
+			isDynamic = rslt.manifestExt.getIsDynamic(manifest);
+
             var request = new MediaPlayer.vo.SegmentRequest();
-            request.streamType = this.getType();
+
+
+            request.streamType = streamType;
             request.type = "Initialization Segment";
-            request.data = getInitData(quality, data);
+            request.url = null;
+            request.data = getInitData(representation);
+            request.range =  representation.range;
+            request.availabilityStartTime = self.timelineConverter.calcAvailabilityStartTimeFromPresentationTime(presentationStartTime, representation.adaptation.period.mpd, isDynamic);
+            request.availabilityEndTime = self.timelineConverter.calcAvailabilityEndTimeFromPresentationTime(presentationStartTime + period.duration, period.mpd, isDynamic);
+
 			//console.saveBinArray(request.data, data.type + "_" + quality + ".mp4");
             //request.action = "complete"; //needed to avoid to execute request
-            request.quality = quality;
+            request.quality = representation.index;
             deferred.resolve(request);
             return deferred.promise;
         };
