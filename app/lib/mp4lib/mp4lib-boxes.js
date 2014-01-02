@@ -681,7 +681,7 @@ TrackFragmentHeaderBox.prototype.boxtype = 'tfhd';
 TrackFragmentHeaderBox.prototype._processFields = function(processor) {
     FullBox.prototype._processFields.call(this,processor);
     processor.eat('track_ID',FIELD_UINT32);
-    processor.eat_flagged(this,'flags',0x000001,'base_date_offset',FIELD_UINT64);
+    processor.eat_flagged(this,'flags',0x000001,'base_data_offset',FIELD_UINT64);
     processor.eat_flagged(this,'flags',0x000002,'sample_description_index',FIELD_UINT32);
     processor.eat_flagged(this,'flags',0x000008,'default_sample_duration',FIELD_UINT32);
     processor.eat_flagged(this,'flags',0x000010,'default_sample_size',FIELD_UINT32);

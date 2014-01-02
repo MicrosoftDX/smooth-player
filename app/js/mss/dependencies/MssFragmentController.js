@@ -14,7 +14,7 @@
 
 Mss.dependencies.MssFragmentController = function () {
     "use strict";
-    console.debug("Mss.dependencies.MssFragmentController");
+
     var getIndex = function (adaptation, manifest) {
 
             var periods = manifest.Period_asArray,
@@ -110,16 +110,19 @@ Mss.dependencies.MssFragmentController = function () {
                 removeBoxByType(traf, "tfrf");                
             }
 
+            // Before determining new size of the converted fragment we update some box flags related to data offset
+            tfhd.flags &= 0xFFFFFE; // set tfhd.base-data-offset-present to false
+            tfhd.flags |= 0x020000; // set tfhd.default-base-is-moof to true
+            trun.flags |= 0x000001; // set trun.data-offset-present to true
+            trun.data_offset = 0;   // Set a default value for trun.data_offset
+
             // Determine new size of the converted fragment
             // and allocate new data buffer
             var lp = new LengthCounterBoxFieldsProcessor(fragment);
             fragment._processFields(lp);
             var new_data = new Uint8Array(lp.res);
 
-            // Update trun.dataOffset field
-            // We also modified the tfhd.flags in order to specify that base-dataoffset for the track fragment
-            // is the position of the first byte of the enclosing Movie Fragment Box
-            tfhd.flags |= 0x020000;
+            // updata trun.data_offset field = offset of first data byte (inside mdat box)
             trun.data_offset = lp.res - mdat.size + 8; // 8 = 'size' + 'type' mdat fields length
 
             // Serialize converted fragment into output data buffer

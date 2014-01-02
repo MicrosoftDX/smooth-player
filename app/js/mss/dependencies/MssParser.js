@@ -4,6 +4,7 @@ Mss.dependencies.MssParser = function () {
     var TIME_SCALE_100_NANOSECOND_UNIT = 10000000.0;
 
     var numericRegex = /^[-+]?[0-9]+[.]?[0-9]*([eE][-+]?[0-9]+)?$/;
+    var hexadecimalRegex = /^0[xX][A-Fa-f0-9]+$/;
 
     var matchers = [
         {
@@ -13,6 +14,16 @@ Mss.dependencies.MssParser = function () {
             },
             converter: function (str) {
                 return parseFloat(str);
+            }
+        },
+        {
+            type: "hexadecimal",
+            test: function (str) {
+                return hexadecimalRegex.test(str);
+            },
+            converter: function (str) {
+                // Remove '0x'
+                return str.substr(2);
             }
         }
     ];
@@ -283,6 +294,12 @@ Mss.dependencies.MssParser = function () {
                 adaptTransformed.Channels = node.QualityLevel && node.QualityLevel.Channels; //used by AudioChannelConfiguration
             }
 
+            // Add 'Id'  field on representations
+            for (var i = 0; i < adaptTransformed.Representation_asArray.length; i++) {
+                var rep = adaptTransformed.Representation_asArray[i];
+                rep.Id = adaptTransformed.id + "_" + rep.Index;
+            }
+
             return adaptTransformed;
         };
         period.children.push(adaptationSet);
@@ -312,7 +329,7 @@ Mss.dependencies.MssParser = function () {
 
             }
             else
-            if (node.FourCC === "AACL")
+            if (node.FourCC.indexOf("AAC") >= 0)
             {
                 mimeType = "mp4a";
                 avcoti = "40";
@@ -324,7 +341,7 @@ Mss.dependencies.MssParser = function () {
             var codecs = mimeType + "." + avcoti;
 
             return {
-                id: node.Index,
+                id: node.Id,
                 bandwidth: node.Bitrate,
                 width: node.MaxWidth,
                 height: node.MaxHeight,
@@ -457,9 +474,6 @@ Mss.dependencies.MssParser = function () {
     };
 
 
-
-
-
     var internalParse = function(data, baseUrl) {
         this.debug.log("[MssParser]", "Doing parse.");
         
@@ -467,6 +481,9 @@ Mss.dependencies.MssParser = function () {
         var converter = new X2JS(matchers, '', true);
         var iron = new Custom.utils.ObjectIron(getDashMap());
  
+        // Process 'CodecPrivateData' attributes values so that they can be identified/processed as hexadecimal strings
+        data = data.replace(/CodecPrivateData="/g, "CodecPrivateData=\"0x");
+
         this.debug.log("[MssParser]", "Converting from XML.");
         manifest = converter.xml_str2json(data);
 
