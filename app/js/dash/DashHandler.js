@@ -728,7 +728,7 @@ Dash.dependencies.DashHandler = function () {
     };
 };
 
-Dash.dependencies.DashHandler.EPSILON = 0.003;
+Dash.dependencies.DashHandler.EPSILON = 0.1;
 
 Dash.dependencies.DashHandler.prototype = {
     constructor: Dash.dependencies.DashHandler
