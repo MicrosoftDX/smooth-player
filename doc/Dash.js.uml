@@ -1806,8 +1806,8 @@
 <XPD:ATTR name="FillColor" type="string">$00B9FFFF</XPD:ATTR>
 <XPD:ATTR name="Left" type="integer">1288</XPD:ATTR>
 <XPD:ATTR name="Top" type="integer">424</XPD:ATTR>
-<XPD:ATTR name="Width" type="integer">130</XPD:ATTR>
-<XPD:ATTR name="Height" type="integer">134</XPD:ATTR>
+<XPD:ATTR name="Width" type="integer">135</XPD:ATTR>
+<XPD:ATTR name="Height" type="integer">199</XPD:ATTR>
 <XPD:REF name="Model">4SIW/I5GdkGI8COWMkkx4QAA</XPD:REF>
 <XPD:OBJ name="NameCompartment" type="UMLNameCompartmentView" guid="eGYey7my7EeseyCpYqlQsgAA">
 <XPD:OBJ name="NameLabel" type="LabelView" guid="P0sWgRQae0upQX2h1AppFwAA">
@@ -1950,7 +1950,7 @@
 <XPD:OBJ name="OwnedViews[35]" type="UMLAssociationView" guid="ALznv280KUW4dAriTgDnUgAA">
 <XPD:ATTR name="LineColor" type="string">clMaroon</XPD:ATTR>
 <XPD:ATTR name="FillColor" type="string">$00B9FFFF</XPD:ATTR>
-<XPD:ATTR name="Points" type="Points">1218,460;1288,476</XPD:ATTR>
+<XPD:ATTR name="Points" type="Points">1218,473;1288,499</XPD:ATTR>
 <XPD:REF name="Model">cBW/MXR6w0uPd6dKmnijjQAA</XPD:REF>
 <XPD:REF name="Head">L+NSWZZh8U+lrbFMLGw+7gAA</XPD:REF>
 <XPD:REF name="Tail">QG2690dCUk6dIWfhLaUwJgAA</XPD:REF>
@@ -2034,7 +2034,7 @@
 <XPD:OBJ name="OwnedViews[36]" type="UMLAssociationView" guid="MJv7kA+RzkO8acp4pWdWlwAA">
 <XPD:ATTR name="LineColor" type="string">clMaroon</XPD:ATTR>
 <XPD:ATTR name="FillColor" type="string">$00B9FFFF</XPD:ATTR>
-<XPD:ATTR name="Points" type="Points">1214,549;1288,517</XPD:ATTR>
+<XPD:ATTR name="Points" type="Points">1214,564;1288,542</XPD:ATTR>
 <XPD:REF name="Model">LyRX5rlwK0qx4QKlpNSg3wAA</XPD:REF>
 <XPD:REF name="Head">L+NSWZZh8U+lrbFMLGw+7gAA</XPD:REF>
 <XPD:REF name="Tail">4B3uycaN1E+IR0GCbj58AgAA</XPD:REF>
@@ -13758,7 +13758,7 @@ loadSession juste avant l'appel à la fonction du load de la classe Stream
 <XPD:REF name="Views[1]">zum0m4si50u5HTylo7CkNwAA</XPD:REF>
 <XPD:REF name="Views[2]">zUxgCVCQw0uWR5tP0Gjw9AAA</XPD:REF>
 <XPD:REF name="Views[3]">a858DUiCY02Drzbcj9NxSwAA</XPD:REF>
-<XPD:ATTR name="#Operations" type="integer">7</XPD:ATTR>
+<XPD:ATTR name="#Operations" type="integer">12</XPD:ATTR>
 <XPD:OBJ name="Operations[0]" type="UMLOperation" guid="ZFNwY7gA2E+sQJfWIG8RNgAA">
 <XPD:ATTR name="Name" type="string">listenToNeedKey</XPD:ATTR>
 <XPD:REF name="Owner">4SIW/I5GdkGI8COWMkkx4QAA</XPD:REF>
@@ -13793,6 +13793,26 @@ loadSession juste avant l'appel à la fonction du load de la classe Stream
 </XPD:OBJ>
 <XPD:OBJ name="Operations[6]" type="UMLOperation" guid="tQWhCw/8fUKMyO1K5Lc3iQAA">
 <XPD:ATTR name="Name" type="string">supportsCodec</XPD:ATTR>
+<XPD:REF name="Owner">4SIW/I5GdkGI8COWMkkx4QAA</XPD:REF>
+</XPD:OBJ>
+<XPD:OBJ name="Operations[7]" type="UMLOperation" guid="nCgl/9kqxUWey5GzNbEDswAA">
+<XPD:ATTR name="Name" type="string">addKey</XPD:ATTR>
+<XPD:REF name="Owner">4SIW/I5GdkGI8COWMkkx4QAA</XPD:REF>
+</XPD:OBJ>
+<XPD:OBJ name="Operations[8]" type="UMLOperation" guid="kUflyEnyJk+jpOBJnN2ENgAA">
+<XPD:ATTR name="Name" type="string">generateKeyRequest</XPD:ATTR>
+<XPD:REF name="Owner">4SIW/I5GdkGI8COWMkkx4QAA</XPD:REF>
+</XPD:OBJ>
+<XPD:OBJ name="Operations[9]" type="UMLOperation" guid="6PQBh/vohU6TRarxd1BCywAA">
+<XPD:ATTR name="Name" type="string">unlistenToKeyError</XPD:ATTR>
+<XPD:REF name="Owner">4SIW/I5GdkGI8COWMkkx4QAA</XPD:REF>
+</XPD:OBJ>
+<XPD:OBJ name="Operations[10]" type="UMLOperation" guid="0HUQXsmn6EmxEXQVFoldbgAA">
+<XPD:ATTR name="Name" type="string">unlistenToKeyMessage</XPD:ATTR>
+<XPD:REF name="Owner">4SIW/I5GdkGI8COWMkkx4QAA</XPD:REF>
+</XPD:OBJ>
+<XPD:OBJ name="Operations[11]" type="UMLOperation" guid="MbHRmFQeakishCBP245NngAA">
+<XPD:ATTR name="Name" type="string">unlistenToKeyAdded</XPD:ATTR>
 <XPD:REF name="Owner">4SIW/I5GdkGI8COWMkkx4QAA</XPD:REF>
 </XPD:OBJ>
 <XPD:ATTR name="#TypedFeatures" type="integer">2</XPD:ATTR>
