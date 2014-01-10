@@ -13113,7 +13113,7 @@ loadSession juste avant l'appel à la fonction du load de la classe Stream
 <XPD:REF name="Views[1]">q6pGymWkGkKQIwQl/8bU3QAA</XPD:REF>
 <XPD:REF name="Views[2]">zGaji/YuSkyX8RmxhE9SKwAA</XPD:REF>
 <XPD:REF name="Views[3]">yzsHLHxa5kiBRP1GI1i1jgAA</XPD:REF>
-<XPD:ATTR name="#Operations" type="integer">2</XPD:ATTR>
+<XPD:ATTR name="#Operations" type="integer">3</XPD:ATTR>
 <XPD:OBJ name="Operations[0]" type="UMLOperation" guid="iGQH06GMtEKABldKIp/r1AAA">
 <XPD:ATTR name="Name" type="string">createSession</XPD:ATTR>
 <XPD:REF name="Owner">Pu8CAquStkuqC7hrGGMTvQAA</XPD:REF>
@@ -13157,6 +13157,23 @@ loadSession juste avant l'appel à la fonction du load de la classe Stream
 <XPD:REF name="BehavioralFeature">s8taAC0EXEu4Eq/5OHzmtAAA</XPD:REF>
 </XPD:OBJ>
 </XPD:OBJ>
+<XPD:OBJ name="Operations[2]" type="UMLOperation" guid="+4x3/MNm9EWPeQt0rJKb+gAA">
+<XPD:ATTR name="Name" type="string">loadSession</XPD:ATTR>
+<XPD:REF name="Owner">Pu8CAquStkuqC7hrGGMTvQAA</XPD:REF>
+<XPD:ATTR name="#Parameters" type="integer">2</XPD:ATTR>
+<XPD:OBJ name="Parameters[0]" type="UMLParameter" guid="CeYVP9+pb02I4ao7QekRegAA">
+<XPD:ATTR name="Name" type="string">sessionId</XPD:ATTR>
+<XPD:ATTR name="TypeExpression" type="string">DOMString</XPD:ATTR>
+<XPD:REF name="BehavioralFeature">+4x3/MNm9EWPeQt0rJKb+gAA</XPD:REF>
+</XPD:OBJ>
+<XPD:OBJ name="Parameters[1]" type="UMLParameter" guid="A87o56iYV0ys9hX/bpw7zgAA">
+<XPD:ATTR name="Name" type="string">MediaKeySession</XPD:ATTR>
+<XPD:ATTR name="DirectionKind" type="UMLParameterDirectionKind">pdkReturn</XPD:ATTR>
+<XPD:ATTR name="TypeExpression" type="string">MediaKeySession</XPD:ATTR>
+<XPD:REF name="BehavioralFeature">+4x3/MNm9EWPeQt0rJKb+gAA</XPD:REF>
+<XPD:REF name="Type_">wZ1gcC1zvUuK7xBi9FFzDAAA</XPD:REF>
+</XPD:OBJ>
+</XPD:OBJ>
 <XPD:ATTR name="#TypedParameters" type="integer">1</XPD:ATTR>
 <XPD:REF name="TypedParameters[0]">BMolXlIh50KaugggxhUh4gAA</XPD:REF>
 <XPD:ATTR name="#Attributes" type="integer">1</XPD:ATTR>
@@ -13189,9 +13206,10 @@ loadSession juste avant l'appel à la fonction du load de la classe Stream
 <XPD:ATTR name="Name" type="string">release</XPD:ATTR>
 <XPD:REF name="Owner">wZ1gcC1zvUuK7xBi9FFzDAAA</XPD:REF>
 </XPD:OBJ>
-<XPD:ATTR name="#TypedParameters" type="integer">2</XPD:ATTR>
+<XPD:ATTR name="#TypedParameters" type="integer">3</XPD:ATTR>
 <XPD:REF name="TypedParameters[0]">GcY31mc6okCG3oiDqgTTyAAA</XPD:REF>
 <XPD:REF name="TypedParameters[1]">J8w9kF34qky49kKCuKNjtgAA</XPD:REF>
+<XPD:REF name="TypedParameters[2]">A87o56iYV0ys9hX/bpw7zgAA</XPD:REF>
 <XPD:ATTR name="#Attributes" type="integer">3</XPD:ATTR>
 <XPD:OBJ name="Attributes[0]" type="UMLAttribute" guid="cVHLfpoiCkmtFxzOQ2kfVwAA">
 <XPD:ATTR name="Name" type="string">error</XPD:ATTR>
