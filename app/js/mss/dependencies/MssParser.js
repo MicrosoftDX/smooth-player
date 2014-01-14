@@ -197,6 +197,7 @@ Mss.dependencies.MssParser = function () {
         var mpd,
             period,
             adaptationSet,
+            contentProtection,
             representation,
             segmentTemplate,
             segmentTimeline,
@@ -243,10 +244,30 @@ Mss.dependencies.MssParser = function () {
                 BaseURL: node.BaseURL,
                 Period: node,
                 Period_asArray: [node],
-                minBufferTime : 10
+                minBufferTime : 10,
+                ContentProtection : node.Protection.ProtectionHeader,
+                ContentProtection_asArray : node.Protection_asArray
             };
         };
         mpd.isTransformed = false;
+
+        contentProtection = {};
+        contentProtection.name = "ContentProtection";
+        contentProtection.parent = mpd;
+        contentProtection.isRoot = false;
+        contentProtection.isArray = false;
+        contentProtection.children = [];
+        //here node is Protection
+        contentProtection.transformFunc = function(node){
+
+            return{
+                schemeIdUri : node.SystemID,
+                value : "2.0",
+                'cenc:default_KID' : "10000000-1000-1000-1000-100000000001",
+                'mspr:pro' : node.__text
+            };
+        };
+        mpd.children.push(contentProtection);
 
         period = {};
         period.name = "Period";
@@ -507,6 +528,14 @@ Mss.dependencies.MssParser = function () {
 
         this.debug.log("[MssParser]", "Flatten manifest properties.");
         manifest = iron.run(manifest);
+
+        for (var i = 0; i < manifest.Period.AdaptationSet.length; i++) {
+            manifest.Period.AdaptationSet[i].ContentProtection = manifest.ContentProtection;
+            manifest.Period.AdaptationSet[i].ContentProtection_asArray = manifest.ContentProtection_asArray;
+        }
+
+        delete manifest.ContentProtection;
+        delete manifest.ContentProtection_asArray;
 
         this.debug.log("[MssParser]", "Parsing complete.");
         console.log(manifest);
