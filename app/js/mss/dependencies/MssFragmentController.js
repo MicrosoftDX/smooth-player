@@ -51,10 +51,8 @@ Mss.dependencies.MssFragmentController = function () {
                 var r = (lastSegment.r === undefined)?0:lastSegment.r;
                 var t = lastSegment.t + (lastSegment.d * r);
 
-                //rslt.debug.log("[MssFragmentController] (" + adaptation.id + ") future segment time = " + (parseFloat(fragment_absolute_time) / 10000000.0));
                 if (fragment_absolute_time > t)
                 {
-                    rslt.debug.log("[MssFragmentController] (" + adaptation.id + ") Add segment, time = " + (parseFloat(fragment_absolute_time) / 10000000.0));
                     if (fragment_duration === lastSegment.d)
                     {
                         lastSegment.r = r + 1;
@@ -108,41 +106,40 @@ Mss.dependencies.MssFragmentController = function () {
             var trackId = getIndex(adaptation, manifest) + 1; // +1 since track_id shall start from '1'
 
             // Create new fragment
-            var fragment = new File();
-            var processor = new DeserializationBoxFieldsProcessor(fragment, data, 0, data.length);
+            var fragment = new mp4lib.boxes.File();
+            var processor = new mp4lib.fieldProcessors.DeserializationBoxFieldsProcessor(fragment, data, 0, data.length);
             fragment._processFields(processor);
             //console.log(fragment);
 
             // Get references en boxes
-            var moof = getBoxByType(fragment, "moof");
-            var mdat = getBoxByType(fragment, "mdat");
-            var traf = getBoxByType(moof, "traf");
-            var trun = getBoxByType(traf, "trun");
-            var tfhd = getBoxByType(traf, "tfhd");
+            var moof = mp4lib.helpers.getBoxByType(fragment, "moof");
+            var mdat = mp4lib.helpers.getBoxByType(fragment, "mdat");
+            var traf = mp4lib.helpers.getBoxByType(moof, "traf");
+            var trun = mp4lib.helpers.getBoxByType(traf, "trun");
+            var tfhd = mp4lib.helpers.getBoxByType(traf, "tfhd");
 
             // Update tfhd.track_ID field
             tfhd.track_ID = trackId;
 
             // Process tfxd boxes
             // This box provide absolute timestamp but we take the segment start time for tfdt
-            removeBoxByType(traf, "tfxd");
+            mp4lib.helpers.removeBoxByType(traf, "tfxd");
 
             // Create and add tfdt box
-            var tfdt = getBoxByType(traf, "tfdt");
-            if (tfdt === null)
-            {
-                tfdt = new TrackFragmentBaseMediaDecodeTimeBox();
+            var tfdt = mp4lib.helpers.getBoxByType(traf, "tfdt");
+            if (tfdt === null){
+                tfdt = new mp4lib.boxes.TrackFragmentBaseMediaDecodeTimeBox();
                 tfdt.version = 1;
                 tfdt.baseMediaDecodeTime = Math.floor(request.startTime * request.timescale);
                 traf.boxes.push(tfdt);
             }
 
             // Process tfrf box
-            var tfrf = getBoxByType(traf, "tfrf");
+            var tfrf = mp4lib.helpers.getBoxByType(traf, "tfrf");
             if (tfrf !== null)
             {
                 segmentsUpdated = processTfrf(tfrf, adaptation);
-                removeBoxByType(traf, "tfrf");                
+                mp4lib.helpers.removeBoxByType(traf, "tfrf");                
             }
 
             // Before determining new size of the converted fragment we update some box flags related to data offset
@@ -153,7 +150,7 @@ Mss.dependencies.MssFragmentController = function () {
 
             // Determine new size of the converted fragment
             // and allocate new data buffer
-            var lp = new LengthCounterBoxFieldsProcessor(fragment);
+            var lp = new mp4lib.fieldProcessors.LengthCounterBoxFieldsProcessor(fragment);
             fragment._processFields(lp);
             var new_data = new Uint8Array(lp.res);
 
@@ -161,7 +158,7 @@ Mss.dependencies.MssFragmentController = function () {
             trun.data_offset = lp.res - mdat.size + 8; // 8 = 'size' + 'type' mdat fields length
 
             // Serialize converted fragment into output data buffer
-            var sp = new SerializationBoxFieldsProcessor(fragment, new_data, 0);
+            var sp = new mp4lib.fieldProcessors.SerializationBoxFieldsProcessor(fragment, new_data, 0);
             fragment._processFields(sp);
 
             return {
@@ -174,7 +171,6 @@ Mss.dependencies.MssFragmentController = function () {
 
     rslt.manifestModel = undefined;
     rslt.mp4Processor = undefined;
-    rslt.debug = undefined;
 
     rslt.process = function (bytes, request, representations) {
 
