@@ -151,7 +151,7 @@ Mss.dependencies.MssHandler = function() {
 	var rslt = Custom.utils.copyMethods(Dash.dependencies.DashHandler);
 	rslt.mp4Processor = undefined;
 
-	rslt.getInitRequest = function (representation,streamType) {
+	rslt.getInitRequest = function (representation) {
 			var period = null;
 			var self = this; 
 			var presentationStartTime = null;
@@ -166,8 +166,7 @@ Mss.dependencies.MssHandler = function() {
 
             var request = new MediaPlayer.vo.SegmentRequest();
 
-
-            request.streamType = streamType;
+            request.streamType = rslt.getType();
             request.type = "Initialization Segment";
             request.url = null;
             request.data = getInitData(representation);
@@ -175,7 +174,7 @@ Mss.dependencies.MssHandler = function() {
             request.availabilityStartTime = self.timelineConverter.calcAvailabilityStartTimeFromPresentationTime(presentationStartTime, representation.adaptation.period.mpd, isDynamic);
             request.availabilityEndTime = self.timelineConverter.calcAvailabilityEndTimeFromPresentationTime(presentationStartTime + period.duration, period.mpd, isDynamic);
 
-			//console.saveBinArray(request.data, data.type + "_" + quality + ".mp4");
+			//console.saveBinArray(request.data, request.streamType + "_" + representation.index + ".mp4");
             //request.action = "complete"; //needed to avoid to execute request
             request.quality = representation.index;
             deferred.resolve(request);
