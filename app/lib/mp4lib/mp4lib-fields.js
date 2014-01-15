@@ -309,8 +309,8 @@ mp4lib.fields.BoxesListField.prototype.read = function(buf,pos,end){
     var res = [];
     while (pos<end){
         // Read box size
-        // TOOD : replace by Constent ??
-        var size = new mp4lib.fields.NumberField(32, false).read(buf, pos);
+        
+        var size = mp4lib.fields.FIELD_BIT32.read(buf, pos);
 
         // Read boxtype
         var boxtype = mp4lib.fields.readString(buf, pos+4, 4);
@@ -318,9 +318,7 @@ mp4lib.fields.BoxesListField.prototype.read = function(buf,pos,end){
         // Extented type?
         if (boxtype == "uuid"){
             var uuidFieldPos = (size == 1)?16:8;
-            // TODO : replace by constant ?
             var uuid = new mp4lib.fields.ArrayField(mp4lib.fields.FIELD_INT8, 16).read(buf, pos + uuidFieldPos, pos + uuidFieldPos + 16);
-            // TODO : why prototype is used here ??
             boxtype = mp4lib.boxes.Box.prototype.uuidToBoxTypes[JSON.stringify(uuid)];
             if (boxtype === undefined) {
                 boxtype = "uuid";
