@@ -4,6 +4,8 @@
   "private": true,
   "dependencies": {
     "express":"3.x",
-    "request":"*"
+    "request":"*",
+    "tunnel":"*",
+    "http-proxy":"*"
   }
 }
