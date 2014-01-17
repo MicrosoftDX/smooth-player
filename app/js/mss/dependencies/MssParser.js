@@ -487,6 +487,7 @@ Mss.dependencies.MssParser = function () {
             manifest.availabilityStartTime = new Date(mpdLoadedTime.getTime() - (manifest.timeShiftBufferDepth * 1000));
         }
 
+        period.start = 0;
         // Set adaptations presentation time offset 
         for (i = 0, len = adaptations.length; i < len; i += 1) {
             var representations = adaptations[i].Representation_asArray;
@@ -497,10 +498,8 @@ Mss.dependencies.MssParser = function () {
                 representations[j].SegmentTemplate.presentationTimeOffset = presentationTimeOffset;
             }
 
-            if (adaptations[i].contentType === "video")
-            {
-                period.start = parseFloat(presentationTimeOffset) / TIME_SCALE_100_NANOSECOND_UNIT;
-            }
+            var adaptationTimeOffset = parseFloat(presentationTimeOffset) / TIME_SCALE_100_NANOSECOND_UNIT;
+            period.start = (period.start === 0)?adaptationTimeOffset:Math.min(period.start, adaptationTimeOffset);
         }
     };
 
