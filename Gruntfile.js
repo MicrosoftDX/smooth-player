@@ -37,7 +37,7 @@ module.exports = function(grunt) {
         options: {
           compress:{
             pure_funcs: [
-              'self.debug.log',   /* that functions do not produce side effects so remove it ! */
+              'self.debug.log',   /* set this function « no side effects » so  you can remove it ! */
               'this.debug.log'
             ],
             drop_console : true,  /* remove console statements */
