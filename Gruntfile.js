@@ -34,6 +34,17 @@ module.exports = function(grunt) {
         }
       },
       all : {
+        options: {
+          compress:{
+            pure_funcs: [
+              'self.debug.log',   /* that functions do not produce side effects so remove it ! */
+              'this.debug.log'
+            ],
+            drop_console : true,  /* remove console statements */
+            drop_debugger: true,  /* remove debugger statements */
+            warnings: true        /* display compress warnings (lines removal for example) */
+          }
+        },
         files: {
           "dash.all.js" : [
             "./app/lib/q.min.js",
