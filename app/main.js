@@ -99,6 +99,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
         videoSeries = [],
         audioSeries = [],
         maxGraphPoints = 50,
+        firstAccess = true,
         updateInterval = 333;
 
     ////////////////////////////////////////
@@ -107,11 +108,54 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
     //
     ////////////////////////////////////////
 
+    function initMetrics() {
+
+        $scope.videoBitrate = 0;
+        $scope.videoIndex = 0;
+        $scope.videoPendingIndex = "";
+        $scope.videoMaxIndex = 0;
+        $scope.videoBufferLength = 0;
+        $scope.videoDroppedFrames = 0;
+        $scope.videoWidth = 0;
+        $scope.videoHeight = 0;
+        $scope.videoCodecs = "-";
+
+        $scope.audioBitrate = 0;
+        $scope.audioIndex = 0;
+        $scope.audioPendingIndex = "";
+        $scope.audioMaxIndex = 0;
+        $scope.audioBufferLength = 0;
+        $scope.audioDroppedFrames = 0;
+        $scope.audioCodecs = "-";
+
+        $('#sliderBitrate').labeledslider({
+            max: 0,
+            step: 1,
+            values: [0],
+            tickLabels: [],
+            orientation: 'vertical',
+            range: true,
+            stop: function(evt, ui) {
+                //player.setQualityBoundariesFor("video", ui.values[0], ui.values[1]);
+            }
+        });
+        $('#sliderAudio').labeledslider({
+            max:0,
+            step:1,
+            orientation:'vertical',
+            range:false,
+            tickLabels: [],
+        });
+        firstAccess=true;
+    }
+
+
     initMetrics();
 
     var converter = new MetricsTreeConverter();
     $scope.videoMetrics = null;
     $scope.audioMetrics = null;
+    $scope.audioTrackList  = [];
 
     $scope.getVideoTreeMetrics = function () {
         var metrics = player.getMetricsFor("video");
@@ -124,6 +168,25 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
         var metricsExt = player.getMetricsExt();
         $scope.audioMetrics = converter.toTreeViewDataSource(metrics,metricsExt);
     };
+
+    function initAudioTracks(){
+        var  audioDatas=  player.getAudioTracks();
+        $scope.audioTrackList = audioDatas;
+        $scope.audioLang = audioDatas[0] ? audioDatas[0].id + "- "+audioDatas[0].lang : "";
+        var audioLabels = [];
+        var audioValues = [];
+        for(var j = 0; j<audioDatas.length;j++){
+            audioLabels.push(audioDatas[j].id + "- "+audioDatas[j].lang);
+            audioValues.push(j);
+        }
+        $('#sliderAudio').labeledslider({ max: audioValues.length - 1, step: 1,value:0, tickLabels: audioLabels});
+        $('#sliderAudio').labeledslider({stop: function( event, ui ) {
+            //console.info("slider audio ::", event, ui, ui.value);
+            $scope.audioLang = $scope.audioTrackList[ui.value].id + "- "+$scope.audioTrackList[ui.value].lang;
+            player.setAudioTrack( $scope.audioTrackList[ui.value],ui.value);
+        }});
+    }
+
 
     function getCribbedMetricsFor(type) {
         var metrics = player.getMetricsFor(type),
@@ -223,38 +286,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
         }
     }
 
-    function initMetrics() {
-
-        $scope.videoBitrate = 0;
-        $scope.videoIndex = 0;
-        $scope.videoPendingIndex = "";
-        $scope.videoMaxIndex = 0;
-        $scope.videoBufferLength = 0;
-        $scope.videoDroppedFrames = 0;
-        $scope.videoWidth = 0;
-        $scope.videoHeight = 0;
-        $scope.videoCodecs = "-";
-
-        $scope.audioBitrate = 0;
-        $scope.audioIndex = 0;
-        $scope.audioPendingIndex = "";
-        $scope.audioMaxIndex = 0;
-        $scope.audioBufferLength = 0;
-        $scope.audioDroppedFrames = 0;
-        $scope.audioCodecs = "-";
-
-        $('#sliderBitrate').labeledslider({
-            max: 0,
-            step: 1,
-            values: [0],
-            tickLabels: [],
-            orientation: 'vertical',
-            range: true,
-            stop: function(evt, ui) {
-                //player.setQualityBoundariesFor("video", ui.values[0], ui.values[1]);
-            }
-        });
-    }
+    
 
     function update() {
         var metrics,
@@ -297,6 +329,12 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
 
         metrics = getCribbedMetricsFor("audio");
         if (metrics) {
+            //to avoid update tree on each update we do it one time
+            if(firstAccess){
+               initAudioTracks();
+               firstAccess = false;
+            }
+            
             $scope.audioBitrate = metrics.bandwidthValue;
             $scope.audioIndex = metrics.bitrateIndexValue;
             $scope.audioPendingIndex = metrics.pendingIndex;
@@ -305,8 +343,11 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
             $scope.audioDroppedFrames = metrics.droppedFramesValue;
             $scope.audioCodecs = metrics.codecsValue;
 
+            //console.info("audioIndex : ",$scope.audioIndex);
+
             point = [parseFloat(video.currentTime), Math.round(parseFloat(metrics.bufferLengthValue))];
             audioSeries.push(point);
+
 
             if (audioSeries.length > maxGraphPoints) {
                 audioSeries.splice(0, 1);
@@ -357,12 +398,12 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
     $scope.showCharts = false;
     $scope.setCharts = function (show) {
         $scope.showCharts = show;
-    }
+    };
 
     $scope.showDebug = false;
     $scope.setDebug = function (show) {
         $scope.showDebug = show;
-    }
+    };
 
     ////////////////////////////////////////
     //
@@ -373,6 +414,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
     video = document.querySelector(".dash-video-player video");
     context = new Custom.di.CustomContext();
     player = new MediaPlayer(context);
+
     
     $scope.version = player.getVersion();
 
@@ -393,7 +435,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
     $scope.setAbrEnabled = function (enabled) {
         $scope.abrEnabled = enabled;
         player.setAutoSwitchQuality(enabled);
-    }
+    };
 
     $scope.abrUp = function (type) {
         var newQuality,
@@ -406,7 +448,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
             newQuality = max - 1;
         }
         player.setQualityFor(type, newQuality);
-    }
+    };
 
     $scope.abrDown = function (type) {
         var newQuality = player.getQualityFor(type) - 1;
@@ -414,7 +456,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
             newQuality = 0;
         }
         player.setQualityFor(type, newQuality);
-    }
+    };
 
     ////////////////////////////////////////
     //
@@ -471,7 +513,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
         else {
             return (str.indexOf(filterValue) != -1);
         }
-    }
+    };
 
     Sources.query(function (data) {
         $scope.availableStreams = data.items;
@@ -495,20 +537,21 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
 
     $scope.setStream = function (item) {
         $scope.selectedItem = item;
-    }
+    };
 
     $scope.doLoad = function () {
+
         initMetrics();
         player.attachSource($scope.selectedItem.url);
         setTimeout(update, updateInterval);
-    }
+    };
 
     $scope.hasLogo = function (item) {
         return (item.hasOwnProperty("logo")
                 && item.logo !== null
                 && item.logo !== undefined
                 && item.logo !== "");
-    }
+    };
 
     // Get initial stream if it was passed in.
     var paramUrl = null;

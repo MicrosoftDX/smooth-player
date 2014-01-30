@@ -22,6 +22,7 @@ Custom.di.CustomContext = function () {
             this.system.mapSingleton('metricsModel', Custom.models.CustomMetricsModel);
             this.system.mapSingleton('metricsExt', Custom.dependencies.CustomMetricsExtensions);
             this.system.mapSingleton('abrController', Custom.dependencies.CustomAbrController);
+            this.system.mapClass('bufferController', Custom.dependencies.CustomBufferController);
 
             // plug message handler. When the message is notify, the contextManager is called
             this.system.mapHandler('setContext', 'contextManager', 'setContext');

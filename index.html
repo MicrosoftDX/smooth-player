@@ -141,6 +141,7 @@
     <script src="app/js/custom/dependencies/CustomParser.js"></script>
     <script src="app/js/custom/dependencies/CustomFragmentLoader.js"></script>
     <script src="app/js/custom/dependencies/CustomAbrController.js"></script>
+    <script src="app/js/custom/dependencies/CustomBufferController.js"></script>
     <script src="app/js/custom/di/CustomContext.js"></script>
     <script src="app/js/custom/models/CustomMetricsModel.js"></script>
     <script src="app/js/custom/modules/ContextManager.js"></script>
@@ -258,7 +259,8 @@
                 </div>
                 <div class="panel">
                     <div class="panel-heading panel-top">
-                        <span class="panel-title">Audio</span>
+                        <span class="panel-title">Audio<br/> {{audioLang}}</span>
+                         <div class="btn-group"><div id="sliderAudio"></div></div>
                         <!--div class="btn-group">
                             <button
                                 type="button"
