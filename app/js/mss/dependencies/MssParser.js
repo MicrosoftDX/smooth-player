@@ -518,7 +518,7 @@ Mss.dependencies.MssParser = function () {
         manifest = converter.xml_str2json(data);
 
         if (manifest === null) {
-            this.logger.error("[MssParser]", "Failed to parse manifest!!");
+            this.debug.error("[MssParser]", "Failed to parse manifest!!");
             return Q.when(null);
         }
 
