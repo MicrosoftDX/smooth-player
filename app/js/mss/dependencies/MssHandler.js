@@ -130,6 +130,12 @@ Mss.dependencies.MssHandler = function() {
 					media.codecPrivateData = realRepresentation.codecPrivateData;
 					media.bandwidth = realRepresentation.bandwidth;
 
+					//DRM Protected Adaptation is detected
+					if (realAdaptation.ContentProtection != undefined)
+					{
+						media.contentProtection = realAdaptation.ContentProtection;
+					};
+
 					// Video related informations
 					media.width = realRepresentation.width || realAdaptation.maxWidth;
 					media.height = realRepresentation.height || realAdaptation.maxHeight;

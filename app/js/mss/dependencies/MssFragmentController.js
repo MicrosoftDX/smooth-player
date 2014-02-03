@@ -106,6 +106,7 @@ Mss.dependencies.MssFragmentController = function () {
             var trackId = getIndex(adaptation, manifest) + 1; // +1 since track_id shall start from '1'
 
             // Create new fragment
+            //debugger;
             var fragment = new mp4lib.boxes.File();
             var processor = new mp4lib.fieldProcessors.DeserializationBoxFieldsProcessor(fragment, data, 0, data.length);
             fragment._processFields(processor);
@@ -117,6 +118,55 @@ Mss.dependencies.MssFragmentController = function () {
             var traf = mp4lib.helpers.getBoxByType(moof, "traf");
             var trun = mp4lib.helpers.getBoxByType(traf, "trun");
             var tfhd = mp4lib.helpers.getBoxByType(traf, "tfhd");
+            
+            //if protected content
+            var sepiff = mp4lib.helpers.getBoxByType(traf,"sepiff");
+            if(sepiff !== null)
+            {
+                //debugger;
+                sepiff.boxtype = "senc";
+                // Create Sample Auxiliary Information Offsets Box box (saio) 
+                var saio = new mp4lib.boxes.SampleAuxiliaryInformationOffsetsBox();
+                saio.version = 0;
+                saio.flags = 0;
+                saio.entry_count = 1;
+                saio.offset = [];
+                //debugger;
+                //saio.offset[0] = sepiff.size;
+
+                var saiz = new mp4lib.boxes.SampleAuxiliaryInformationSizesBox();
+                saiz.version = 0;
+                saiz.flags = 0;
+                saiz.sample_count = sepiff.sample_count;
+                saiz.default_sample_info_size = 0;
+
+                saiz.sample_info_size = [];
+                //debugger;
+                var sizedifferent = false;
+                for (var i = 0; i < sepiff.sample_count; i++) 
+                {
+                    saiz.sample_info_size[i] = 8+(sepiff.entry[i].NumberOfEntries*6)+2;
+                    //8 (Init vector size) + NumberOfEntries*(clear (2) +crypted (4))+ 2 (numberofEntries size (2))
+                    if(i>1)
+                    {
+                        if (saiz.sample_info_size[i] != saiz.sample_info_size[i-1])
+                        {
+                            sizedifferent = true;
+                        }
+                    }
+                };
+
+                if (sizedifferent === false)
+                {
+                    debugger;
+                    saiz.default_sample_info_size = saiz.sample_info_size[0];
+                    saiz.sample_info_size = [];
+                };
+
+                traf.boxes.push(saiz);
+                traf.boxes.push(saio);
+                //add saio and saiz box
+            }
 
             // Update tfhd.track_ID field
             tfhd.track_ID = trackId;
@@ -147,6 +197,17 @@ Mss.dependencies.MssFragmentController = function () {
             tfhd.flags |= 0x020000; // set tfhd.default-base-is-moof to true
             trun.flags |= 0x000001; // set trun.data-offset-present to true
             trun.data_offset = 0;   // Set a default value for trun.data_offset
+            //debugger;
+            if(sepiff !== null)
+            {
+                //+8 => box size + type
+                var moofpositionInFragment = mp4lib.helpers.getBoxPositionByType(fragment,"moof")+8;
+                var trafpositionInMoof = mp4lib.helpers.getBoxPositionByType(moof,"traf")+8;
+                var sencpositionInTraf = mp4lib.helpers.getBoxPositionByType(traf,"senc")+8;
+
+                saio.offset[0] = moofpositionInFragment+trafpositionInMoof+sencpositionInTraf+8;//flags (3) + version (1) + sampleCount (4)
+                //debugger;
+            }
 
             // Determine new size of the converted fragment
             // and allocate new data buffer
