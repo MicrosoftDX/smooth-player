@@ -374,6 +374,7 @@ Dash.dependencies.DashManifestExtensions.prototype = {
 
     getContentProtectionData: function (data) {
         "use strict";
+
         if (!data || !data.hasOwnProperty("ContentProtection_asArray") || data.ContentProtection_asArray.length === 0) {
             return Q.when(null);
         }
