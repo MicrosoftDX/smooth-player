@@ -1138,7 +1138,6 @@ mp4lib.boxes.PiffTrackEncryptionBox.prototype.uuid = [0x89, 0x74, 0xDB, 0xCE, 0x
 
 mp4lib.boxes.PiffTrackEncryptionBox.prototype._processFields = function(processor) {
     mp4lib.boxes.FullBox.prototype._processFields.call(this,processor);
-    debugger;
 };
 
 mp4lib.boxes.Box.prototype.registerBoxType(mp4lib.boxes.PiffTrackEncryptionBox);
@@ -1151,7 +1150,6 @@ mp4lib.boxes.PiffProtectionSystemSpecificHeaderBox.prototype.uuid = [0xD0, 0x8A,
 
 mp4lib.boxes.PiffProtectionSystemSpecificHeaderBox.prototype._processFields = function(processor) {
     mp4lib.boxes.FullBox.prototype._processFields.call(this,processor);
-    debugger;
 };
 
 mp4lib.boxes.Box.prototype.registerBoxType(mp4lib.boxes.PiffProtectionSystemSpecificHeaderBox);
