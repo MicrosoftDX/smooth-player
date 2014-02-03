@@ -569,7 +569,6 @@ MediaPlayer.dependencies.Mp4Processor = function () {
             
             if (media.contentProtection != undefined)
             {
-                debugger;
                 // create and add Protection Scheme Info Box
                 mp4a.boxes.push(createProtectionSchemeInfoBox(media));
             }
@@ -748,7 +747,6 @@ MediaPlayer.dependencies.Mp4Processor = function () {
         },
 
         doGenerateInitSegment = function (media) {
-            //debugger;
             // Create file
             var moov_file = new mp4lib.boxes.File();
             moov_file.boxes = [];
@@ -781,9 +779,6 @@ MediaPlayer.dependencies.Mp4Processor = function () {
             var data = new Uint8Array(lp.res);
             var sp = new mp4lib.fieldProcessors.SerializationBoxFieldsProcessor(moov_file, data, 0);
             moov_file._processFields(sp);
-            //debugger;
-
-            //console.saveBinArray(data, "init_"+media.type+".mp4");
 
             return data;
         };

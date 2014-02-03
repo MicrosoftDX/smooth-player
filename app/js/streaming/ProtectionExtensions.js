@@ -81,8 +81,6 @@ MediaPlayer.dependencies.ProtectionExtensions.prototype = {
                     parser = new DOMParser(),
                     xmlDoc = parser.parseFromString(msg, "application/xml");
 
-                    debugger;
-
                 if (xmlDoc.getElementsByTagName("Challenge")[0]) {
                     var Challenge = xmlDoc.getElementsByTagName("Challenge")[0].childNodes[0].nodeValue;
                     if (Challenge) {
@@ -121,7 +119,6 @@ MediaPlayer.dependencies.ProtectionExtensions.prototype = {
                     deferred.reject('DRM: playready update, XHR aborted. status is "' + xhr.statusText + '" (' + xhr.status + '), readyState is ' + xhr.readyState);
                 };
                 xhr.onerror = function () {
-                    debugger;
                     deferred.reject('DRM: playready update, XHR error. status is "' + xhr.statusText + '" (' + xhr.status + '), readyState is ' + xhr.readyState);
                 };
 
