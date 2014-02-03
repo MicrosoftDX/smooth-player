@@ -276,6 +276,7 @@ MediaPlayer.dependencies.BufferController = function () {
                 currentVideoTime = self.videoModel.getCurrentTime(),
                 currentTime = new Date();
 
+
             self.debug.log("Push (" + type + ") bytes: " + data.byteLength);
 
             if (playListTraceMetricsClosed === true && state !== WAITING && lastQuality !== -1) {
@@ -360,7 +361,6 @@ MediaPlayer.dependencies.BufferController = function () {
                     );
                 }
             );
-
             return deferred.promise;
         },
 
@@ -696,7 +696,6 @@ MediaPlayer.dependencies.BufferController = function () {
 
         onFragmentRequest = function (request) {
             var self = this;
-
             if (request !== null) {
                 // If we have already loaded the given fragment ask for the next one. Otherwise prepare it to get loaded
                 if (self.fragmentController.isFragmentLoadedOrPending(self, request)) {

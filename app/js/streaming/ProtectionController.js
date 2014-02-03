@@ -54,6 +54,8 @@ MediaPlayer.dependencies.ProtectionController = function () {
                 return;
             }
 
+            debugger;
+
             initData = self.protectionModel.getInitData(kid);
 
             if (!initData && !!eventInitData) {
@@ -76,9 +78,11 @@ MediaPlayer.dependencies.ProtectionController = function () {
         updateFromMessage = function (kid, session, msg, laURL) {
             var self = this,
                 result;
+                debugger;
             result = self.protectionModel.updateFromMessage(kid, msg, laURL);
             result.then(
                 function (data) {
+                    debugger;
                     session.update(data);
             });
             return result;

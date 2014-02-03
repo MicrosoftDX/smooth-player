@@ -90,8 +90,11 @@ MediaPlayer.dependencies.Stream = function () {
             var self = this,
                 type;
 
+
             type = (event.type !== "msneedkey") ? event.type : videoCodec;
             initData.push({type: type, initData: event.initData});
+
+            debugger;
 
             this.debug.log("DRM: Key required for - " + type);
             //this.debug.log("DRM: Generating key request...");
@@ -103,6 +106,7 @@ MediaPlayer.dependencies.Stream = function () {
                 }
                 catch (error)
                 {
+                    debugger;
                     pause.call(self);
                     self.debug.log(error);
                     self.errHandler.mediaKeySystemSelectionError(error);
@@ -121,15 +125,17 @@ MediaPlayer.dependencies.Stream = function () {
                 msg = null,
                 laURL = null;
 
+
             this.debug.log("DRM: Got a key message...");
 
             session = event.target;
             bytes = new Uint16Array(event.message.buffer);
             msg = String.fromCharCode.apply(null, bytes);
             laURL = event.destinationURL;
-
+debugger;
             self.protectionController.updateFromMessage(kid, session, msg, laURL).fail(
                 function (error) {
+                    debugger;
                     pause.call(self);
                     self.debug.log(error);
                     self.errHandler.mediaKeyMessageError(error);
@@ -146,11 +152,13 @@ MediaPlayer.dependencies.Stream = function () {
 
         onMediaSourceKeyAdded = function () {
             this.debug.log("DRM: Key added.");
+            debugger;
         },
 
         onMediaSourceKeyError = function () {
             var session = event.target,
                 msg;
+                debugger;
             msg = 'DRM: MediaKeyError - sessionId: ' + session.sessionId + ' errorCode: ' + session.error.code + ' systemErrorCode: ' + session.error.systemCode + ' [';
             switch (session.error.code) {
                 case 1:
@@ -507,6 +515,7 @@ MediaPlayer.dependencies.Stream = function () {
         },
 
         onError = function (event) {
+            debugger;
             var error = event.srcElement.error,
                 code = error.code,
                 msg = "";

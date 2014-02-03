@@ -358,7 +358,17 @@ MediaPlayer.dependencies.Mp4Processor = function () {
         createAVCVisualSampleEntry = function (media) {
 
             //An AVC visual sample entry shall contain an AVC Configuration Box
-            var avc1 = new mp4lib.boxes.AVC1VisualSampleEntryBox();
+            var avc1 = null;
+
+            if (media.contentProtection !== undefined)
+            {
+                avc1 = new mp4lib.boxes.EncryptedVideoBox();
+            }
+            else
+            {
+                avc1 = new mp4lib.boxes.AVC1VisualSampleEntryBox();
+            }
+
             avc1.boxes = [];
 
             avc1.data_reference_index = 1; //To DO... ??
@@ -382,8 +392,71 @@ MediaPlayer.dependencies.Mp4Processor = function () {
             
             //create and add AVC Configuration Box (avcC)
             avc1.boxes.push(createAVCConfigurationBox(media));
+
+            if (media.contentProtection != undefined)
+            {
+                // create and add Protection Scheme Info Box
+                avc1.boxes.push(createProtectionSchemeInfoBox(media));
+            }
            
             return avc1;
+        },
+
+        createOriginalFormatBox = function (media) {
+            var frma = new mp4lib.boxes.OriginalFormatBox();
+            frma.data_format = stringToCharCode(media.codecs.substring(0, media.codecs.indexOf('.')));
+
+            return frma;
+        },
+
+        createSchemeTypeBox = function () {
+            var schm = new mp4lib.boxes.SchemeTypeBox();
+
+            schm.flags=0;
+            schm.version=0;
+            schm.scheme_type = 0x63656E63; //'cenc' => common encryption
+            schm.scheme_version = 0x00010000;// version set to 0x00010000 (Major version 1, Minor version 0)
+
+            return schm;
+        },
+
+        createSchemeInformationBox = function (media) {
+            var schi = new mp4lib.boxes.SchemeInformationBox();
+            schi.boxes = [];
+
+            //create and add Track Encryption Box
+            schi.boxes.push(createTrackEncryptionBox(media));
+
+            return schi;
+        },
+
+        createTrackEncryptionBox = function (media) {
+            var tenc = new mp4lib.boxes.TrackEncryptionBox();
+            
+            tenc.default_IsEncrypted = 0x1; //default value
+            tenc.default_IV_size = 8; //default value, NA => à préciser
+            tenc.default_KID = [];
+
+            //tenc.default_KID = _hexstringtoBuffer(media.contentProtection['cenc:default_KID'].replace(/[^A-Fa-f0-9]/g, ""));
+
+            return tenc;
+        },
+
+        createProtectionSchemeInfoBox = function (media) {
+            //create Protection Scheme Info Box
+            var sinf = new mp4lib.boxes.ProtectionSchemeInformationBox();
+            sinf.boxes = [];
+
+            //create and add Original Format Box => indicate codec type of the encrypted content         
+            sinf.boxes.push(createOriginalFormatBox(media));
+
+            //create and add Scheme Type box            
+            sinf.boxes.push(createSchemeTypeBox());
+
+            //create and add Scheme Information Box
+            sinf.boxes.push(createSchemeInformationBox(media));
+            
+            return sinf;
         },
 
         createVisualSampleEntry = function (media) {
@@ -460,7 +533,17 @@ MediaPlayer.dependencies.Mp4Processor = function () {
         },
 
         createMP4AudioSampleEntry = function (media) {
-            var mp4a = new mp4lib.boxes.MP4AudioSampleEntryBox();
+            var mp4a = null;
+
+            if (media.contentProtection !== undefined)
+            {
+                mp4a = new mp4lib.boxes.EncryptedAudioBox();
+            }
+            else
+            {
+                mp4a = new mp4lib.boxes.MP4AudioSampleEntryBox();
+            }
+
             mp4a.boxes = [];
 
             // SampleEntry fields
@@ -483,6 +566,13 @@ MediaPlayer.dependencies.Mp4Processor = function () {
 
             // MP4AudioSampleEntry fields
             mp4a.boxes.push(esdBox);
+            
+            if (media.contentProtection != undefined)
+            {
+                debugger;
+                // create and add Protection Scheme Info Box
+                mp4a.boxes.push(createProtectionSchemeInfoBox(media));
+            }
 
             return mp4a;
         },
@@ -499,7 +589,7 @@ MediaPlayer.dependencies.Mp4Processor = function () {
                 break;
             }
 
-            return null;   
+            return null;
         },
         
         createSampleDescriptionBox = function (media) {
@@ -638,8 +728,27 @@ MediaPlayer.dependencies.Mp4Processor = function () {
             return mvex;
         },
 
-        doGenerateInitSegment = function (media) {
+        createProtectionSystemSpecificHeaderBox = function (media) {
+            var pssh = new mp4lib.boxes.ProtectionSystemSpecificHeaderBox();
 
+            pssh.version = 0; //default value
+            pssh.flags = 0; //default value
+
+            //get hexadecimal value from SS manifest
+            //remove 'urn:uuid:' and '-' characters
+            var schemeIdUri = media.contentProtection.schemeIdUri.substring(8).replace(/[^A-Fa-f0-9]/g, "");
+            //convert string to hexadecimal value
+            pssh.SystemID = _hexstringtoBuffer(schemeIdUri);
+            //get protection header
+            var array = BASE64.decodeArray(media.contentProtection.pro.__text);
+            pssh.DataSize = array.length;
+            pssh.Data = array;
+
+            return pssh;
+        },
+
+        doGenerateInitSegment = function (media) {
+            //debugger;
             // Create file
             var moov_file = new mp4lib.boxes.File();
             moov_file.boxes = [];
@@ -657,6 +766,12 @@ MediaPlayer.dependencies.Mp4Processor = function () {
             // Create and add MovieExtends box (mvex)
             moov.boxes.push(createMovieExtendsBox(media));
 
+            //Create and add Protection System Specific Header box (pssh)
+            if (media.contentProtection != undefined) 
+            {
+                moov.boxes.push(createProtectionSystemSpecificHeaderBox(media));
+            }
+
             moov_file.boxes.push(createFileTypeBox());
 
             moov_file.boxes.push(moov);
@@ -666,6 +781,9 @@ MediaPlayer.dependencies.Mp4Processor = function () {
             var data = new Uint8Array(lp.res);
             var sp = new mp4lib.fieldProcessors.SerializationBoxFieldsProcessor(moov_file, data, 0);
             moov_file._processFields(sp);
+            //debugger;
+
+            //console.saveBinArray(data, "init_"+media.type+".mp4");
 
             return data;
         };

@@ -230,7 +230,6 @@
                 sIdx,
                 period,
                 stream;
-
             if (!manifest) {
                 return Q.when(false);
             }
