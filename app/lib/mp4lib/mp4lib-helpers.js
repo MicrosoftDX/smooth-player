@@ -68,6 +68,19 @@ mp4lib.helpers.getBoxByType = function(box, boxType) {
     return null;
 };
 
+mp4lib.helpers.getBoxPositionByType = function(box, boxType) {
+    var position = 0;
+    for(var i = 0; i < box.boxes.length; i++) {
+        if(box.boxes[i].boxtype === boxType) {
+            return position;
+        }else
+        {
+            position += box.boxes[i].size;
+        }
+    }
+    return null;
+};
+
 mp4lib.helpers.removeBoxByType = function(box, boxType) {
     for(var i = 0; i < box.boxes.length; i++) {
         if(box.boxes[i].boxtype === boxType) {
