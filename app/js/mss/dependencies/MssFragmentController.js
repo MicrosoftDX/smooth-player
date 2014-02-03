@@ -34,7 +34,9 @@ Mss.dependencies.MssFragmentController = function () {
 
         processTfrf = function(tfrf, adaptation) {
 
-            // Get last timestamp of current timeline
+            var segmentsUpdated = false;
+
+            // Get adaptation's segment timeline (always a SegmentTimeline in Smooth Streaming use case)
             var segments = adaptation.SegmentTemplate.SegmentTimeline.S;
 
             // Go through entries
@@ -62,11 +64,42 @@ Mss.dependencies.MssFragmentController = function () {
                             'd': fragment_duration
                         });
                     }
+                    segmentsUpdated = true;
                 }
             }
+
+            // In case we have added some segments, we also check if some out of date segments
+            // may not been removed
+            if (segmentsUpdated)
+            {
+                var manifest = rslt.manifestModel.getValue();
+
+                var currentTime = new Date();
+                var presentationStartTime = currentTime.getTime() - manifest.mpdLoadedTime.getTime();
+                presentationStartTime = (presentationStartTime * 10000) + adaptation.SegmentTemplate.presentationTimeOffset;
+
+                var segment = segments[0];
+                while (segment.t < presentationStartTime)
+                {
+                    if ((segment.r !== undefined) && (segment.r > 0))
+                    {
+                        segment.t += segment.d;
+                        segment.r -= 1;
+                    }
+                    else
+                    {
+                        segments.splice(0, 1);
+                    }
+                    segment = segments[0];
+                }
+            }
+
+            return segmentsUpdated;
         },
 
         convertFragment = function (data, request, adaptation) {
+
+            var segmentsUpdated = false;
 
             // Get track id corresponding to adaptation set
             var manifest = rslt.manifestModel.getValue();
@@ -105,8 +138,8 @@ Mss.dependencies.MssFragmentController = function () {
             var tfrf = mp4lib.helpers.getBoxByType(traf, "tfrf");
             if (tfrf !== null)
             {
-                processTfrf(tfrf, adaptation);
-                mp4lib.helpers.removeBoxByType(traf, "tfrf");             
+                segmentsUpdated = processTfrf(tfrf, adaptation);
+                mp4lib.helpers.removeBoxByType(traf, "tfrf");                
             }
 
             // Before determining new size of the converted fragment we update some box flags related to data offset
@@ -128,7 +161,10 @@ Mss.dependencies.MssFragmentController = function () {
             var sp = new mp4lib.fieldProcessors.SerializationBoxFieldsProcessor(fragment, new_data, 0);
             fragment._processFields(sp);
 
-            return new_data;
+            return {
+                bytes: new_data,
+                segmentsUpdated: segmentsUpdated
+            };
         };
     
     var rslt = Custom.utils.copyMethods(MediaPlayer.dependencies.FragmentController);
@@ -136,16 +172,31 @@ Mss.dependencies.MssFragmentController = function () {
     rslt.manifestModel = undefined;
     rslt.mp4Processor = undefined;
 
-    rslt.process = function (bytes, request, adaptation) {
+    rslt.process = function (bytes, request, representations) {
+
         var result = null;
 
         if (bytes !== null && bytes !== undefined && bytes.byteLength > 0) {
             result = new Uint8Array(bytes);
         }
 
-        if (request && (request.type === "Media Segment"))
+        if (request && (request.type === "Media Segment") && representations && (representations.length > 0))
         {
-            result = convertFragment(result, request, adaptation);
+            // Get adaptation containing provided representations
+            // (Note: here representations is of type Dash.vo.Representation)
+            var manifest = this.manifestModel.getValue();
+            var adaptation = manifest.Period_asArray[representations[0].adaptation.period.index].AdaptationSet_asArray[representations[0].adaptation.index];
+            var res = convertFragment(result, request, adaptation);
+            result = res.bytes;
+            if (res.segmentsUpdated === true)
+            {
+                // If some segments have been added or removed, then
+                // we reset the list of segments for each representation
+                for (var i = 0; i < representations.length; i++)
+                {
+                    representations[i].segments = null;
+                }
+            }
             //console.saveBinArray(result, request.streamType + "_" + request.quality + "_" + request.index + ".mp4");
         }
 

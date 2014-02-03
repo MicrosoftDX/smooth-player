@@ -231,23 +231,41 @@ Mss.dependencies.MssParser = function () {
         mpd.children = [];
         mpd.properties = common;
         mpd.transformFunc = function(node) {
+            var duration = (node.Duration === 0)?Infinity:node.Duration;
             if(this.isTransformed) {
                 return node;
             }
             //used to not transfor it an other time !
             this.isTransformed = true;
+
+            if( node.Protection !== undefined )
+            {
             return {
                 profiles: "urn:mpeg:dash:profile:isoff-live:2011",
                 type: node.IsLive ? "dynamic" : "static",
-                timeShiftBufferDepth: node.DVRWindowLength,
-                mediaPresentationDuration : parseFloat(node.Duration) / TIME_SCALE_100_NANOSECOND_UNIT,
+                timeShiftBufferDepth: parseFloat(node.DVRWindowLength) / TIME_SCALE_100_NANOSECOND_UNIT,
+                mediaPresentationDuration : parseFloat(duration) / TIME_SCALE_100_NANOSECOND_UNIT,
                 BaseURL: node.BaseURL,
                 Period: node,
                 Period_asArray: [node],
                 minBufferTime : 10,
                 ContentProtection : node.Protection.ProtectionHeader,
                 ContentProtection_asArray : node.Protection_asArray
-            };
+                };
+            }
+            else    
+            {
+                return {
+                    profiles: "urn:mpeg:dash:profile:isoff-live:2011",
+                    type: node.IsLive ? "dynamic" : "static",
+                    timeShiftBufferDepth: parseFloat(node.DVRWindowLength) / TIME_SCALE_100_NANOSECOND_UNIT,
+                    mediaPresentationDuration : parseFloat(duration) / TIME_SCALE_100_NANOSECOND_UNIT,
+                    BaseURL: node.BaseURL,
+                    Period: node,
+                    Period_asArray: [node],
+                    minBufferTime : 10
+                };
+            }
         };
         mpd.isTransformed = false;
 
@@ -259,12 +277,21 @@ Mss.dependencies.MssParser = function () {
         contentProtection.children = [];
         //here node is Protection
         contentProtection.transformFunc = function(node){
-
+            node.pro = {
+                    __text : node.__text,
+                    __prefix : "mspr"
+                };
+                
+            //remove {}
+            if (node.SystemID[0]=="{") {
+                node.SystemID = node.SystemID.substring(1,node.SystemID.length-1);
+            }
+            
             return{
-                schemeIdUri : node.SystemID,
-                value : "2.0",
-                'cenc:default_KID' : "10000000-1000-1000-1000-100000000001",
-                'mspr:pro' : node.__text
+                schemeIdUri : "urn:uuid:"+node.SystemID,
+                value : 2,
+                pro : node.pro,
+                pro_asArray : node.pro
             };
         };
         mpd.children.push(contentProtection);
@@ -278,8 +305,9 @@ Mss.dependencies.MssParser = function () {
         period.properties = common;
         // here node is SmoothStreamingMedia node
         period.transformFunc = function(node) {
+            var duration = (node.Duration === 0)?Infinity:node.Duration;
             return {
-                duration: parseFloat(node.Duration) / TIME_SCALE_100_NANOSECOND_UNIT,
+                duration: parseFloat(duration) / TIME_SCALE_100_NANOSECOND_UNIT,
                 BaseURL: node.BaseURL,
                 AdaptationSet: node.StreamIndex,
                 AdaptationSet_asArray: node.StreamIndex_asArray
@@ -299,7 +327,7 @@ Mss.dependencies.MssParser = function () {
             var adaptTransformed = {
                 id: node.Name,
                 lang: node.Language,
-                contenType: node.Type,
+                contentType: node.Type,
                 mimeType: mimeTypeMap[node.Type],
                 maxWidth: node.MaxWidth,
                 maxHeight: node.MaxHeight,
@@ -399,21 +427,19 @@ Mss.dependencies.MssParser = function () {
         segmentTemplate.parent = adaptationSet;
         segmentTemplate.children = [];
         segmentTemplate.properties = common;
-        //here node is QualityLevel
+        //here node is StreamIndex
         segmentTemplate.transformFunc = function(node) {
-            //TODO put timescale in conf or const !
 
             var mediaUrl = node.Url.replace('{bitrate}','$Bandwidth$');
             mediaUrl = mediaUrl.replace('{start time}','$Time$');
             return {
                 media: mediaUrl,
                 //duration: node.Duration,
-                timescale: "10000000",
+                timescale: TIME_SCALE_100_NANOSECOND_UNIT,
                 SegmentTimeline: node
             };
         };
         adaptationSet.children.push(segmentTemplate);
-
 
         segmentTimeline = {};
         segmentTimeline.name = "SegmentTimeline";
@@ -422,8 +448,9 @@ Mss.dependencies.MssParser = function () {
         segmentTimeline.parent = segmentTemplate;
         segmentTimeline.children = [];
         segmentTimeline.properties = common;
-        //here node is QualityLevel
+        //here node is StreamIndex
         segmentTimeline.transformFunc = function(node) {
+
             if (node.c_asArray.length>1) {
                 var groupedSegments = [];
                 var segments = node.c_asArray;
@@ -454,9 +481,6 @@ Mss.dependencies.MssParser = function () {
                 node.c = groupedSegments;
             }
 
-            
-
-
             return {
                 S: node.c,
                 S_asArray: node.c_asArray
@@ -471,7 +495,7 @@ Mss.dependencies.MssParser = function () {
         segment.parent = segmentTimeline;
         segment.children = [];
         segment.properties = common;
-        //here node is QualityLevel
+        //here node is c (chunk)
         segment.transformFunc = function(node) {
             return {
                 d: node.d,
@@ -492,6 +516,47 @@ Mss.dependencies.MssParser = function () {
         result.push(getBaseUrlValuesMap());
 
         return result;
+    };
+
+    var processManifest = function (manifest) {
+
+        var period = manifest.Period_asArray[0],
+            adaptations = period.AdaptationSet_asArray,
+            i,
+            j,
+            len;
+
+        // In case of live streams, set availabilityStartTime property according to DVRWindowLength
+        if (manifest.type === "dynamic")
+        {
+            var mpdLoadedTime = new Date();
+            manifest.availabilityStartTime = new Date(mpdLoadedTime.getTime() - (manifest.timeShiftBufferDepth * 1000));
+        }
+
+        // Set adaptations presentation time offset 
+        for (i = 0, len = adaptations.length; i < len; i += 1) {
+            var representations = adaptations[i].Representation_asArray;
+            var fistSegment = representations[0].SegmentTemplate.SegmentTimeline.S_asArray[0];
+            var presentationTimeOffset = fistSegment.t;
+            for (j = 0; j < representations.length; j++)
+            {
+                representations[j].SegmentTemplate.presentationTimeOffset = presentationTimeOffset;
+            }
+
+            if (adaptations[i].contentType === "video")
+            {
+                period.start = parseFloat(presentationTimeOffset) / TIME_SCALE_100_NANOSECOND_UNIT;
+            }
+            if (manifest.ContentProtection !== undefined)
+            {
+                manifest.Period.AdaptationSet[i].ContentProtection = manifest.ContentProtection;
+                manifest.Period.AdaptationSet[i].ContentProtection_asArray = manifest.ContentProtection_asArray;
+            };
+        }
+
+        //Content Protection under manifest object must be deleted
+        delete manifest.ContentProtection;
+        delete manifest.ContentProtection_asArray;
     };
 
 
@@ -529,13 +594,8 @@ Mss.dependencies.MssParser = function () {
         this.debug.log("[MssParser]", "Flatten manifest properties.");
         manifest = iron.run(manifest);
 
-        for (var i = 0; i < manifest.Period.AdaptationSet.length; i++) {
-            manifest.Period.AdaptationSet[i].ContentProtection = manifest.ContentProtection;
-            manifest.Period.AdaptationSet[i].ContentProtection_asArray = manifest.ContentProtection_asArray;
-        }
-
-        delete manifest.ContentProtection;
-        delete manifest.ContentProtection_asArray;
+        // Post process manifest
+        processManifest.call(this, manifest);
 
         this.debug.log("[MssParser]", "Parsing complete.");
         console.log(manifest);
