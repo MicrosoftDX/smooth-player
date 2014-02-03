@@ -123,7 +123,6 @@ Mss.dependencies.MssFragmentController = function () {
             var sepiff = mp4lib.helpers.getBoxByType(traf,"sepiff");
             if(sepiff !== null)
             {
-                //debugger;
                 sepiff.boxtype = "senc";
                 // Create Sample Auxiliary Information Offsets Box box (saio) 
                 var saio = new mp4lib.boxes.SampleAuxiliaryInformationOffsetsBox();
@@ -131,9 +130,7 @@ Mss.dependencies.MssFragmentController = function () {
                 saio.flags = 0;
                 saio.entry_count = 1;
                 saio.offset = [];
-                //debugger;
-                //saio.offset[0] = sepiff.size;
-
+                
                 var saiz = new mp4lib.boxes.SampleAuxiliaryInformationSizesBox();
                 saiz.version = 0;
                 saiz.flags = 0;
@@ -141,8 +138,9 @@ Mss.dependencies.MssFragmentController = function () {
                 saiz.default_sample_info_size = 0;
 
                 saiz.sample_info_size = [];
-                //debugger;
+
                 var sizedifferent = false;
+                // get for each sample_info the size
                 for (var i = 0; i < sepiff.sample_count; i++) 
                 {
                     saiz.sample_info_size[i] = 8+(sepiff.entry[i].NumberOfEntries*6)+2;
@@ -155,17 +153,18 @@ Mss.dependencies.MssFragmentController = function () {
                         }
                     }
                 };
-
+                
+                //all the samples have the same size
+                //det default size and remove the table.
                 if (sizedifferent === false)
                 {
-                    debugger;
                     saiz.default_sample_info_size = saiz.sample_info_size[0];
                     saiz.sample_info_size = [];
                 };
 
+                //add saio and saiz box
                 traf.boxes.push(saiz);
                 traf.boxes.push(saio);
-                //add saio and saiz box
             }
 
             // Update tfhd.track_ID field
@@ -197,16 +196,15 @@ Mss.dependencies.MssFragmentController = function () {
             tfhd.flags |= 0x020000; // set tfhd.default-base-is-moof to true
             trun.flags |= 0x000001; // set trun.data-offset-present to true
             trun.data_offset = 0;   // Set a default value for trun.data_offset
-            //debugger;
+
             if(sepiff !== null)
             {
                 //+8 => box size + type
                 var moofpositionInFragment = mp4lib.helpers.getBoxPositionByType(fragment,"moof")+8;
                 var trafpositionInMoof = mp4lib.helpers.getBoxPositionByType(moof,"traf")+8;
                 var sencpositionInTraf = mp4lib.helpers.getBoxPositionByType(traf,"senc")+8;
-
+                // set offset from begin fragment to the first IV in senc box
                 saio.offset[0] = moofpositionInFragment+trafpositionInMoof+sencpositionInTraf+8;//flags (3) + version (1) + sampleCount (4)
-                //debugger;
             }
 
             // Determine new size of the converted fragment
