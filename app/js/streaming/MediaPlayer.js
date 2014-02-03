@@ -53,31 +53,15 @@ MediaPlayer = function (aContext) {
         autoPlay = true,
         scheduleWhilePaused = false,
         bufferMax = MediaPlayer.dependencies.BufferExtensions.BUFFER_SIZE_REQUIRED,
+        activeStream = null,
+       
 
         isReady = function () {
             return (!!element && !!source);
         },
 
         initLogger = function () {
-            /*var container = document.getElementById("logs");
-            var appender = new log4javascript.InPageAppender(container);
-
-            appender.addEventListener("load", function() {
-                var iframes = document.getElementsByTagName("iframe");
-                for (var i = 0, len = iframes.length; i < len; ++i) {
-                    if (iframes[i].id.indexOf("_InPageAppender_") > -1) {
-                        var iframeDoc = iframes[i].contentDocument || iframes[i].contentWindow.document;
-                        iframeDoc.getElementById("switchesContainer").style.display = "none";
-                        iframeDoc.getElementById("commandLine").style.display = "none";
-                    }
-                }
-            });*/
-
-           // var appender = new log4javascript.PopUpAppender();
-           // var layout = new log4javascript.PatternLayout("%d{HH:mm:ss.SSS} %-5p - %m%n");
-           // appender.setLayout(layout);
             this.logger.addAppender();
-            //this.logger.setLevel(log4javascript.Level.ALL);
         },
 
         play = function () {
@@ -85,7 +69,6 @@ MediaPlayer = function (aContext) {
             var self = this;
             
            // initLogger.call(this);
-
             this.debug.log("[MediaPlayer]", "play", source);
             if (!initialized) {
                 throw "MediaPlayer not initialized!";
@@ -123,6 +106,7 @@ MediaPlayer = function (aContext) {
     system.mapValue("system", system);
     system.mapOutlet("system");
     system.injectInto(context);
+
 
     return {
         debug: undefined,
@@ -212,6 +196,17 @@ MediaPlayer = function (aContext) {
         // ORANGE: add function to set manually representation boundaries for a media
         setQualityBoundariesFor: function (type, min, max) {
             this.metricsModel.addRepresentationBoundaries(type, new Date(), min, max);
+        },
+
+        //ORANGE : add function to swithc audioTracks for a media
+        setAudioTrack: function(audioTrack,audioTrackIndex){
+            console.info("set audiotTrack", audioTrack,audioTrackIndex,activeStream);
+            streamController.setAudioTrack(audioTrack);
+        },
+
+        //ORANGE: get the audio track list
+        getAudioTracks: function(){
+            return streamController.getAudioTracks();
         },
 
         attachView: function (view) {

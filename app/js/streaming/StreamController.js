@@ -29,6 +29,7 @@
         timeupdateListener,
         seekingListener,
         progressListener,
+        audioTracks,
 
         play = function () {
             activeStream.play();
@@ -278,11 +279,24 @@
 
             return deferred.promise;
         },
+        //ORANGE : create function to handle auditracks
+        updateAudioTracks = function(){
+            if(activeStream){
+                var self = this;
+                self.manifestExt.getAudioDatas(self.manifestModel.getValue(),activeStream.getPeriodIndex()).then(function(audiosDatas){
+                    audioTracks = audiosDatas;
+                    // fire event to notify that audiotracks have changed
 
+                    self.system.notify("audioTracksUpdated");
+                });
+            }
+        },
         manifestHasUpdated = function() {
             var self = this;
             composeStreams.call(self).then(
                 function() {
+                    //ORANGE : Update Audio Tracks List
+                    updateAudioTracks.call(self);
                     self.system.notify("streamsComposed");
                 }
             );
@@ -333,6 +347,18 @@
             this.videoModel = value;
         },
 
+        // ORANGE : audioTrack Management
+        getAudioTracks: function(){
+            return audioTracks;
+        },
+
+        setAudioTrack:function(audioTrack){
+            if(activeStream){
+                activeStream.setAudioTrack(audioTrack);
+            }
+        },
+
+        // ORANGE en  of modification
         load: function (url) {
             var self = this;
 

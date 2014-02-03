@@ -48,6 +48,8 @@ MediaPlayer.dependencies.Stream = function () {
         keyAddedListener,
         keyErrorListener,
 
+        
+
         play = function () {
             this.debug.log("Attempting play...");
 
@@ -789,6 +791,24 @@ debugger;
             this.videoModel.listen("loadedmetadata", loadedListener);
 
             this.requestScheduler.videoModel = value;
+        },
+
+        //ORANGE : add the capability to set audioTrack
+        setAudioTrack:function(audioTrack){
+            var deferredAudioUpdate = Q.defer();
+            if(audioController){
+                audioController.emptyBuffer().then(
+                    function(){
+                        console.info("update new data");
+                        audioController.updateData(audioTrack,periodInfo).then(function(){
+                            deferredAudioUpdate.resolve();
+                        });
+                    }
+                );
+            }else{
+                deferredAudioUpdate.reject();
+            }
+            return deferredAudioUpdate.promise;
         },
 
         initProtection: function() {

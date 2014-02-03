@@ -533,8 +533,10 @@ Mss.dependencies.MssParser = function () {
             manifest.availabilityStartTime = new Date(mpdLoadedTime.getTime() - (manifest.timeShiftBufferDepth * 1000));
         }
 
+        period.start = 0;
         // Set adaptations presentation time offset 
-        for (i = 0, len = adaptations.length; i < len; i += 1) {
+        for (i = 0, len = adaptations.length; i < len; i += 1) 
+        {
             var representations = adaptations[i].Representation_asArray;
             var fistSegment = representations[0].SegmentTemplate.SegmentTimeline.S_asArray[0];
             var presentationTimeOffset = fistSegment.t;
@@ -543,15 +545,14 @@ Mss.dependencies.MssParser = function () {
                 representations[j].SegmentTemplate.presentationTimeOffset = presentationTimeOffset;
             }
 
-            if (adaptations[i].contentType === "video")
-            {
-                period.start = parseFloat(presentationTimeOffset) / TIME_SCALE_100_NANOSECOND_UNIT;
-            }
+            var adaptationTimeOffset = parseFloat(presentationTimeOffset) / TIME_SCALE_100_NANOSECOND_UNIT;
+            period.start = (period.start === 0)?adaptationTimeOffset:Math.min(period.start, adaptationTimeOffset);
+
             if (manifest.ContentProtection !== undefined)
             {
                 manifest.Period.AdaptationSet[i].ContentProtection = manifest.ContentProtection;
                 manifest.Period.AdaptationSet[i].ContentProtection_asArray = manifest.ContentProtection_asArray;
-            };
+            }
         }
 
         //Content Protection under manifest object must be deleted
@@ -574,7 +575,7 @@ Mss.dependencies.MssParser = function () {
         manifest = converter.xml_str2json(data);
 
         if (manifest === null) {
-            this.logger.error("[MssParser]", "Failed to parse manifest!!");
+            this.debug.error("[MssParser]", "Failed to parse manifest!!");
             return Q.when(null);
         }
 
