@@ -1,6 +1,21 @@
 {
     "items": [
         {
+            "name": "DASH + PlayReady DRM",
+            "url": "http://wams.edgesuite.net/media/SintelTrailer_Smooth_from_WAME_720p_Main_Profile_CENC/CENC/sintel_trailer-720p.ism/manifest(format=mpd-time-csf)",
+            "browsers": "cdsbi"
+        },
+        {
+            "name": "Smooth + PlayReady DRM",
+            "url": "http://2is7server1.rd.francetelecom.com/VOD/selection-SD-DRM/selection-SD-DRM.ism/Manifest",
+            "browsers": "cdsbi"
+        },
+        {
+            "name": "Smooth + PlayReady DRM 2",
+            "url": "http://playready.directtaps.net/smoothstreaming/SSWSS720H264PR/SuperSpeedway_720.ism/Manifest",
+            "browsers": "cdsbi"
+        },
+        {
             "name": "Big Buck Bunny (Smooth - VOD)",
             "url": "http://2is7server1.rd.francetelecom.com/VOD/BBB-SD/big_buck_bunny_1080p_stereo.ism/Manifest",
             "browsers": "cdsbi"
