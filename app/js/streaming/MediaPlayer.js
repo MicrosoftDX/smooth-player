@@ -199,8 +199,7 @@ MediaPlayer = function (aContext) {
         },
 
         //ORANGE : add function to swithc audioTracks for a media
-        setAudioTrack: function(audioTrack,audioTrackIndex){
-            console.info("set audiotTrack", audioTrack,audioTrackIndex,activeStream);
+        setAudioTrack: function(audioTrack){
             streamController.setAudioTrack(audioTrack);
         },
 
