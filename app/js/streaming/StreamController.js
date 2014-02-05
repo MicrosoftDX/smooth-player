@@ -279,7 +279,7 @@
 
             return deferred.promise;
         },
-        //ORANGE : create function to handle auditracks
+        //ORANGE : create function to handle audiotracks
         updateAudioTracks = function(){
             if(activeStream){
                 var self = this;
@@ -319,6 +319,8 @@
         debug: undefined,
         metricsExt: undefined,
         errHandler: undefined,
+        //Orange : add backUrl attribute
+        backUrl : undefined,
 
         setup: function() {
             this.system.mapHandler("manifestUpdated", undefined, manifestHasUpdated.bind(this));
@@ -359,13 +361,22 @@
         },
 
         // ORANGE en  of modification
-        load: function (url) {
+        //Orange : add backUrl parameter
+        load: function (url, backUrl) {
             var self = this;
+            //Orange : add backUrl parameter
+            self.backUrl = backUrl;
 
             self.debug.log("[StreamController]", "load url: " + url);
-
+            debugger;
             self.manifestLoader.load(url).then(
                 function(manifest) {
+                    debugger;
+                    //Orange : add backUrl parameter
+                    if (self.backUrl !== undefined) 
+                    {
+                        manifest.backUrl = self.backUrl;
+                    }
                     self.manifestModel.setValue(manifest);
                     self.debug.log("Manifest has loaded.");
                     self.debug.log(self.manifestModel.getValue());
