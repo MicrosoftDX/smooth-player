@@ -31,8 +31,6 @@ MediaPlayer.dependencies.Stream = function () {
         errored = false,
         kid = null,
         initData = [],
-        // ORANGE: internalSeek for live starting 
-        internalSeek = -1,
 
         loadedListener,
         playListener,
@@ -503,10 +501,13 @@ MediaPlayer.dependencies.Stream = function () {
             var initialSeekTime = this.timelineConverter.calcPresentationStartTime(periodInfo);
             this.debug.log("Starting playback at offset: " + initialSeekTime);
 
-            // ORANGE
-            internalSeek = initialSeekTime;
-
-            this.videoModel.setCurrentTime(initialSeekTime);
+            // ORANGE: performs a programmatical seek only if initial seek time is different
+            // from current time (live use case)
+            if (initialSeekTime != this.videoModel.getCurrentTime())
+            {
+                this.system.notify("setCurrentTime");
+                this.videoModel.setCurrentTime(initialSeekTime);                
+            }
 
             load.resolve(null);
         },
@@ -562,13 +563,6 @@ MediaPlayer.dependencies.Stream = function () {
         onSeeking = function () {
             this.debug.log("Got seeking event.");
             var time = this.videoModel.getCurrentTime();
-
-            // ORANGE: do not handle seek if internal seek (see onLoad() function)
-            if (time === internalSeek)
-            {
-                internalSeek = -1;
-                return;
-            }
 
             if (videoController) {
                 videoController.seek(time);
