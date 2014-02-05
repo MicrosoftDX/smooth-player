@@ -92,7 +92,6 @@ MediaPlayer.dependencies.Stream = function () {
             var self = this,
                 type;
 
-
             type = (event.type !== "msneedkey") ? event.type : videoCodec;
             initData.push({type: type, initData: event.initData});
 
@@ -124,7 +123,6 @@ MediaPlayer.dependencies.Stream = function () {
                 msg = null,
                 laURL = null;
 
-
             this.debug.log("DRM: Got a key message...");
 
             session = event.target;
@@ -133,7 +131,6 @@ MediaPlayer.dependencies.Stream = function () {
             laURL = event.destinationURL;
             
             //Orange : if backUrl is defined, override laURL
-            debugger;
             var manifest = self.manifestModel.getValue();
             if(manifest.backUrl !== undefined)
             {
