@@ -368,10 +368,9 @@
             self.backUrl = backUrl;
 
             self.debug.log("[StreamController]", "load url: " + url);
-            debugger;
+
             self.manifestLoader.load(url).then(
                 function(manifest) {
-                    debugger;
                     //Orange : add backUrl parameter
                     if (self.backUrl !== undefined) 
                     {

@@ -241,7 +241,6 @@ MediaPlayer = function (aContext) {
             if (!initialized) {
                 throw "MediaPlayer not initialized!";
             }
-            debugger;
             source = url;
             //Orange : modify attachSource function to add backUrl parameter
             sourceBackUrl = backUrl;
