@@ -414,7 +414,6 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
     video = document.querySelector(".dash-video-player video");
     context = new Custom.di.CustomContext();
     player = new MediaPlayer(context);
-
     
     $scope.version = player.getVersion();
 
@@ -542,7 +541,9 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
     $scope.doLoad = function () {
 
         initMetrics();
-        player.attachSource($scope.selectedItem.url);
+        //Orange : use Orange attachSource function
+        //player.attachSource($scope.selectedItem.url);
+        player.attachSource($scope.selectedItem.url,$scope.selectedItem.backUrl);
         setTimeout(update, updateInterval);
     };
 
