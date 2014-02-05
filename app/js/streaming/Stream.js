@@ -131,6 +131,14 @@ MediaPlayer.dependencies.Stream = function () {
             bytes = new Uint16Array(event.message.buffer);
             msg = String.fromCharCode.apply(null, bytes);
             laURL = event.destinationURL;
+            
+            //Orange : if backUrl is defined, override laURL
+            debugger;
+            var manifest = self.manifestModel.getValue();
+            if(manifest.backUrl !== undefined)
+            {
+                laURL = manifest.backUrl;
+            }
 
             self.protectionController.updateFromMessage(kid, session, msg, laURL).fail(
                 function (error) {
