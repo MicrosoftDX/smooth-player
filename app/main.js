@@ -155,7 +155,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
     var converter = new MetricsTreeConverter();
     $scope.videoMetrics = null;
     $scope.audioMetrics = null;
-    $scope.audioTrackList  = [];
+    $scope.audioTracks  = [];
 
     $scope.getVideoTreeMetrics = function () {
         var metrics = player.getMetricsFor("video");
@@ -171,21 +171,14 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
 
     function initAudioTracks(){
         var  audioDatas=  player.getAudioTracks();
-        $scope.audioTrackList = audioDatas;
-        $scope.audioLang = audioDatas[0] ? audioDatas[0].id + "- "+audioDatas[0].lang : "";
-        var audioLabels = [];
-        var audioValues = [];
-        for(var j = 0; j<audioDatas.length;j++){
-            audioLabels.push(audioDatas[j].id + "- "+audioDatas[j].lang);
-            audioValues.push(j);
-        }
-        $('#sliderAudio').labeledslider({ max: audioValues.length - 1, step: 1,value:0, tickLabels: audioLabels});
-        $('#sliderAudio').labeledslider({stop: function( event, ui ) {
-            //console.info("slider audio ::", event, ui, ui.value);
-            $scope.audioLang = $scope.audioTrackList[ui.value].id + "- "+$scope.audioTrackList[ui.value].lang;
-            player.setAudioTrack( $scope.audioTrackList[ui.value],ui.value);
-        }});
+        $scope.audioTracks = audioDatas;
+        // position to the first audioTrack the select
+        $scope.audioData = $scope.audioTracks[0];
     }
+
+    $scope.selectAudioTrack = function(track){
+        player.setAudioTrack(track);
+   };
 
 
     function getCribbedMetricsFor(type) {
