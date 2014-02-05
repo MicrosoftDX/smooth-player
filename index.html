@@ -205,6 +205,12 @@
         </div>
 
         <div class="row">
+            <div class="input-group col-md-9">
+                <input type="text" class="form-control" placeholder="licenser" ng-model="selectedItem.backUrl">
+            </div>
+        </div>
+
+        <div class="row">
             <div class="dash-video-player col-md-9">
                 <video controls="true"></video>
             </div>
@@ -259,8 +265,15 @@
                 </div>
                 <div class="panel">
                     <div class="panel-heading panel-top">
-                        <span class="panel-title">Audio<br/> {{audioLang}}</span>
-                         <div class="btn-group"><div id="sliderAudio"></div></div>
+                        <span class="panel-title">Audio</span>
+                         <div>
+                             <select id="audioTracksSelect"
+                                    ng-model="audioData"
+                                    ng-options="track.lang +' - ' + track.id for track in audioTracks"
+                                    required="true"
+                                    ng-change="selectAudioTrack(audioData)">
+                            </select>
+                         </div>
                         <!--div class="btn-group">
                             <button
                                 type="button"

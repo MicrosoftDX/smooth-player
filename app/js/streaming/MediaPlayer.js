@@ -46,6 +46,8 @@ MediaPlayer = function (aContext) {
         system,
         element,
         source,
+        //Orange : add backUrl attribute
+        sourceBackUrl,
         streamController,
         videoModel,
         initialized = false,
@@ -88,7 +90,8 @@ MediaPlayer = function (aContext) {
             streamController = system.getObject("streamController");
             streamController.setVideoModel(videoModel);
             streamController.setAutoPlay(autoPlay);
-            streamController.load(source);
+            //Orange : add backUrl parameter
+            streamController.load(source, sourceBackUrl);
             system.mapValue("scheduleWhilePaused", scheduleWhilePaused);
             system.mapOutlet("scheduleWhilePaused", "stream");
             system.mapValue("bufferMax", bufferMax);
@@ -198,9 +201,8 @@ MediaPlayer = function (aContext) {
             this.metricsModel.addRepresentationBoundaries(type, new Date(), min, max);
         },
 
-        //ORANGE : add function to swithc audioTracks for a media
-        setAudioTrack: function(audioTrack,audioTrackIndex){
-            console.info("set audiotTrack", audioTrack,audioTrackIndex,activeStream);
+        //ORANGE : add function to switch audioTracks for a media
+        setAudioTrack: function(audioTrack){
             streamController.setAudioTrack(audioTrack);
         },
 
@@ -234,13 +236,14 @@ MediaPlayer = function (aContext) {
                 doAutoPlay.call(this);
             }
         },
-
-        attachSource: function (url) {
+        //Orange : modify attachSource function to add backUrl parameter
+        attachSource: function (url, backUrl) {
             if (!initialized) {
                 throw "MediaPlayer not initialized!";
             }
-
             source = url;
+            //Orange : modify attachSource function to add backUrl parameter
+            sourceBackUrl = backUrl;
             this.setQualityFor('video', 0);
             this.setQualityFor('audio', 0);
 
