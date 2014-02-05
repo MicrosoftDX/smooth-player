@@ -31,6 +31,8 @@ MediaPlayer.dependencies.Stream = function () {
         errored = false,
         kid = null,
         initData = [],
+        // ORANGE: internalSeek for live starting 
+        internalSeek = -1,
 
         loadedListener,
         playListener,
@@ -493,6 +495,9 @@ MediaPlayer.dependencies.Stream = function () {
             var initialSeekTime = this.timelineConverter.calcPresentationStartTime(periodInfo);
             this.debug.log("Starting playback at offset: " + initialSeekTime);
 
+            // ORANGE
+            internalSeek = initialSeekTime;
+
             this.videoModel.setCurrentTime(initialSeekTime);
 
             load.resolve(null);
@@ -549,6 +554,13 @@ MediaPlayer.dependencies.Stream = function () {
         onSeeking = function () {
             this.debug.log("Got seeking event.");
             var time = this.videoModel.getCurrentTime();
+
+            // ORANGE: do not handle seek if internal seek (see onLoad() function)
+            if (time === internalSeek)
+            {
+                internalSeek = -1;
+                return;
+            }
 
             if (videoController) {
                 videoController.seek(time);
@@ -666,6 +678,22 @@ MediaPlayer.dependencies.Stream = function () {
             stopBuffering.call(this);
         },
 
+
+        // ORANGE: 'liveEdgeFound' event raised when live edga has been found on video stream
+        // => then seek every BufferController at the found live edge time
+        onLiveEdgeFound = function() {
+
+            var liveEdgeTime = this.timelineConverter.calcPresentationStartTime(periodInfo);
+            this.debug.log("[O][Stream] ### LiveEdge = " + liveEdgeTime);
+
+            if (videoController) {
+                videoController.seek(liveEdgeTime);
+            }
+            if (audioController) {
+                audioController.seek(liveEdgeTime);
+            }
+        },
+
         updateData = function (updatedPeriodInfo) {
             var self = this,
                 videoData,
@@ -753,6 +781,9 @@ MediaPlayer.dependencies.Stream = function () {
             this.system.mapHandler("setCurrentTime", undefined, currentTimeChanged.bind(this));
             this.system.mapHandler("bufferingCompleted", undefined, bufferingCompleted.bind(this));
             this.system.mapHandler("segmentLoadingFailed", undefined, segmentLoadingFailed.bind(this));
+            // ORANGE: add event handler "liveEdgeFound"
+            this.system.mapHandler("liveEdgeFound", undefined, onLiveEdgeFound.bind(this));
+
 
             load = Q.defer();
 

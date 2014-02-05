@@ -534,20 +534,10 @@ Mss.dependencies.MssParser = function () {
         }
 
         period.start = 0;
-        // Set adaptations presentation time offset 
+
+        // Propagate content protection information into each adaptation 
         for (i = 0, len = adaptations.length; i < len; i += 1) 
         {
-            var representations = adaptations[i].Representation_asArray;
-            var fistSegment = representations[0].SegmentTemplate.SegmentTimeline.S_asArray[0];
-            var presentationTimeOffset = fistSegment.t;
-            for (j = 0; j < representations.length; j++)
-            {
-                representations[j].SegmentTemplate.presentationTimeOffset = presentationTimeOffset;
-            }
-
-            var adaptationTimeOffset = parseFloat(presentationTimeOffset) / TIME_SCALE_100_NANOSECOND_UNIT;
-            period.start = (period.start === 0)?adaptationTimeOffset:Math.min(period.start, adaptationTimeOffset);
-
             if (manifest.ContentProtection !== undefined)
             {
                 manifest.Period.AdaptationSet[i].ContentProtection = manifest.ContentProtection;
