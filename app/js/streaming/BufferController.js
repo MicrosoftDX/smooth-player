@@ -972,15 +972,30 @@ MediaPlayer.dependencies.BufferController = function () {
                         return;
                     }
 
-                    searchForLiveEdge.call(self).then(
-                        function(liveEdgeTime) {
-                            // step back from a found live edge time to be able to buffer some data
-                            periodInfo.liveEdge = liveEdgeTime - minBufferTime;
-                            ready = true;
-                            startPlayback.call(self);
-                            doSeek.call(self, periodInfo.liveEdge);
-                        }
-                    );
+                    // ORANGE: in live use case, search for live edge only for main video stream.
+                    // Else do nothing. startPlayback will be called later once live edge of video stream
+                    // will be found
+                    if (self.getData().contentType === "video")
+                    {
+                        searchForLiveEdge.call(self).then(
+                            function(liveEdgeTime) {
+                                // step back from a found live edge time to be able to buffer some data
+                                periodInfo.liveEdge = liveEdgeTime - minBufferTime;
+                                self.debug.log("[O][BufferController] ### (" + self.getData().contentType + ") periodInfo.liveEdge = " + periodInfo.liveEdge);
+                                ready = true;
+                                // ORANGE: notify live edge has been found
+                                self.system.notify("liveEdgeFound");
+
+                                // ORANGE: startPlayback() will be called once live edge will be found
+                                //startPlayback.call(self);
+                                //doSeek.call(self, periodInfo.liveEdge);
+                            }
+                        );
+                    }
+                    else
+                    {
+                        ready = true;
+                    }
                 }
             );
             self.setBuffer(buffer);
