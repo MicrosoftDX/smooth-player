@@ -107,19 +107,17 @@ Mss.dependencies.MssFragmentController = function () {
 
             // Create new fragment
             //debugger;
-            var fragment = new mp4lib.boxes.File();
-            var processor = new mp4lib.fieldProcessors.DeserializationBoxFieldsProcessor(fragment, data, 0, data.length);
-            fragment._processFields(processor);
+            var fragment = new mp4lib.deserialize(data);
 
             // Get references en boxes
-            var moof = mp4lib.helpers.getBoxByType(fragment, "moof");
-            var mdat = mp4lib.helpers.getBoxByType(fragment, "mdat");
-            var traf = mp4lib.helpers.getBoxByType(moof, "traf");
-            var trun = mp4lib.helpers.getBoxByType(traf, "trun");
-            var tfhd = mp4lib.helpers.getBoxByType(traf, "tfhd");
+            var moof = mp4lib.getBoxByType(fragment, "moof");
+            var mdat = mp4lib.getBoxByType(fragment, "mdat");
+            var traf = mp4lib.getBoxByType(moof, "traf");
+            var trun = mp4lib.getBoxByType(traf, "trun");
+            var tfhd = mp4lib.getBoxByType(traf, "tfhd");
             
             //if protected content
-            var sepiff = mp4lib.helpers.getBoxByType(traf,"sepiff");
+            var sepiff = mp4lib.getBoxByType(traf,"sepiff");
             if(sepiff !== null)
             {
                 sepiff.boxtype = "senc";
@@ -171,10 +169,10 @@ Mss.dependencies.MssFragmentController = function () {
 
             // Process tfxd boxes
             // This box provide absolute timestamp but we take the segment start time for tfdt
-            mp4lib.helpers.removeBoxByType(traf, "tfxd");
+            mp4lib.removeBoxByType(traf, "tfxd");
 
             // Create and add tfdt box
-            var tfdt = mp4lib.helpers.getBoxByType(traf, "tfdt");
+            var tfdt = mp4lib.getBoxByType(traf, "tfdt");
             if (tfdt === null){
                 tfdt = new mp4lib.boxes.TrackFragmentBaseMediaDecodeTimeBox();
                 tfdt.version = 1;
@@ -183,11 +181,11 @@ Mss.dependencies.MssFragmentController = function () {
             }
 
             // Process tfrf box
-            var tfrf = mp4lib.helpers.getBoxByType(traf, "tfrf");
+            var tfrf = mp4lib.getBoxByType(traf, "tfrf");
             if (tfrf !== null)
             {
                 segmentsUpdated = processTfrf(tfrf, adaptation);
-                mp4lib.helpers.removeBoxByType(traf, "tfrf");                
+                mp4lib.removeBoxByType(traf, "tfrf");                
             }
 
             // Before determining new size of the converted fragment we update some box flags related to data offset
@@ -199,9 +197,9 @@ Mss.dependencies.MssFragmentController = function () {
             if(sepiff !== null)
             {
                 //+8 => box size + type
-                var moofpositionInFragment = mp4lib.helpers.getBoxPositionByType(fragment,"moof")+8;
-                var trafpositionInMoof = mp4lib.helpers.getBoxPositionByType(moof,"traf")+8;
-                var sencpositionInTraf = mp4lib.helpers.getBoxPositionByType(traf,"senc")+8;
+                var moofpositionInFragment = mp4lib.getBoxPositionByType(fragment,"moof")+8;
+                var trafpositionInMoof = mp4lib.getBoxPositionByType(moof,"traf")+8;
+                var sencpositionInTraf = mp4lib.getBoxPositionByType(traf,"senc")+8;
                 // set offset from begin fragment to the first IV in senc box
                 saio.offset[0] = moofpositionInFragment+trafpositionInMoof+sencpositionInTraf+8;//flags (3) + version (1) + sampleCount (4)
             }

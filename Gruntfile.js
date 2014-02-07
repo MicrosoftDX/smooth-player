@@ -29,7 +29,6 @@ module.exports = function(grunt) {
             "app/lib/mp4lib/mp4lib-boxes.js",
             "app/lib/mp4lib/mp4lib-fieldProcessors.js",
             "app/lib/mp4lib/mp4lib-fields.js",
-            "app/lib/mp4lib/mp4lib-helpers.js",
             "app/js/*/**/*.js"],
         }
       },
@@ -58,7 +57,6 @@ module.exports = function(grunt) {
             "./app/lib/mp4lib/mp4lib-boxes.js",
             "./app/lib/mp4lib/mp4lib-fieldProcessors.js",
             "./app/lib/mp4lib/mp4lib-fields.js",
-            "./app/lib/mp4lib/mp4lib-helpers.js",
             "./app/js/streaming/MediaPlayer.js",
             "./app/js/streaming/Context.js",
             "./app/js/dash/Dash.js",
