@@ -818,13 +818,15 @@ MediaPlayer.dependencies.Stream = function () {
 
         //ORANGE : add the capability to set audioTrack
         setAudioTrack:function(audioTrack){
-            var deferredAudioUpdate = Q.defer();
+            var deferredAudioUpdate = Q.defer(),
+                self = this;
+
             if(audioController){
+                // TODO : determine the buffer range to keep, could be dependent of fragment duration
                 audioController.emptyBuffer().then(
                     function(){
-                        console.info("update new data");
-                        audioController.updateData(audioTrack,periodInfo).then(function(){
-                            deferredAudioUpdate.resolve();
+                        audioController.updateData(audioTrack,periodInfo,self.videoModel.getCurrentTime()+3).then(function(){
+                             deferredAudioUpdate.resolve();
                         });
                     }
                 );

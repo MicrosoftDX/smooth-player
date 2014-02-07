@@ -16,8 +16,8 @@ Custom.dependencies.CustomBufferController = function () {
 
     rslt.emptyBuffer = function(){
         var deferred = Q.defer(),
-            currentTime = Math.floor(this.videoModel.getCurrentTime()),
-            removeStart = currentTime + 5,
+            currentTime = this.videoModel.getCurrentTime(),
+            removeStart = 0,
             selfParent = rslt.parent,
             buffer = selfParent.getBuffer(),
             fragmentModel = rslt.fragmentController.attachBufferController(rslt),
@@ -30,12 +30,15 @@ Custom.dependencies.CustomBufferController = function () {
             removeEnd =currentTime + 5;
         }
         
-        console.info(removeStart, removeEnd);
-        rslt.sourceBufferExt.remove(buffer,removeStart, removeEnd,selfParent.getPeriodInfo().duration, mediaSource).then(
-            (function(){
-                rslt.fragmentController.removeExecutedRequestsBeforeTime(fragmentModel,removeEnd);
-                deferred.resolve();
-            }));
+        rslt.sourceBufferExt.remove(buffer,removeStart, currentTime -1,selfParent.getPeriodInfo().duration, mediaSource).then(
+            function(){
+                 rslt.sourceBufferExt.remove(buffer, currentTime + 3, removeEnd, selfParent.getPeriodInfo().duration, mediaSource).then(
+                        function(){
+                            rslt.fragmentController.removeExecutedRequestsBeforeTime(fragmentModel,removeEnd);
+                            deferred.resolve();
+                        }
+                    );
+            });
 
         return deferred.promise;
     };

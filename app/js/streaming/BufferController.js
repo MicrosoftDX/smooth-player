@@ -332,7 +332,7 @@ MediaPlayer.dependencies.BufferController = function () {
 
                                                             self.debug.log("Number of buffered " + type + " ranges: " + ranges.length);
                                                             for (i = 0, len = ranges.length; i < len; i += 1) {
-                                                                self.debug.log("Buffered " + type + " Range: " + ranges.start(i) + " - " + ranges.end(i));
+                                                                self.debug.log("Buffered " + type + " Range: " + ranges.start(i) + " - " + ranges.end(i)+  " - "+self.getVideoModel().getCurrentTime());
                                                             }
                                                         }
                                                     }
@@ -1065,7 +1065,8 @@ MediaPlayer.dependencies.BufferController = function () {
             return data;
         },
 
-        updateData: function(dataValue, periodInfoValue) {
+        // Orange : add currentTime option to tell the restart time when updating data
+        updateData: function(dataValue, periodInfoValue, currentTime) {
             var self = this,
                 deferred = Q.defer(),
                 from = data;
@@ -1084,10 +1085,13 @@ MediaPlayer.dependencies.BufferController = function () {
                             if (!currentRepresentation) {
                                 currentRepresentation = getRepresentationForQuality.call(self, result.quality);
                             }
-                            self.indexHandler.getCurrentTime(currentRepresentation).then(
-                                function (time) {
+
+                            var restart = function(time){
+
                                     dataChanged = true;
+                                    // playingTime = time;
                                     playingTime = time;
+
                                     currentRepresentation = getRepresentationForQuality.call(self, result.quality);
                                     if (currentRepresentation.segmentDuration) {
                                         fragmentDuration = currentRepresentation.segmentDuration;
@@ -1097,8 +1101,18 @@ MediaPlayer.dependencies.BufferController = function () {
                                     self.bufferExt.updateData(data, type);
                                     startPlayback.call(self);
                                     deferred.resolve();
-                                }
-                            );
+
+                                
+                            };
+
+                            if(currentTime){
+                                restart(currentTime);
+                            }else{
+
+                                self.indexHandler.getCurrentTime(currentRepresentation).then(restart);
+
+                            }
+
                         }
                     );
                 }
