@@ -17,7 +17,6 @@ mp4lib.boxes.Box = function(){
 mp4lib.boxes.Box.prototype._processFields = function(processor) {
     processor.eat('size',mp4lib.fields.FIELD_UINT32);
     processor.eat('boxtype',mp4lib.fields.FIELD_ID);
-    //console.log('processing box:'+this.boxtype);
     if (this.size==1) {
         processor.eat('largesize',mp4lib.fields.FIELD_INT64);
     }
@@ -859,9 +858,6 @@ mp4lib.boxes.AVCConfigurationBox.prototype._processFields = function(processor) 
 
 mp4lib.boxes.AVCConfigurationBox.prototype._processNAL = function(box,processor) {
     processor.eat('NAL_length',mp4lib.fields.FIELD_UINT16);
-    //console.log('READING NAL, len'+this.NAL_length);
-    //console.log('THIS:');
-    //console.log(this);
     processor.eat('NAL',new mp4lib.fields.DataField(this.NAL_length));
 };
 

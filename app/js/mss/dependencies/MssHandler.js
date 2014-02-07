@@ -180,7 +180,6 @@ Mss.dependencies.MssHandler = function() {
             request.availabilityStartTime = self.timelineConverter.calcAvailabilityStartTimeFromPresentationTime(presentationStartTime, representation.adaptation.period.mpd, isDynamic);
             request.availabilityEndTime = self.timelineConverter.calcAvailabilityEndTimeFromPresentationTime(presentationStartTime + period.duration, period.mpd, isDynamic);
 
-			//console.saveBinArray(request.data, request.streamType + "_" + representation.index + ".mp4");
             //request.action = "complete"; //needed to avoid to execute request
             request.quality = representation.index;
             deferred.resolve(request);

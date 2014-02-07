@@ -110,7 +110,6 @@ Mss.dependencies.MssFragmentController = function () {
             var fragment = new mp4lib.boxes.File();
             var processor = new mp4lib.fieldProcessors.DeserializationBoxFieldsProcessor(fragment, data, 0, data.length);
             fragment._processFields(processor);
-            //console.log(fragment);
 
             // Get references en boxes
             var moof = mp4lib.helpers.getBoxByType(fragment, "moof");
@@ -256,7 +255,6 @@ Mss.dependencies.MssFragmentController = function () {
                     representations[i].segments = null;
                 }
             }
-            //console.saveBinArray(result, request.streamType + "_" + request.quality + "_" + request.index + ".mp4");
         }
 
         return Q.when(result);
