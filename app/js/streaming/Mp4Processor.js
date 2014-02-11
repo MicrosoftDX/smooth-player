@@ -438,8 +438,6 @@ MediaPlayer.dependencies.Mp4Processor = function () {
             tenc.default_IV_size = 8; //default value, NA => à préciser
             tenc.default_KID = [];
 
-            //tenc.default_KID = _hexstringtoBuffer(media.contentProtection['cenc:default_KID'].replace(/[^A-Fa-f0-9]/g, ""));
-
             return tenc;
         },
 

@@ -150,7 +150,7 @@ Mss.dependencies.MssFragmentController = function () {
                             sizedifferent = true;
                         }
                     }
-                };
+                }
                 
                 //all the samples have the same size
                 //det default size and remove the table.
@@ -158,7 +158,7 @@ Mss.dependencies.MssFragmentController = function () {
                 {
                     saiz.default_sample_info_size = saiz.sample_info_size[0];
                     saiz.sample_info_size = [];
-                };
+                }
 
                 //add saio and saiz box
                 traf.boxes.push(saiz);
@@ -267,7 +267,6 @@ Mss.dependencies.MssFragmentController = function () {
                     representations[i].segments = null;
                 }
             }
-            //console.saveBinArray(result, request.streamType + "_" + request.quality + "_" + request.index + ".mp4");
         }
 
         // PATCH timescale value in mvhd and mdhd boxes in case of live streams within chrome
