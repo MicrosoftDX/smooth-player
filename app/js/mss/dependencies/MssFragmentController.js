@@ -106,11 +106,9 @@ Mss.dependencies.MssFragmentController = function () {
             var trackId = getIndex(adaptation, manifest) + 1; // +1 since track_id shall start from '1'
 
             // Create new fragment
-            //debugger;
             var fragment = new mp4lib.boxes.File();
             var processor = new mp4lib.fieldProcessors.DeserializationBoxFieldsProcessor(fragment, data, 0, data.length);
             fragment._processFields(processor);
-            //console.log(fragment);
 
             // Get references en boxes
             var moof = mp4lib.helpers.getBoxByType(fragment, "moof");
@@ -216,6 +214,19 @@ Mss.dependencies.MssFragmentController = function () {
             // updata trun.data_offset field = offset of first data byte (inside mdat box)
             trun.data_offset = lp.res - mdat.size + 8; // 8 = 'size' + 'type' mdat fields length
 
+            // PATCH tfdt and trun samples timestamp values in case of live streams within chrome
+            if ((navigator.userAgent.indexOf("Chrome") >= 0) && (manifest.type === "dynamic"))
+            {
+                tfdt.baseMediaDecodeTime /= 1000;
+                for  (var i = 0; i < trun.samples_table.length; i++)
+                {
+                    if (trun.samples_table[i].sample_composition_time_offset > 0)
+                        trun.samples_table[i].sample_composition_time_offset /= 1000;
+                    if (trun.samples_table[i].sample_duration > 0)
+                        trun.samples_table[i].sample_duration /= 1000;
+                }
+            }
+
             // Serialize converted fragment into output data buffer
             var sp = new mp4lib.fieldProcessors.SerializationBoxFieldsProcessor(fragment, new_data, 0);
             fragment._processFields(sp);
@@ -233,7 +244,8 @@ Mss.dependencies.MssFragmentController = function () {
 
     rslt.process = function (bytes, request, representations) {
 
-        var result = null;
+        var result = null,
+            manifest = this.manifestModel.getValue();
 
         if (bytes !== null && bytes !== undefined && bytes.byteLength > 0) {
             result = new Uint8Array(bytes);
@@ -243,7 +255,6 @@ Mss.dependencies.MssFragmentController = function () {
         {
             // Get adaptation containing provided representations
             // (Note: here representations is of type Dash.vo.Representation)
-            var manifest = this.manifestModel.getValue();
             var adaptation = manifest.Period_asArray[representations[0].adaptation.period.index].AdaptationSet_asArray[representations[0].adaptation.index];
             var res = convertFragment(result, request, adaptation);
             result = res.bytes;
@@ -257,6 +268,26 @@ Mss.dependencies.MssFragmentController = function () {
                 }
             }
             //console.saveBinArray(result, request.streamType + "_" + request.quality + "_" + request.index + ".mp4");
+        }
+
+        // PATCH timescale value in mvhd and mdhd boxes in case of live streams within chrome
+        // Note: request = 'undefined' in case of initialization segments
+        if ((request === undefined) && (navigator.userAgent.indexOf("Chrome") >= 0) && (manifest.type === "dynamic"))
+        {
+            var init_segment = new mp4lib.boxes.File();
+            var processor = new mp4lib.fieldProcessors.DeserializationBoxFieldsProcessor(init_segment, result, 0, result.length);
+            init_segment._processFields(processor);
+            var moov = mp4lib.helpers.getBoxByType(init_segment, "moov");
+            var mvhd = mp4lib.helpers.getBoxByType(moov, "mvhd");
+            var trak = mp4lib.helpers.getBoxByType(moov, "trak");
+            var mdia = mp4lib.helpers.getBoxByType(trak, "mdia");
+            var mdhd = mp4lib.helpers.getBoxByType(mdia, "mdhd");
+
+            mvhd.timescale /= 1000;
+            mdhd.timescale /= 1000;
+
+            var sp = new mp4lib.fieldProcessors.SerializationBoxFieldsProcessor(init_segment, result, 0);
+            init_segment._processFields(sp);
         }
 
         return Q.when(result);
