@@ -46,7 +46,7 @@ MediaPlayer = function (aContext) {
         system,
         element,
         source,
-        //Orange : add backUrl attribute
+        // ORANGE: licenser backUrl
         sourceBackUrl,
         streamController,
         videoModel,
@@ -90,7 +90,7 @@ MediaPlayer = function (aContext) {
             streamController = system.getObject("streamController");
             streamController.setVideoModel(videoModel);
             streamController.setAutoPlay(autoPlay);
-            //Orange : add backUrl parameter
+            // ORANGE: add licenser backUrl parameter
             streamController.load(source, sourceBackUrl);
             system.mapValue("scheduleWhilePaused", scheduleWhilePaused);
             system.mapOutlet("scheduleWhilePaused", "stream");
@@ -201,12 +201,12 @@ MediaPlayer = function (aContext) {
             this.metricsModel.addRepresentationBoundaries(type, new Date(), min, max);
         },
 
-        //ORANGE : add function to switch audioTracks for a media
+        // ORANGE: add function to switch audioTracks for a media
         setAudioTrack: function(audioTrack){
             streamController.setAudioTrack(audioTrack);
         },
 
-        //ORANGE: get the audio track list
+        / /ORANGE: get the audio track list
         getAudioTracks: function(){
             return streamController.getAudioTracks();
         },
@@ -236,13 +236,14 @@ MediaPlayer = function (aContext) {
                 doAutoPlay.call(this);
             }
         },
-        //Orange : modify attachSource function to add backUrl parameter
+        
+        // ORANGE: modify attachSource function to add licenser backUrl parameter
         attachSource: function (url, backUrl) {
             if (!initialized) {
                 throw "MediaPlayer not initialized!";
             }
             source = url;
-            //Orange : modify attachSource function to add backUrl parameter
+            // ORANGE: modify attachSource function to add licenser backUrl parameter
             sourceBackUrl = backUrl;
             this.setQualityFor('video', 0);
             this.setQualityFor('audio', 0);

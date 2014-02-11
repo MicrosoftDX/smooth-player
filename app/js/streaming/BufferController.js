@@ -1065,7 +1065,7 @@ MediaPlayer.dependencies.BufferController = function () {
             return data;
         },
 
-        // Orange : add currentTime option to tell the restart time when updating data
+        // ORANGE: add currentTime option to tell the restart time when updating data
         updateData: function(dataValue, periodInfoValue, currentTime) {
             var self = this,
                 deferred = Q.defer(),

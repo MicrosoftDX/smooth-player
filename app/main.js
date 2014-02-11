@@ -534,9 +534,8 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
     $scope.doLoad = function () {
 
         initMetrics();
-        //Orange : use Orange attachSource function
-        //player.attachSource($scope.selectedItem.url);
-        player.attachSource($scope.selectedItem.url,$scope.selectedItem.backUrl);
+        // ORANGE: add licenser backUrl parameter
+        player.attachSource($scope.selectedItem.url, $scope.selectedItem.backUrl);
         setTimeout(update, updateInterval);
     };
 
