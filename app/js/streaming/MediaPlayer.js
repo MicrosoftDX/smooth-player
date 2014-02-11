@@ -206,7 +206,7 @@ MediaPlayer = function (aContext) {
             streamController.setAudioTrack(audioTrack);
         },
 
-        / /ORANGE: get the audio track list
+        // ORANGE: get the audio track list
         getAudioTracks: function(){
             return streamController.getAudioTracks();
         },
