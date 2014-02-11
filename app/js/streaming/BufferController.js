@@ -315,11 +315,29 @@ MediaPlayer.dependencies.BufferController = function () {
 
                                             isQuotaExceeded = false;
 
-                                            updateBufferLevel.call(self).then(
-                                                function() {
-                                                    deferred.resolve();
-                                                }
-                                            );
+                                            // ORANGE: in case of live streams, remove outdated buffer parts
+                                            var updateBuffer = function() {
+                                                updateBufferLevel.call(self).then(
+                                                    function() {
+                                                        deferred.resolve();
+                                                    }
+                                                );
+                                            };
+
+                                            // ORANGE: in case of live streams, remove outdated buffer parts
+                                            if (isDynamic)
+                                            {
+                                                self.sourceBufferExt.remove(buffer, 0, self.videoModel.getCurrentTime() - 4, periodInfo.duration, mediaSource).then(
+                                                    function() {
+                                                        self.debug.log("[BufferController] ### " + type + " cleared buffer");
+                                                        updateBuffer();
+                                                    }
+                                                );
+                                            }
+                                            else
+                                            {                                                        
+                                                updateBuffer();
+                                            }
 
                                             if (!buffer) return;
                                             self.sourceBufferExt.getAllRanges(buffer).then(
