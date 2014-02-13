@@ -538,6 +538,15 @@ Mss.dependencies.MssParser = function () {
         // Propagate content protection information into each adaptation 
         for (i = 0, len = adaptations.length; i < len; i += 1) 
         {
+            // In case of VOD streams, check if start time is greater than 0.
+            // Therefore, set period start time to the higher adaptation start time
+            if (manifest.type === "static")
+            {
+                var fistSegment = adaptations[i].Representation_asArray[0].SegmentTemplate.SegmentTimeline.S_asArray[0];
+                var adaptationTimeOffset = parseFloat(fistSegment.t) / TIME_SCALE_100_NANOSECOND_UNIT;
+                period.start = (period.start === 0)?adaptationTimeOffset:Math.max(period.start, adaptationTimeOffset);
+            }
+
             if (manifest.ContentProtection !== undefined)
             {
                 manifest.Period.AdaptationSet[i].ContentProtection = manifest.ContentProtection;
