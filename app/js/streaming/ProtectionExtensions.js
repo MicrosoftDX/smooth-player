@@ -19,7 +19,7 @@ MediaPlayer.dependencies.ProtectionExtensions.prototype = {
 
     supportsCodec: function (mediaKeysString, codec) {
         "use strict";
-
+        
         var hasWebKit = ("WebKitMediaKeys" in window),
             hasMs = ("MSMediaKeys" in window),
             hasMediaSource = ("MediaKeys" in window);

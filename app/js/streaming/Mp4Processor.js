@@ -158,6 +158,7 @@ MediaPlayer.dependencies.Mp4Processor = function () {
                     hdlr.name = hdlr.HANDLERTEXTNAME;
                     break;
             }
+            hdlr.name += '\0';
             hdlr.reserved = [0x0, 0x0]; //default value
             hdlr.flags = 0; //default value
 
@@ -436,8 +437,6 @@ MediaPlayer.dependencies.Mp4Processor = function () {
             tenc.default_IsEncrypted = 0x1; //default value
             tenc.default_IV_size = 8; //default value, NA => à préciser
             tenc.default_KID = [];
-
-            //tenc.default_KID = _hexstringtoBuffer(media.contentProtection['cenc:default_KID'].replace(/[^A-Fa-f0-9]/g, ""));
 
             return tenc;
         },

@@ -589,7 +589,6 @@ Mss.dependencies.MssParser = function () {
         processManifest.call(this, manifest);
 
         this.debug.log("[MssParser]", "Parsing complete.");
-        console.log(manifest);
         return Q.when(manifest);
     };
 

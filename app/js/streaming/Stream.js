@@ -92,7 +92,6 @@ MediaPlayer.dependencies.Stream = function () {
             var self = this,
                 type;
 
-
             type = (event.type !== "msneedkey") ? event.type : videoCodec;
             initData.push({type: type, initData: event.initData});
 
@@ -124,7 +123,6 @@ MediaPlayer.dependencies.Stream = function () {
                 msg = null,
                 laURL = null;
 
-
             this.debug.log("DRM: Got a key message...");
 
             session = event.target;
@@ -132,8 +130,7 @@ MediaPlayer.dependencies.Stream = function () {
             msg = String.fromCharCode.apply(null, bytes);
             laURL = event.destinationURL;
             
-            //Orange : if backUrl is defined, override laURL
-            debugger;
+            // ORANGE: if backUrl is defined, override laURL
             var manifest = self.manifestModel.getValue();
             if(manifest.backUrl !== undefined)
             {
@@ -819,15 +816,17 @@ MediaPlayer.dependencies.Stream = function () {
             this.requestScheduler.videoModel = value;
         },
 
-        //ORANGE : add the capability to set audioTrack
+        // ORANGE: add the capability to set audioTrack
         setAudioTrack:function(audioTrack){
-            var deferredAudioUpdate = Q.defer();
+            var deferredAudioUpdate = Q.defer(),
+                self = this;
+
             if(audioController){
+                // TODO : determine the buffer range to keep, could be dependent of fragment duration
                 audioController.emptyBuffer().then(
                     function(){
-                        console.info("update new data");
-                        audioController.updateData(audioTrack,periodInfo).then(function(){
-                            deferredAudioUpdate.resolve();
+                        audioController.updateData(audioTrack,periodInfo,self.videoModel.getCurrentTime()+3).then(function(){
+                             deferredAudioUpdate.resolve();
                         });
                     }
                 );
