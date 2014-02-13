@@ -71,6 +71,11 @@
             "browsers": "cdsbi"
         },
         {
+            "name": "MSS/LIVE - Atre multi-audio",
+            "url": "http://2is7server1.rd.francetelecom.com/C4/C4-49_S1.isml/Manifest",
+            "browsers": "cdsbi"
+        },
+        {
             "name": "MSS/VOD - SynchroAV",
             "url": "http://2is7server2.rd.francetelecom.com/VOD/Synchro/C4-52_S1.ism/Manifest",
             "browsers": "cdsbi"
