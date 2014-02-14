@@ -271,9 +271,7 @@ Mss.dependencies.MssFragmentController = function () {
         // Note: request = 'undefined' in case of initialization segments
         if ((request === undefined) && (navigator.userAgent.indexOf("Chrome") >= 0) && (manifest.type === "dynamic"))
         {
-            var init_segment = new mp4lib.boxes.File();
-            var processor = new mp4lib.fieldProcessors.DeserializationBoxFieldsProcessor(init_segment, result, 0, result.length);
-            init_segment._processFields(processor);
+            var init_segment = mp4lib.deserialize(result)
             var moov = mp4lib.getBoxByType(init_segment, "moov");
             var mvhd = mp4lib.getBoxByType(moov, "mvhd");
             var trak = mp4lib.getBoxByType(moov, "trak");
@@ -283,8 +281,7 @@ Mss.dependencies.MssFragmentController = function () {
             mvhd.timescale /= 1000;
             mdhd.timescale /= 1000;
 
-            var sp = new mp4lib.fieldProcessors.SerializationBoxFieldsProcessor(init_segment, result, 0);
-            init_segment._processFields(sp);
+            result = mp4lib.serialize(init_segment)
         }
 
         return Q.when(result);
