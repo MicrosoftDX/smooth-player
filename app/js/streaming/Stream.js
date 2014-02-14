@@ -130,7 +130,7 @@ MediaPlayer.dependencies.Stream = function () {
             msg = String.fromCharCode.apply(null, bytes);
             laURL = event.destinationURL;
             
-            //Orange : if backUrl is defined, override laURL
+            // ORANGE: if backUrl is defined, override laURL
             var manifest = self.manifestModel.getValue();
             if(manifest.backUrl !== undefined)
             {
@@ -816,7 +816,7 @@ MediaPlayer.dependencies.Stream = function () {
             this.requestScheduler.videoModel = value;
         },
 
-        //ORANGE : add the capability to set audioTrack
+        // ORANGE: add the capability to set audioTrack
         setAudioTrack:function(audioTrack){
             var deferredAudioUpdate = Q.defer(),
                 self = this;

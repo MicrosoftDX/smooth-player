@@ -158,6 +158,7 @@ MediaPlayer.dependencies.Mp4Processor = function () {
                     hdlr.name = hdlr.HANDLERTEXTNAME;
                     break;
             }
+            hdlr.name += '\0';
             hdlr.reserved = [0x0, 0x0]; //default value
             hdlr.flags = 0; //default value
 

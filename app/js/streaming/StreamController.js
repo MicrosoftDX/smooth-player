@@ -279,7 +279,7 @@
 
             return deferred.promise;
         },
-        //ORANGE : create function to handle audiotracks
+        // ORANGE: create function to handle audiotracks
         updateAudioTracks = function(){
             if(activeStream){
                 var self = this;
@@ -295,7 +295,7 @@
             var self = this;
             composeStreams.call(self).then(
                 function() {
-                    //ORANGE : Update Audio Tracks List
+                    // ORANGE: Update Audio Tracks List
                     updateAudioTracks.call(self);
                     self.system.notify("streamsComposed");
                 }
@@ -319,7 +319,7 @@
         debug: undefined,
         metricsExt: undefined,
         errHandler: undefined,
-        //Orange : add backUrl attribute
+        // ORANGE: licenser backUrl
         backUrl : undefined,
 
         setup: function() {
@@ -349,7 +349,7 @@
             this.videoModel = value;
         },
 
-        // ORANGE : audioTrack Management
+        // ORANGE: audioTrack Management
         getAudioTracks: function(){
             return audioTracks;
         },
@@ -359,19 +359,19 @@
                 activeStream.setAudioTrack(audioTrack);
             }
         },
-
         // ORANGE en  of modification
-        //Orange : add backUrl parameter
+        
+        // ORANGE: add licenser backUrl parameter
         load: function (url, backUrl) {
             var self = this;
-            //Orange : add backUrl parameter
+            // ORANGE: add licenser backUrl parameter
             self.backUrl = backUrl;
 
             self.debug.log("[StreamController]", "load url: " + url);
 
             self.manifestLoader.load(url).then(
                 function(manifest) {
-                    //Orange : add backUrl parameter
+                    // ORANGE: add licenser backUrl parameter
                     if (self.backUrl !== undefined) 
                     {
                         manifest.backUrl = self.backUrl;
