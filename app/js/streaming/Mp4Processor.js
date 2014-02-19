@@ -771,15 +771,9 @@ MediaPlayer.dependencies.Mp4Processor = function () {
 
             moov_file.boxes.push(createFileTypeBox());
 
-            moov_file.boxes.push(moov);
+            moov_file.boxes.push(moov);        
 
-            var lp = new mp4lib.fieldProcessors.LengthCounterBoxFieldsProcessor(moov_file);
-            moov_file._processFields(lp);
-            var data = new Uint8Array(lp.res);
-            var sp = new mp4lib.fieldProcessors.SerializationBoxFieldsProcessor(moov_file, data, 0);
-            moov_file._processFields(sp);
-
-            return data;
+            return mp4lib.serialize(moov_file);
         };
 
     return {

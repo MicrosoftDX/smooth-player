@@ -300,7 +300,9 @@ Dash.dependencies.DashHandler = function () {
                 presentationEndTime,
                 seg;
 
-            presentationStartTime = this.timelineConverter.calcPresentationTimeFromMediaTime(scaledTime, representation);
+            // ORANGE: presentationStartTime is the media time of the segment as provided in the SegmentTimeline
+            presentationStartTime = scaledTime;//self.timelineConverter.calcPresentationTimeFromMediaTime(scaledTime, representation);
+
             presentationEndTime = presentationStartTime + scaledDuration;
 
             seg = new Dash.vo.Segment();

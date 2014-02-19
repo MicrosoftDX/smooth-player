@@ -11,6 +11,51 @@ module.exports = function(grunt) {
       }
     },
     uglify : {
+<<<<<<< .mine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=======
+      min : {
+        files: {
+          "dash.min.js" : [
+            "app/js/streaming/MediaPlayer.js",
+            "app/js/streaming/Context.js",
+            "app/js/dash/Dash.js",
+            "app/js/dash/DashContext.js",
+            "app/js/mss/Mss.js",
+            "app/js/custom/Custom.js",
+            "app/js/custom/di/CustomContext.js",
+            "app/lib/q.min.js",
+            "app/lib/xml2json.js",
+            "app/lib/objectiron.js",
+            "app/lib/dijon.js",
+            "app/lib/mp4lib/mp4lib.js",
+            "app/lib/mp4lib/mp4lib-boxes.js",
+            "app/lib/mp4lib/mp4lib-fieldProcessors.js",
+            "app/lib/mp4lib/mp4lib-fields.js",
+            "app/js/*/**/*.js"],
+        }
+      },
+>>>>>>> .theirs
       all : {
         options: {
           compress:{
@@ -41,7 +86,6 @@ module.exports = function(grunt) {
             "./app/lib/mp4lib/mp4lib-boxes.js",
             "./app/lib/mp4lib/mp4lib-fieldProcessors.js",
             "./app/lib/mp4lib/mp4lib-fields.js",
-            "./app/lib/mp4lib/mp4lib-helpers.js",
             "./app/js/streaming/MediaPlayer.js",
             "./app/js/streaming/Context.js",
             "./app/js/dash/Dash.js",
