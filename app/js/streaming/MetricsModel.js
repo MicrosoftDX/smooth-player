@@ -75,7 +75,10 @@ MediaPlayer.models.MetricsModel = function () {
             vo.interval = interval;
             vo.mediaduration = mediaduration;
 
-            this.getMetricsFor(streamType).HttpList.push(vo);
+            // ORANGE unnecessary metrics. save the whole list is useless
+            //this.getMetricsFor(streamType).HttpList.push(vo);
+            this.getMetricsFor(streamType).HttpList = [vo];
+
             return vo;
         },
 
@@ -107,8 +110,10 @@ MediaPlayer.models.MetricsModel = function () {
 
             vo.t = t;
             vo.level = level;
-
-            this.getMetricsFor(streamType).BufferLevel.push(vo);
+            
+            // ORANGE unnecessary metrics. save the whole list is useless
+            //this.getMetricsFor(streamType).HttpList.push(vo);
+            this.getMetricsFor(streamType).BufferLevel = [vo];
             return vo;
         },
 
