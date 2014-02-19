@@ -79,7 +79,7 @@ MediaPlayer.dependencies.FragmentLoader = function () {
                                                                           null,
                                                                           request.duration);
 
-                    // MGA remove unused httpTrace
+                    // ORANGE unnecessary metrics
                     // self.metricsModel.appendHttpTrace(httpRequestMetrics,
                     //                                   currentTime,
                     //                                   new Date().getTime() - currentTime.getTime(),
