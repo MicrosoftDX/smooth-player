@@ -576,7 +576,6 @@ Dash.dependencies.DashHandler = function () {
                         request.index = index;
                         self.debug.log("Signal complete.");
                         self.debug.log(request);
-                        self = null;
                         deferred.resolve(request);
                     } else {
                         segment = representation.segments[index];
