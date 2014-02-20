@@ -70,8 +70,7 @@ Mss.dependencies.MssFragmentController = function () {
 
             // In case we have added some segments, we also check if some out of date segments
             // may not been removed
-            if (segmentsUpdated)
-            {
+            if (segmentsUpdated) {
                 var manifest = rslt.manifestModel.getValue();
 
                 var currentTime = new Date();
@@ -117,8 +116,8 @@ Mss.dependencies.MssFragmentController = function () {
             
             //if protected content
             var sepiff = mp4lib.getBoxByType(traf,"sepiff");
-            if(sepiff !== null)
-            {
+            if(sepiff !== null) {
+
                 sepiff.boxtype = "senc";
                 // Create Sample Auxiliary Information Offsets Box box (saio) 
                 var saio = new mp4lib.boxes.SampleAuxiliaryInformationOffsetsBox();
@@ -137,14 +136,11 @@ Mss.dependencies.MssFragmentController = function () {
 
                 var sizedifferent = false;
                 // get for each sample_info the size
-                for (var i = 0; i < sepiff.sample_count; i++) 
-                {
+                for (var i = 0; i < sepiff.sample_count; i++) {
                     saiz.sample_info_size[i] = 8+(sepiff.entry[i].NumberOfEntries*6)+2;
                     //8 (Init vector size) + NumberOfEntries*(clear (2) +crypted (4))+ 2 (numberofEntries size (2))
-                    if(i>1)
-                    {
-                        if (saiz.sample_info_size[i] != saiz.sample_info_size[i-1])
-                        {
+                    if(i>1) {
+                        if (saiz.sample_info_size[i] != saiz.sample_info_size[i-1]) {
                             sizedifferent = true;
                         }
                     }
@@ -152,8 +148,7 @@ Mss.dependencies.MssFragmentController = function () {
                 
                 //all the samples have the same size
                 //det default size and remove the table.
-                if (sizedifferent === false)
-                {
+                if (sizedifferent === false) {
                     saiz.default_sample_info_size = saiz.sample_info_size[0];
                     saiz.sample_info_size = [];
                 }
@@ -172,7 +167,7 @@ Mss.dependencies.MssFragmentController = function () {
 
             // Create and add tfdt box
             var tfdt = mp4lib.getBoxByType(traf, "tfdt");
-            if (tfdt === null){
+            if (tfdt === null) {
                 tfdt = new mp4lib.boxes.TrackFragmentBaseMediaDecodeTimeBox();
                 tfdt.version = 1;
                 tfdt.baseMediaDecodeTime = Math.floor(request.startTime * request.timescale);
@@ -181,10 +176,9 @@ Mss.dependencies.MssFragmentController = function () {
 
             // Process tfrf box
             var tfrf = mp4lib.getBoxByType(traf, "tfrf");
-            if (tfrf !== null)
-            {
+            if (tfrf !== null) {
                 segmentsUpdated = processTfrf(tfrf, adaptation);
-                mp4lib.removeBoxByType(traf, "tfrf");                
+                mp4lib.removeBoxByType(traf, "tfrf");
             }
 
             // Before determining new size of the converted fragment we update some box flags related to data offset
@@ -193,13 +187,13 @@ Mss.dependencies.MssFragmentController = function () {
             trun.flags |= 0x000001; // set trun.data-offset-present to true
             trun.data_offset = 0;   // Set a default value for trun.data_offset
 
-            if(sepiff !== null)
-            {
+            if(sepiff !== null) {
                 //+8 => box size + type
                 var moofpositionInFragment = mp4lib.getBoxPositionByType(fragment,"moof")+8;
                 var trafpositionInMoof = mp4lib.getBoxPositionByType(moof,"traf")+8;
                 var sencpositionInTraf = mp4lib.getBoxPositionByType(traf,"senc")+8;
                 // set offset from begin fragment to the first IV in senc box
+                // FIXME saio is out of scope, how it works ?.????
                 saio.offset[0] = moofpositionInFragment+trafpositionInMoof+sencpositionInTraf+8;//flags (3) + version (1) + sampleCount (4)
             }
 
@@ -213,15 +207,15 @@ Mss.dependencies.MssFragmentController = function () {
             trun.data_offset = lp.res - mdat.size + 8; // 8 = 'size' + 'type' mdat fields length
 
             // PATCH tfdt and trun samples timestamp values in case of live streams within chrome
-            if ((navigator.userAgent.indexOf("Chrome") >= 0) && (manifest.type === "dynamic"))
-            {
+            if ((navigator.userAgent.indexOf("Chrome") >= 0) && (manifest.type === "dynamic")) {
                 tfdt.baseMediaDecodeTime /= 1000;
-                for  (var i = 0; i < trun.samples_table.length; i++)
-                {
-                    if (trun.samples_table[i].sample_composition_time_offset > 0)
+                for  (var i = 0; i < trun.samples_table.length; i++) {
+                    if (trun.samples_table[i].sample_composition_time_offset > 0) {
                         trun.samples_table[i].sample_composition_time_offset /= 1000;
-                    if (trun.samples_table[i].sample_duration > 0)
+                    }
+                    if (trun.samples_table[i].sample_duration > 0) {
                         trun.samples_table[i].sample_duration /= 1000;
+                    }
                 }
             }
 
@@ -249,19 +243,16 @@ Mss.dependencies.MssFragmentController = function () {
             result = new Uint8Array(bytes);
         }
 
-        if (request && (request.type === "Media Segment") && representations && (representations.length > 0))
-        {
+        if (request && (request.type === "Media Segment") && representations && (representations.length > 0)) {
             // Get adaptation containing provided representations
             // (Note: here representations is of type Dash.vo.Representation)
             var adaptation = manifest.Period_asArray[representations[0].adaptation.period.index].AdaptationSet_asArray[representations[0].adaptation.index];
             var res = convertFragment(result, request, adaptation);
             result = res.bytes;
-            if (res.segmentsUpdated === true)
-            {
+            if (res.segmentsUpdated === true) {
                 // If some segments have been added or removed, then
                 // we reset the list of segments for each representation
-                for (var i = 0; i < representations.length; i++)
-                {
+                for (var i = 0; i < representations.length; i++) {
                     representations[i].segments = null;
                 }
             }
@@ -269,19 +260,19 @@ Mss.dependencies.MssFragmentController = function () {
 
         // PATCH timescale value in mvhd and mdhd boxes in case of live streams within chrome
         // Note: request = 'undefined' in case of initialization segments
-        if ((request === undefined) && (navigator.userAgent.indexOf("Chrome") >= 0) && (manifest.type === "dynamic"))
-        {
-            var init_segment = mp4lib.deserialize(result)
-            var moov = mp4lib.getBoxByType(init_segment, "moov");
-            var mvhd = mp4lib.getBoxByType(moov, "mvhd");
-            var trak = mp4lib.getBoxByType(moov, "trak");
-            var mdia = mp4lib.getBoxByType(trak, "mdia");
-            var mdhd = mp4lib.getBoxByType(mdia, "mdhd");
+        if ((request === undefined) && (navigator.userAgent.indexOf("Chrome") >= 0) && (manifest.type === "dynamic")) {
+            var init_segment = mp4lib.deserialize(result);
+            // FIXME unused variables ?
+            // var moov = mp4lib.getBoxByType(init_segment, "moov");
+            // var mvhd = mp4lib.getBoxByType(moov, "mvhd");
+            // var trak = mp4lib.getBoxByType(moov, "trak");
+            // var mdia = mp4lib.getBoxByType(trak, "mdia");
+            // var mdhd = mp4lib.getBoxByType(mdia, "mdhd");
 
-            mvhd.timescale /= 1000;
-            mdhd.timescale /= 1000;
+            // mvhd.timescale /= 1000;
+            // mdhd.timescale /= 1000;*/
 
-            result = mp4lib.serialize(init_segment)
+            result = mp4lib.serialize(init_segment);
         }
 
         return Q.when(result);

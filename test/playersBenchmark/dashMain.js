@@ -38,7 +38,7 @@ function onLoaded() {
     player.attachView(video);
     player.setAutoPlay(true);
     */
-    console.debug("attachSource");
+    //console.debug("attachSource");
     //player.attachSource('http://dash.edgesuite.net/dash264/TestCases/1a/netflix/exMPD_BIP_TC1.mpd');
     
     var results = [];
@@ -78,12 +78,13 @@ function toTest() {
 
     var startTime = new Date();*/
     context = new Custom.di.CustomContext();
+    //context = new Dash.di.DashContext();
     player = new MediaPlayer(context);
     player.startup();
     player.attachView(video);
     player.setAutoPlay(true);
+    //player.attachSource('http://2is7server1.rd.francetelecom.com/C4/C4-46_S2.isml/Manifest');
     player.attachSource('http://2is7server1.rd.francetelecom.com/VOD/BBB-SD/big_buck_bunny_1080p_stereo.ism/Manifest');
-    
 
     /*return deferred.promise;*/
 };

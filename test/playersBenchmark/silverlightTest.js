@@ -81,8 +81,8 @@ function embedSL(){
 			version:"5.0",
 			alt:"Silverlight n'est pas installé",
 			EnableGPUAcceleration:"true",
-			EnableCacheVisualization:"false",
-			EnableFrameRateCounter:'true',
+			EnableCacheVisualization:"false",/*
+			EnableFrameRateCounter:'true',*/
 			autoUpgrade:"true",
 			uiculture:"fr",
 			enableHTMLAccess:"true"

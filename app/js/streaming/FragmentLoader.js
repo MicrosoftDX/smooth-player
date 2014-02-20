@@ -79,10 +79,11 @@ MediaPlayer.dependencies.FragmentLoader = function () {
                                                                           null,
                                                                           request.duration);
 
-                    self.metricsModel.appendHttpTrace(httpRequestMetrics,
-                                                      currentTime,
-                                                      new Date().getTime() - currentTime.getTime(),
-                                                      [bytes.byteLength]);
+                    // ORANGE unnecessary metrics
+                    // self.metricsModel.appendHttpTrace(httpRequestMetrics,
+                    //                                   currentTime,
+                    //                                   new Date().getTime() - currentTime.getTime(),
+                    //                                   [bytes.byteLength]);
 
                     request.deferred.resolve({
                         data: bytes,
