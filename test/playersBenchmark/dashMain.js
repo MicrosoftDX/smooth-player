@@ -1,11 +1,8 @@
 
-var player,
-    video,
-    context,
-    videoSeries = [],
-    audioSeries = [],
-    maxGraphPoints = 50,
-    updateInterval = 333;
+    var player,
+        video,
+        context,
+        results;
         
 function onLoaded() {
     
@@ -41,7 +38,7 @@ function onLoaded() {
     //console.debug("attachSource");
     //player.attachSource('http://dash.edgesuite.net/dash264/TestCases/1a/netflix/exMPD_BIP_TC1.mpd');
     
-    var results = [];
+    results = [];
     
     
     // toTest();
@@ -66,8 +63,9 @@ function startVideo() {
 }
 
 function toTest() {
-    /*console.log("toTest");
+    console.log("toTest");
     var deferred = Q.defer();
+
     video.addEventListener("playing", function() {
         if (!deferred.promise.isFulfilled()) {
             results.push(new Date() - startTime);
@@ -76,17 +74,22 @@ function toTest() {
         }
     });
 
-    var startTime = new Date();*/
-    context = new Custom.di.CustomContext();
-    //context = new Dash.di.DashContext();
+    var startTime = new Date();
+    
+
+
+     context = new Custom.di.CustomContext();
+    // //context = new Dash.di.DashContext();
     player = new MediaPlayer(context);
     player.startup();
     player.attachView(video);
     player.setAutoPlay(true);
-    //player.attachSource('http://2is7server1.rd.francetelecom.com/C4/C4-46_S2.isml/Manifest');
-    player.attachSource('http://2is7server1.rd.francetelecom.com/VOD/BBB-SD/big_buck_bunny_1080p_stereo.ism/Manifest');
+    player.attachSource('http://2is7server1.rd.francetelecom.com/C4/C4-46_S2.isml/Manifest?toto=titi');
+    //player.attachSource('http://161.105.176.12/VOD/Arte/C4-51_S1.ism/manifest');
+    //player.attachSource('http://webtv-smooth.cdnfr.orange-business.com/live/france3_live.isml/Manifest?IS=0&ET=1392905465&CIP=193.49.124.107&KO=1&KN=1&US=bc3b10d6feb2323b62596a59af99ee38');
+    // //player.attachSource('http://2is7server1.rd.francetelecom.com/VOD/BBB-SD/big_buck_bunny_1080p_stereo.ism/Manifest');
 
-    /*return deferred.promise;*/
+    return deferred.promise;
 };
 
 
