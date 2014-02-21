@@ -263,14 +263,14 @@ Mss.dependencies.MssFragmentController = function () {
         if ((request === undefined) && (navigator.userAgent.indexOf("Chrome") >= 0) && (manifest.type === "dynamic")) {
             var init_segment = mp4lib.deserialize(result);
             // FIXME unused variables ?
-            // var moov = mp4lib.getBoxByType(init_segment, "moov");
-            // var mvhd = mp4lib.getBoxByType(moov, "mvhd");
-            // var trak = mp4lib.getBoxByType(moov, "trak");
-            // var mdia = mp4lib.getBoxByType(trak, "mdia");
-            // var mdhd = mp4lib.getBoxByType(mdia, "mdhd");
+            var moov = mp4lib.getBoxByType(init_segment, "moov");
+            var mvhd = mp4lib.getBoxByType(moov, "mvhd");
+            var trak = mp4lib.getBoxByType(moov, "trak");
+            var mdia = mp4lib.getBoxByType(trak, "mdia");
+            var mdhd = mp4lib.getBoxByType(mdia, "mdhd");
 
-            // mvhd.timescale /= 1000;
-            // mdhd.timescale /= 1000;*/
+            mvhd.timescale /= 1000;
+            mdhd.timescale /= 1000;
 
             result = mp4lib.serialize(init_segment);
         }
