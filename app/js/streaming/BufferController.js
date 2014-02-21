@@ -920,8 +920,7 @@ MediaPlayer.dependencies.BufferController = function () {
             var self = this,
                 newQuality,
                 qualityChanged = false,
-                // ORANGE unused variable
-                // now = new Date(),
+                now = new Date(),
                 currentVideoTime = self.videoModel.getCurrentTime(),
                 currentTime = getWorkingTime.call(self);
 
@@ -982,7 +981,7 @@ MediaPlayer.dependencies.BufferController = function () {
 
                             // ORANGE unnecessary metrics
                             // clearPlayListTraceMetrics(new Date(), MediaPlayer.vo.metrics.PlayList.Trace.REPRESENTATION_SWITCH_STOP_REASON);
-                            // self.metricsModel.addRepresentationSwitch(type, now, currentVideoTime, currentRepresentation.id);
+                            self.metricsModel.addRepresentationSwitch(type, now, currentVideoTime, currentRepresentation.id);
                         }
 
                         self.debug.log(qualityChanged ? (type + " Quality changed to: " + quality) : "Quality didn't change.");
