@@ -48,43 +48,59 @@ app.directive('chart', function() {
     return {
         restrict: 'E',
         link: function (scope, elem, attrs) {
-            var chart = null,
-                options = {
-                    series: {
-                        shadowSize: 0
-                    },
-                    yaxis: {
-                        min: 0,
-                        max: 15
-                    },
-                    xaxis: {
-                        show: false
-                    }
-                };
+            var chartBuffer = null;
+                // optionsBuffer = {
+                //     series: {
+                //         shadowSize: 0
+                //     },
+                //     yaxis: {
+                //         min: 0,
+                //         max: 15
+                //     },
+                //     xaxis: {
+                //         show: false
+                //     }
+                // },
+            
 
-            // If the data changes somehow, update it in the chart
-            scope.$watch('bufferData', function(v) {
-                if (v === null || v === undefined) {
-                    return;
-                }
+            // // If the data changes somehow, update it in the chart
+            // scope.$watch('bufferData', function(v) {
+                
+            //     if (v === null || v === undefined) {
+            //         return;
+            //     }
+            //     if (!chartBuffer) {
+            //         chartBuffer = $.plot(elem, v , optionsBuffer);
+            //         elem.show();
+            //     }
+            //     else {
+            //         chartBuffer.setData(v);
+            //         chartBuffer.setupGrid();
+            //         chartBuffer.draw();
+            //     }
+            // });
 
-                if (!chart) {
-                    chart = $.plot(elem, v , options);
-                    elem.show();
-                }
-                else {
-                    chart.setData(v);
-                    chart.setupGrid();
-                    chart.draw();
-                }
-            });
+            // scope.$watch('bandwidthData', function(v) {
+            //     if (v === null || v === undefined) {
+            //         return;
+            //     }
+            //     if (!scope.chartBandwidth &&  scope.optionsBandwidth.grid.markings.length >0) {
+            //         scope.chartBandwidth = $.plot(elem, v , scope.optionsBandwidth);
+            //         elem.show();
+            //     } else if (scope.chartBandwidth) {
+            //         scope.chartBandwidth.setData(v);
+            //         scope.chartBandwidth.setupGrid();
+            //         scope.chartBandwidth.draw();
+            //     }
+            // });
 
             scope.$watch('invalidateChartDisplay', function(v) {
-                if (v && chart) {
+                debugger;
+                if (v && scope.chartBandwidth) {
                     var data = scope[attrs.ngModel];
-                    chart.setData(data);
-                    chart.setupGrid();
-                    chart.draw();
+                    scope.chartBandwidth.setData(data);
+                    scope.chartBandwidth.setupGrid();
+                    scope.chartBandwidth.draw();
                     scope.invalidateDisplay(false);
                 }
             });
@@ -97,7 +113,12 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
         video,
         context,
         videoSeries = [],
+        dlSeries = [],
+        playSeries = [],
         audioSeries = [],
+        qualityChangements = [],
+        previousPlayedQuality = 0,
+        previousDownloadedQuality= 0,
         maxGraphPoints = 50,
         firstAccess = true,
         updateInterval = 333;
@@ -127,6 +148,21 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
         $scope.audioBufferLength = 0;
         $scope.audioDroppedFrames = 0;
         $scope.audioCodecs = "-";
+
+        $scope.optionsBandwidth = {
+            series: {
+                shadowSize: 0
+            },
+            yaxis: {
+                min: 0
+            },
+            lines: {
+                steps: true,
+            },
+            grid: {
+                markings: []
+            }
+        };
 
         $('#sliderBitrate').labeledslider({
             max: 0,
@@ -283,8 +319,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
 
     function update() {
         var metrics,
-            point,
-            treeData;
+            point;
 
         metrics = getCribbedMetricsFor("video");
         if (metrics) {
@@ -298,25 +333,71 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
             $scope.videoWidth = metrics.videoWidthValue;
             $scope.videoHeight = metrics.videoHeightValue;
 
-            // Update bitrates slider
+            // initialisation of bitrates slider
             if ($('#sliderBitrate').labeledslider( "option", "max" ) == 0)
             {
                 var labels = [];
-                for (var i = 0; i < metrics.bitrateValues.length; i++)
-                {
+                for (var i = 0; i < metrics.bitrateValues.length; i++) {
                     labels.push(Math.round(metrics.bitrateValues[i] / 1000) + "k");
                 }
+
                 $('#sliderBitrate').labeledslider({ max: (metrics.numBitratesValue - 1), step: 1, values: [ 0, (metrics.numBitratesValue - 1 )], tickLabels: labels});
                 $('#sliderBitrate').labeledslider({stop: function( event, ui ) {
                     player.setQualityBoundariesFor("video", ui.values[0], ui.values[1]);
                 }});
             }
 
+
+            
             point = [parseFloat(video.currentTime), Math.round(parseFloat(metrics.bufferLengthValue))];
             videoSeries.push(point);
 
+            
+
+            if (metrics.bandwidthValue != previousDownloadedQuality) {
+                qualityChangements.push([video.currentTime+parseFloat(metrics.bufferLengthValue), metrics.bandwidthValue]);
+                previousDownloadedQuality = metrics.bandwidthValue;
+            }
+            
+            var dlPoint = [video.currentTime, metrics.bandwidthValue];
+            dlSeries.push(dlPoint);
+
+
+            for (var p in qualityChangements) {
+                if (qualityChangements[p][0] <= video.currentTime) {
+                    previousPlayedQuality = qualityChangements[p][1];
+                    qualityChangements.splice(p,1);
+                }
+            }
+            var playPoint = [video.currentTime, previousPlayedQuality];
+
+
+            playSeries.push(playPoint);
+            
+
             if (videoSeries.length > maxGraphPoints) {
                 videoSeries.splice(0, 1);
+            }
+
+            if (dlSeries.length > maxGraphPoints) {
+                dlSeries.splice(0, 1);
+            }
+            if (playSeries.length > maxGraphPoints) {
+                playSeries.splice(0, 1);
+            }
+
+            //initialisation of chart markings
+            if ($scope.optionsBandwidth.grid.markings.length <=0) {
+                    debugger;
+                for (var idx in metrics.bitrateValues) {
+                    $scope.optionsBandwidth.grid.markings.push({yaxis: { from: metrics.bitrateValues[idx]/1000, to: metrics.bitrateValues[idx]/1000 },color:"green"});
+                }
+
+                $scope.chartBandwidth = $.plot($("#chartBandwidth"), $scope.bandwidthData , $scope.optionsBandwidth);
+            } else {
+                $scope.chartBandwidth.setData($scope.bandwidthData);
+                $scope.chartBandwidth.setupGrid();
+                $scope.chartBandwidth.draw();
             }
         }
 
@@ -373,17 +454,27 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
 
     $scope.invalidateDisplay = function (value) {
         $scope.invalidateChartDisplay = value;
-    }
+    };
+
+    $scope.bandwidthData = [{
+        data: dlSeries,
+        label: "download",
+        color: "#2980B9"
+    }, {
+        data: playSeries,
+        label: "playing",
+        color: "#E74C3C"
+    }];
 
     $scope.bufferData = [
         {
-            data: videoSeries,
-            label: "Video",
+            data:videoSeries,
+            label: "DL",
             color: "#2980B9"
         },
         {
             data: audioSeries,
-            label: "Audio",
+            label: "Play",
             color: "#E74C3C"
         }
     ];

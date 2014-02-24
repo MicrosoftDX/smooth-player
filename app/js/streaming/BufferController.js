@@ -268,18 +268,19 @@ MediaPlayer.dependencies.BufferController = function () {
                             function() {
                                 appendToBuffer.call(self, data, quality).then(
                                     function() {
-                                        // ORANGE unnecessary deferred in dynamic mode
-                                        // FIXME MGA unused in stream an cause memory leak .... remove it !!
-                                        deferredStreamComplete.promise.then(
-                                            function(lastRequest) {
-                                                if ((lastRequest.index - 1) === reqIx && !isBufferingCompleted) {
-                                                    isBufferingCompleted = true;
-                                                    setState.call(self, READY);
-                                                    self.system.notify("bufferingCompleted");
-                                                    self = null;
+                                        // ORANGE unnecessary deferred in dynamic mode which produce a memoryleak, deffered is never resolve...
+                                        if (!isDynamic) {
+                                            deferredStreamComplete.promise.then(
+                                                function(lastRequest) {
+                                                    if ((lastRequest.index - 1) === reqIx && !isBufferingCompleted) {
+                                                        isBufferingCompleted = true;
+                                                        setState.call(self, READY);
+                                                        self.system.notify("bufferingCompleted");
+                                                        self = null;
+                                                    }
                                                 }
-                                            }
-                                        );
+                                            );
+                                        }
                                     }
                                 );
                             }
