@@ -172,7 +172,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
             orientation: 'vertical',
             range: true,
             stop: function(evt, ui) {
-                //player.setQualityBoundariesFor("video", ui.values[0], ui.values[1]);
+                player.setQualityBoundariesFor("video", ui.values[0], ui.values[1]);
             }
         });
         $('#sliderAudio').labeledslider({
