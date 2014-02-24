@@ -211,8 +211,10 @@
 
         <div class="row">
             <div class="dash-video-player col-md-9">
-            <div id="chartBandwidth" class="overlayChart col-md-9" ng-model="bandwidthData"></div>
-                <video controls="true" muted></video>
+                <div class="chartBackground">
+                    <div id="chartBandwidth" class="overlayChart col-md-9" ng-model="bandwidthData"></div>
+                </div>
+                <video controls="true"></video>
             </div>
             <div class="col-md-3">
                 <!--div class="panel">
@@ -322,7 +324,7 @@
                 </div>
                 <div ng-switch on="showCharts">
                     <div class="panel-body panel-stats" ng-switch-when="true">
-                        <!-- <chart ng-model="bufferData"></chart> -->
+                        <chart ng-model="bufferData"></chart>
                     </div>
                 </div>
             </div>

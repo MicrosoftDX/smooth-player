@@ -59,12 +59,21 @@ a:hover {
     line-height: 50px;
 }
 
-.overlayChart {
+.chartBackground {
+    background-color: rgba(0,0,0,0.5);
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
     position: absolute;
+    left: 10px;
+    bottom: 10px;
     z-index: 2;
+}
+
+.overlayChart {
     width: 500px;
     height: 110px;
-    left: 0;
+    margin: 5px;
+    color: 'black';
 }
 
 .dash-video-player {

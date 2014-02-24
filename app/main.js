@@ -48,59 +48,57 @@ app.directive('chart', function() {
     return {
         restrict: 'E',
         link: function (scope, elem, attrs) {
-            var chartBuffer = null;
-                // optionsBuffer = {
-                //     series: {
-                //         shadowSize: 0
-                //     },
-                //     yaxis: {
-                //         min: 0,
-                //         max: 15
-                //     },
-                //     xaxis: {
-                //         show: false
-                //     }
-                // },
+            var chartBuffer = null,
+                optionsBuffer = {
+                    series: {
+                        shadowSize: 0
+                    },
+                    yaxis: {
+                        min: 0
+                    },
+                    xaxis: {
+                        show: false
+                    }
+                };
             
 
-            // // If the data changes somehow, update it in the chart
-            // scope.$watch('bufferData', function(v) {
-                
-            //     if (v === null || v === undefined) {
-            //         return;
-            //     }
-            //     if (!chartBuffer) {
-            //         chartBuffer = $.plot(elem, v , optionsBuffer);
-            //         elem.show();
-            //     }
-            //     else {
-            //         chartBuffer.setData(v);
-            //         chartBuffer.setupGrid();
-            //         chartBuffer.draw();
-            //     }
-            // });
+            // If the data changes somehow, update it in the chart
+            scope.$watch('bufferData', function(v) {
+                if (v === null || v === undefined) {
+                    return;
+                }
 
-            // scope.$watch('bandwidthData', function(v) {
-            //     if (v === null || v === undefined) {
-            //         return;
-            //     }
-            //     if (!scope.chartBandwidth &&  scope.optionsBandwidth.grid.markings.length >0) {
-            //         scope.chartBandwidth = $.plot(elem, v , scope.optionsBandwidth);
-            //         elem.show();
-            //     } else if (scope.chartBandwidth) {
-            //         scope.chartBandwidth.setData(v);
-            //         scope.chartBandwidth.setupGrid();
-            //         scope.chartBandwidth.draw();
-            //     }
-            // });
+                if (!chartBuffer) {
+                    chartBuffer = $.plot(elem, v , optionsBuffer);
+                    elem.show();
+                }
+                else {
+                    chartBuffer.setData(v);
+                    chartBuffer.setupGrid();
+                    chartBuffer.draw();
+                }
+            });
 
-            scope.$watch('invalidateChartDisplay', function(v) {
-                debugger;
-                if (v && scope.chartBandwidth) {
-                    var data = scope[attrs.ngModel];
-                    scope.chartBandwidth.setData(data);
+            scope.$watch('bandwidthData', function(v) {
+                if (v === null || v === undefined) {
+                    return;
+                }
+                if (!scope.chartBandwidth &&  scope.optionsBandwidth.grid.markings.length >0) {
+                    scope.chartBandwidth = $.plot(elem, v , scope.optionsBandwidth);
+                    elem.show();
+                } else if (scope.chartBandwidth) {
+                    scope.chartBandwidth.setData(v);
                     scope.chartBandwidth.setupGrid();
                     scope.chartBandwidth.draw();
+                }
+            });
+
+            scope.$watch('invalidateChartDisplay', function(v) {
+                if (v && chartBuffer) {
+                    var data = scope[attrs.ngModel];
+                    chartBuffer.setData(data);
+                    chartBuffer.setupGrid();
+                    chartBuffer.draw();
                     scope.invalidateDisplay(false);
                 }
             });
@@ -154,13 +152,23 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
                 shadowSize: 0
             },
             yaxis: {
-                min: 0
+                min: 0,
+                ticks: [],
+                color:"#b0b0b0"
+            },
+            xaxis: {
+                 mode: "time",
+                 show: false
             },
             lines: {
                 steps: true,
             },
             grid: {
-                markings: []
+                markings: [],
+                borderWidth: 0
+            },
+            legend: {
+                show: false
             }
         };
 
@@ -318,8 +326,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
     
 
     function update() {
-        var metrics,
-            point;
+        var metrics;
 
         metrics = getCribbedMetricsFor("video");
         if (metrics) {
@@ -349,9 +356,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
 
 
             
-            point = [parseFloat(video.currentTime), Math.round(parseFloat(metrics.bufferLengthValue))];
-            videoSeries.push(point);
-
+            
             
 
             if (metrics.bandwidthValue != previousDownloadedQuality) {
@@ -374,6 +379,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
 
             playSeries.push(playPoint);
             
+            videoSeries.push([parseFloat(video.currentTime), Math.round(parseFloat(metrics.bufferLengthValue))]);
 
             if (videoSeries.length > maxGraphPoints) {
                 videoSeries.splice(0, 1);
@@ -386,12 +392,15 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
                 playSeries.splice(0, 1);
             }
 
-            //initialisation of chart markings
+            //initialisation of bandwidth chart
             if ($scope.optionsBandwidth.grid.markings.length <=0) {
-                    debugger;
+                // $scope.optionsBandwidth.xaxis.min = video.currentTime;
                 for (var idx in metrics.bitrateValues) {
-                    $scope.optionsBandwidth.grid.markings.push({yaxis: { from: metrics.bitrateValues[idx]/1000, to: metrics.bitrateValues[idx]/1000 },color:"green"});
+                    $scope.optionsBandwidth.grid.markings.push({yaxis: { from: metrics.bitrateValues[idx]/1000, to: metrics.bitrateValues[idx]/1000 },color:"#b0b0b0"});
+                    $scope.optionsBandwidth.yaxis.ticks.push([metrics.bitrateValues[idx]/1000, ""+metrics.bitrateValues[idx]/1000+"k"]);
                 }
+                $scope.optionsBandwidth.yaxis.min = Math.min.apply(null,metrics.bitrateValues)/1000;
+                $scope.optionsBandwidth.yaxis.max = Math.max.apply(null,metrics.bitrateValues)/1000;
 
                 $scope.chartBandwidth = $.plot($("#chartBandwidth"), $scope.bandwidthData , $scope.optionsBandwidth);
             } else {
@@ -418,9 +427,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
             $scope.audioCodecs = metrics.codecsValue;
 
             //console.info("audioIndex : ",$scope.audioIndex);
-
-            point = [parseFloat(video.currentTime), Math.round(parseFloat(metrics.bufferLengthValue))];
-            audioSeries.push(point);
+            audioSeries.push([parseFloat(video.currentTime), Math.round(parseFloat(metrics.bufferLengthValue))]);
 
 
             if (audioSeries.length > maxGraphPoints) {
@@ -469,12 +476,12 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
     $scope.bufferData = [
         {
             data:videoSeries,
-            label: "DL",
+            label: "Taille du buffer Vidéo",
             color: "#2980B9"
         },
         {
             data: audioSeries,
-            label: "Play",
+            label: "Taille du buffer Audio",
             color: "#E74C3C"
         }
     ];
