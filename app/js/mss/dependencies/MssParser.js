@@ -237,10 +237,7 @@ Mss.dependencies.MssParser = function () {
             }
             //used to not transfor it an other time !
             this.isTransformed = true;
-
-            if( node.Protection !== undefined )
-            {
-            return {
+            var returnNode = {
                 profiles: "urn:mpeg:dash:profile:isoff-live:2011",
                 type: node.IsLive ? "dynamic" : "static",
                 timeShiftBufferDepth: parseFloat(node.DVRWindowLength) / TIME_SCALE_100_NANOSECOND_UNIT,
@@ -248,25 +245,15 @@ Mss.dependencies.MssParser = function () {
                 BaseURL: node.BaseURL,
                 Period: node,
                 Period_asArray: [node],
-                minBufferTime : 10,
-                ContentProtection : node.Protection.ProtectionHeader,
-                ContentProtection_asArray : node.Protection_asArray
-                };
+                minBufferTime : 10
+            };
+            if(node.Protection !== undefined){
+                returnNode.ContentProtection = node.Protection.ProtectionHeader;
+                returnNode.ContentProtection_asArray = node.Protection_asArray;
             }
-            else    
-            {
-                return {
-                    profiles: "urn:mpeg:dash:profile:isoff-live:2011",
-                    type: node.IsLive ? "dynamic" : "static",
-                    timeShiftBufferDepth: parseFloat(node.DVRWindowLength) / TIME_SCALE_100_NANOSECOND_UNIT,
-                    mediaPresentationDuration : parseFloat(duration) / TIME_SCALE_100_NANOSECOND_UNIT,
-                    BaseURL: node.BaseURL,
-                    Period: node,
-                    Period_asArray: [node],
-                    minBufferTime : 10
-                };
-            }
+            return returnNode;
         };
+        
         mpd.isTransformed = false;
 
         contentProtection = {};
