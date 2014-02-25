@@ -477,6 +477,10 @@ Dash.dependencies.DashHandler = function () {
                 console.log(segments);
             }
 
+            // Orange : prevent requesting null segments by setting a valid index
+            if(idx > segmentLastIdx){
+                idx = segmentLastIdx;
+            }
             // TODO : This is horrible.
             // Temp fix for SegmentTimeline refreshes.
             //if (idx === -1) {
@@ -578,8 +582,12 @@ Dash.dependencies.DashHandler = function () {
                         self.debug.log(request);
                         deferred.resolve(request);
                     } else {
-                        segment = representation.segments[index];
-                        requestPromise = getRequestForSegment.call(self, segment);
+                        if(representation.segments){
+                            segment = representation.segments[index];
+                            requestPromise = getRequestForSegment.call(self, segment);
+                        }else{
+                            Q.when(null);
+                        }
                     }
 
                     return requestPromise;
