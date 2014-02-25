@@ -34,28 +34,36 @@ Mss.dependencies.MssFragmentController = function () {
 
         processTfrf = function(tfrf, adaptation) {
 
-            var segmentsUpdated = false;
+            var manifest = rslt.manifestModel.getValue(),
+                segmentsUpdated = false,
+                // Get adaptation's segment timeline (always a SegmentTimeline in Smooth Streaming use case)
+                segments = adaptation.SegmentTemplate.SegmentTimeline.S,
+                entries = tfrf.entry,
+                fragment_absolute_time = 0,
+                fragment_duration = 0,
+                segment = null,
+                r = 0,
+                t = 0,
+                i = 0,
+                availabilityStartTime = null;
 
-            // Get adaptation's segment timeline (always a SegmentTimeline in Smooth Streaming use case)
-            var segments = adaptation.SegmentTemplate.SegmentTimeline.S;
-
-            // Go through entries
-            var entries = tfrf.entry;
-            for (var i = 0; i < entries.length; i++)
+            // Go through tfrf entries
+            while (i < entries.length)
             {
-                var fragment_absolute_time = entries[i].fragment_absolute_time;
-                var fragment_duration = entries[i].fragment_duration;
+                fragment_absolute_time = entries[i].fragment_absolute_time;
+                fragment_duration = entries[i].fragment_duration;
 
                 // Get timestamp of the last segment
-                var lastSegment = segments[segments.length-1];
-                var r = (lastSegment.r === undefined)?0:lastSegment.r;
-                var t = lastSegment.t + (lastSegment.d * r);
+                segment = segments[segments.length-1];
+                r = (segment.r === undefined)?0:segment.r;
+                t = segment.t + (segment.d * r);
 
                 if (fragment_absolute_time > t)
                 {
-                    if (fragment_duration === lastSegment.d)
+                    rslt.debug.log("[MssFragmentController] Add new segment - t = " + (fragment_absolute_time / 10000000.0));
+                    if (fragment_duration === segment.d)
                     {
-                        lastSegment.r = r + 1;
+                        segment.r = r + 1;
                     }
                     else
                     {
@@ -66,20 +74,27 @@ Mss.dependencies.MssFragmentController = function () {
                     }
                     segmentsUpdated = true;
                 }
+
+                i += 1;
             }
 
             // In case we have added some segments, we also check if some out of date segments
             // may not been removed
             if (segmentsUpdated) {
-                var manifest = rslt.manifestModel.getValue();
 
-                var currentTime = new Date();
-                var presentationStartTime = currentTime.getTime() - manifest.mpdLoadedTime.getTime();
-                presentationStartTime = (presentationStartTime * 10000) + adaptation.SegmentTemplate.presentationTimeOffset;
+                // Get timestamp of the last segment
+                segment = segments[segments.length-1];
+                r = (segment.r === undefined)?0:segment.r;
+                t = segment.t + (segment.d * r);
 
-                var segment = segments[0];
-                while (segment.t < presentationStartTime)
+                // Determine the segments' availability start time
+                availabilityStartTime = t - (manifest.timeShiftBufferDepth * 10000000);
+
+                // Remove segments prior to availability start time
+                segment = segments[0];
+                while (segment.t < availabilityStartTime)
                 {
+                    rslt.debug.log("[MssFragmentController] Remove segment  - t = " + (segment.t / 10000000.0));
                     if ((segment.r !== undefined) && (segment.r > 0))
                     {
                         segment.t += segment.d;
