@@ -29,6 +29,7 @@ MediaPlayer.dependencies.BufferController = function () {
         //mseSetTime = false,
         seekTarget = -1,
         dataChanged = true,
+        dataIsChanging = false,
         availableRepresentations,
         currentRepresentation,
         playingTime,
@@ -209,10 +210,10 @@ MediaPlayer.dependencies.BufferController = function () {
         },
 
         onBytesLoadingStart = function(request) {
-			if (this.fragmentController.isInitializationRequest(request)) {
-				setState.call(this, READY);
-			} else {
-				setState.call(this, LOADING);
+            if (this.fragmentController.isInitializationRequest(request)) {
+                setState.call(this, READY);
+            } else {
+                setState.call(this, LOADING);
                 var time = this.fragmentController.getLoadingTime(this),
                     timeoutFunction = function() {
                         if (!data && !buffer) {
@@ -225,33 +226,33 @@ MediaPlayer.dependencies.BufferController = function () {
 
 
                 setTimeout(timeoutFunction.bind(this), time);
-			}
+            }
         },
 
         onBytesLoaded = function (request, response) {
-			if (this.fragmentController.isInitializationRequest(request)) {
-				onInitializationLoaded.call(this, request, response);
-			} else {
-				onMediaLoaded.call(this, request, response);
-			}
+            if (this.fragmentController.isInitializationRequest(request)) {
+                onInitializationLoaded.call(this, request, response);
+            } else {
+                onMediaLoaded.call(this, request, response);
+            }
         },
 
-		onMediaLoaded = function (request, response) {
-			var self = this;
+        onMediaLoaded = function (request, response) {
+            var self = this;
             // ORANGE new variables to not use request object
             var quality = request.quality;
             var reqIx = request.index;
-			self.debug.log(type + " Bytes finished loading: " + request.url);
+            self.debug.log(type + " Bytes finished loading: " + request.url);
 
             if (!fragmentDuration && !isNaN(request.duration)) {
                 fragmentDuration = request.duration;
             }
         
             // ORANGE: add request and data in function parameters, used by MssFragmentController
-			self.fragmentController.process(response.data, request, availableRepresentations).then(
-				function (data) {
+            self.fragmentController.process(response.data, request, availableRepresentations).then(
+                function (data) {
 
-					if (data !== null && deferredInitAppend !== null) {
+                    if (data !== null && deferredInitAppend !== null) {
 
                         if (quality !== lastQuality) {
                             self.fragmentController.removeExecutedRequest(fragmentModel, request);
@@ -285,14 +286,14 @@ MediaPlayer.dependencies.BufferController = function () {
                                 );
                             }
                         );
-					} else {
-						self.debug.log("No " + type + " bytes to push.");
+                    } else {
+                        self.debug.log("No " + type + " bytes to push.");
                         self = null;
                         request = null;
-					}
-				}
-			);
-		},
+                    }
+                }
+            );
+        },
 
         appendToBuffer = function(data, quality) {
             var self = this,
@@ -667,6 +668,9 @@ MediaPlayer.dependencies.BufferController = function () {
         },
 
         loadInitialization = function (qualityChanged, currentQuality) {
+            if(dataChanged && dataIsChanging){
+                return;
+            }
             var initializationPromise = null,
                 topQuality = this.bufferExt.getTopQualityIndex(type),
                 funcs = [],
@@ -687,6 +691,7 @@ MediaPlayer.dependencies.BufferController = function () {
             if (dataChanged) {
                 deferredInitAppend = Q.defer();
                 initializationData = [];
+                dataIsChanging = true;
                 // get initialization requests for all the qualities of this buffer type
                 for (quality = 0; quality <= topQuality; quality += 1) {
                     funcs.push(this.indexHandler.getInitRequest(availableRepresentations[quality]));
@@ -997,7 +1002,7 @@ MediaPlayer.dependencies.BufferController = function () {
                                     var ln = initializationRequests.length,
                                         request,
                                         i;
-
+                                        dataIsChanging = false;
                                     for (i = 0; i < ln; i += 1) {
                                         request = initializationRequests[i];
                                         self.debug.log("Loading " + type + " initialization: " + request.url);
