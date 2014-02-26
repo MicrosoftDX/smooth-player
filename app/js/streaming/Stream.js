@@ -729,13 +729,15 @@ MediaPlayer.dependencies.Stream = function () {
             }
 
             if (audioController) {
-                audioData = audioController.getData();
-
+                /*audioData = audioController.getData();
+                
                 if (!!audioData && audioData.hasOwnProperty("id")) {
                     deferredAudioData = self.manifestExt.getDataForId(audioData.id, manifest, periodInfo.index);
                 } else {
                     deferredAudioData = self.manifestExt.getDataForIndex(audioTrackIndex, manifest, periodInfo.index);
-                }
+                }*/
+
+                deferredAudioData = self.manifestExt.getDataForIndex(audioTrackIndex, manifest, periodInfo.index);
 
                 deferredAudioData.then(
                         function (data) {
@@ -819,20 +821,45 @@ MediaPlayer.dependencies.Stream = function () {
         // ORANGE: add the capability to set audioTrack
         setAudioTrack:function(audioTrack){
             var deferredAudioUpdate = Q.defer(),
+                currentTime = this.videoModel.getCurrentTime(),
+                manifest = this.manifestModel.getValue(),
+                url,
                 self = this;
 
-            if(audioController){
-                // TODO : determine the buffer range to keep, could be dependent of fragment duration
-                audioController.emptyBuffer().then(
-                    function(){
-                        audioController.updateData(audioTrack,periodInfo,self.videoModel.getCurrentTime()+3).then(function(){
-                             deferredAudioUpdate.resolve();
-                        });
+            if (audioController) {
+                // Get data index corresponding to new audio track
+                self.manifestExt.getDataIndex(audioTrack, manifest, periodInfo.index).then(
+                    function(index) {
+                        audioTrackIndex = index;
+
+                        // Reset audio buffer
+                        audioController.emptyBuffer(currentTime).then(
+                            function() {
+                                // Update manifest
+                                url = manifest.mpdUrl;
+
+                                if (manifest.hasOwnProperty("Location")) {
+                                    url = manifest.Location;
+                                }
+
+                                self.debug.log("### Refresh manifest @ " + url);
+
+                                self.manifestLoader.load(url).then(
+                                    function (manifestResult) {
+                                        self.manifestModel.setValue(manifestResult);
+                                        self.debug.log("### Manifest has been refreshed.");
+                                        deferredAudioUpdate.resolve();
+                                    }
+                                );
+                            }
+                        );
                     }
                 );
-            }else{
+            }
+            else {
                 deferredAudioUpdate.reject();
             }
+
             return deferredAudioUpdate.promise;
         },
 

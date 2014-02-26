@@ -209,12 +209,31 @@ Dash.dependencies.DashManifestExtensions.prototype = {
         var adaptations = manifest.Period_asArray[periodIndex].AdaptationSet_asArray,
             i,
             len;
+        // ORANGE : only ciompare Data.id if exist
+        if(data.id){
 
-        for (i = 0, len = adaptations.length; i < len; i += 1) {
-            if (adaptations[i] === data) {
-                return Q.when(i);
+            for (i = 0, len = adaptations.length; i < len; i += 1) {
+                if (adaptations[i].id  && adaptations[i].id === data.id) {
+                    return Q.when(i);
+                }
+
             }
+        }else{
+            // ORANGE : compare object as string to avoid reference error due to manifest refresh
+            var strData = JSON.stringify(data);
+            var strAdapt;
+            for (i = 0, len = adaptations.length; i < len; i += 1) {
+                strAdapt = JSON.stringify(adaptations[i]);
+                if(strAdapt === strData){
+                    return Q.when(i);
+                }
+
+            }
+
         }
+
+
+
 
         return Q.when(-1);
     },
