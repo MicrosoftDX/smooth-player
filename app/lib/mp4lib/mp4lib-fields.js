@@ -92,6 +92,31 @@ mp4lib.fields.FixedLenStringField.prototype.getLength = function(val) {
     return this.size;
 };
 
+//------------------------------- BoxTypeField -------------------------------
+
+mp4lib.fields.BoxTypeField = function() {};
+
+mp4lib.fields.BoxTypeField.prototype.read = function(buf,pos) {
+    var res = "";
+    for (var i=0;i<4;i++) {
+        res = res+String.fromCharCode(buf[pos+i]);
+    }
+    return res;
+};
+
+mp4lib.fields.BoxTypeField.prototype.write = function(buf,pos,val) {
+    if (mp4lib.findUUIDByBoxtype(val))
+        val = 'uuid';
+    
+    for (var i=0;i<4;i++) {
+        buf[pos+i] = val.charCodeAt(i);
+    }
+};
+
+mp4lib.fields.BoxTypeField.prototype.getLength = function(val) {
+    return 4;
+};
+
 
 //------------------------------- StringField -------------------------------
 
@@ -111,9 +136,9 @@ mp4lib.fields.StringField.prototype.read = function(buf,pos,end) {
 
     if ((end-pos<255) && (buf[0]==String.fromCharCode(end-pos))) {
         res = res.substr(1,end-pos);
-        console.log('WARNING: null-terminated string expected, '+
-                    'but found a string "'+res+'", which seems to be '+
-                    'length-prefixed instead. Conversion done.');
+        mp4lib.warningHandler('null-terminated string expected, '+
+                               'but found a string "'+res+'", which seems to be '+
+                               'length-prefixed instead. Conversion done.');
         return res;
     }
 
@@ -314,7 +339,7 @@ mp4lib.fields.StructureField.prototype.getLength = function(val) {
 
 //------------------------------- BoxesListField -------------------------------
 
-mp4lib.fields.BoxesListField = function() {
+mp4lib.fields.BoxesListField = function BoxesListField() {
 };
 
 mp4lib.fields.readString = function( buf, pos, count ) {
@@ -343,22 +368,12 @@ mp4lib.fields.BoxesListField.prototype.read = function(buf,pos,end) {
             
             if (boxtype === undefined) {
                 boxtype = "uuid";
-                console.log('WARNING: Unknown UUID:'+JSON.stringify(uuid));
+                mp4lib.warningHandler('Unknown UUID:'+JSON.stringify(uuid));
             }
         }
 
         var box = mp4lib.createBox( boxtype );
-
-/*
-        var box;
-        if (boxtype in mp4lib.boxes.Box.prototype.boxPrototypes)
-        // TODO : why protoype is used here ?
-            box = new mp4lib.boxes.Box.prototype.boxPrototypes[boxtype]();
-        else  {
-            console.log('WARNING: Unknown boxtype:'+boxtype+', parsing as UnknownBox');
-            box = new mp4lib.boxes.UnknownBox();
-        }*/
-        
+      
         var p = new mp4lib.fieldProcessors.DeserializationBoxFieldsProcessor(box,buf,pos,end);
         box._processFields(p);
 
@@ -367,9 +382,7 @@ mp4lib.fields.BoxesListField.prototype.read = function(buf,pos,end) {
         // source buffer with serialized box
         if (mp4lib.debug)
             box.__sourceBuffer = buf.subarray(pos,pos+box.size);
-        
 
-        // (Re)set box type in case of extended type
         box.boxtype = boxtype;
 
         res.push(box);
@@ -424,7 +437,7 @@ mp4lib.fields.FIELD_BIT8 = new mp4lib.fields.NumberField(8,false);
 mp4lib.fields.FIELD_BIT16 = new mp4lib.fields.NumberField(16,false);
 mp4lib.fields.FIELD_BIT24 = new mp4lib.fields.NumberField(24,false);
 mp4lib.fields.FIELD_BIT32 = new mp4lib.fields.NumberField(32,false);
-mp4lib.fields.FIELD_ID = new mp4lib.fields.FixedLenStringField(4);
+mp4lib.fields.FIELD_ID = new mp4lib.fields.BoxTypeField(4);
 mp4lib.fields.FIELD_CONTAINER_CHILDREN = new mp4lib.fields.BoxesListField();
 mp4lib.fields.FIELD_STRING = new mp4lib.fields.StringField();
 mp4lib.fields.FIELD_BOX_FILLING_DATA = new mp4lib.fields.BoxFillingDataField();

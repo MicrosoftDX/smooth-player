@@ -6,11 +6,21 @@ var mp4lib = (function() {
         boxes:{},
         fieldProcessors:{},
         fields:{},
-        debug:false
+
+        // In debug mode, source data buffer is kept for each of deserialized box so any 
+        // structural deserialization problems can be traced by serializing each box
+        // and comparing the resulting buffer with the source buffer.
+        // This greatly increases memory consumption, so it is turned off by default.
+        debug:false,
+
+        // A handler function may be hooked up to display warnings.
+        // A warning is typically non-critical issue, like unknown box in data buffer.
+        warningHandler:function(message){}
     };
 
     var boxPrototypes = {};
     var uuidToBoxTypes = {};
+    var boxTypesToUUID = {};
 
     /**
     register new box types to be used by library
@@ -18,7 +28,9 @@ var mp4lib = (function() {
     mp4lib.registerBoxType = function( boxPrototype ) {
         boxPrototypes[ boxPrototype.prototype.boxtype ] = boxPrototype;
         if (boxPrototype.prototype.uuid) {
-            uuidToBoxTypes[JSON.stringify(boxPrototype.prototype.uuid)] = boxPrototype.prototype.boxtype;
+            var uuidString = JSON.stringify(boxPrototype.prototype.uuid);
+            uuidToBoxTypes[uuidString] = boxPrototype.prototype.boxtype;
+            boxTypesToUUID[boxPrototype.prototype.boxtype] = uuidString;
         }
     };
 
@@ -30,7 +42,7 @@ var mp4lib = (function() {
         if (boxtype in boxPrototypes) {
             box = new boxPrototypes[boxtype]();
         } else  {
-            console.log('WARNING: Unknown boxtype:'+boxtype+', parsing as UnknownBox');
+            mp4lib.warningHandler('Unknown boxtype:'+boxtype+', parsing as UnknownBox');
             box = new mp4lib.boxes.UnknownBox();
         }
         return box;
@@ -41,13 +53,17 @@ var mp4lib = (function() {
         return uuidToBoxTypes[uuid];
     };
 
+    mp4lib.findUUIDByBoxtype = function( boxtype ) {
+        return boxTypesToUUID[boxtype];
+    };
+
     
     /**
     deserialize binary data (uint8array) into mp4lib.File object
     */
     mp4lib.deserialize = function(uint8array) {
         var f = new mp4lib.boxes.File();
-        p = new mp4lib.fieldProcessors.DeserializationBoxFieldsProcessor(f, uint8array, 0, uint8array.length);
+        var p = new mp4lib.fieldProcessors.DeserializationBoxFieldsProcessor(f, uint8array, 0, uint8array.length);
         f._processFields(p);
         return f;
     };

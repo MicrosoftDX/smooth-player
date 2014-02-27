@@ -22,7 +22,6 @@ mp4lib.fieldProcessors.SerializationBoxFieldsProcessor.prototype.eat_flagged = f
 };
 
 mp4lib.fieldProcessors.DeserializationBoxFieldsProcessor = function(box, buf, pos, end) {
-    //console.log('Deserialization of '+box.boxtype);
     this.box = box;
     this.buf = buf;
     this.pos = pos;
