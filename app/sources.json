@@ -61,6 +61,11 @@
             "browsers": "cdsbi"
         },
         {
+            "name": "MSS/LIVE - TF1 Halo/IIS 7.13",
+            "url": "http://161.105.176.13/Halo/ch1.isml/manifest",
+            "browsers": "cdsbi"
+        },
+        {
             "name": "MSS/LIVE - France 2",
             "url": "http://2is7server1.rd.francetelecom.com/C4/C4-46_S2.isml/Manifest",
             "browsers": "cdsbi"
