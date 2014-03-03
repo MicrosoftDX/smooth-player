@@ -1253,7 +1253,9 @@ MediaPlayer.dependencies.BufferController = function () {
             this.fragmentController.abortRequestsForModel(fragmentModel);
             this.fragmentController.detachBufferController(fragmentModel);
             fragmentModel = null;
-            deferredAppends = [];
+            // ORANGE remove unnecessary array
+             /* deferredAppends = [];*/
+            previousDeferredAppended = null;
             deferredInitAppend = null;
             initializationData = [];
             deferredStreamComplete = Q.defer();
