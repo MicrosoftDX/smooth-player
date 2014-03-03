@@ -95,7 +95,6 @@ Dash.dependencies.DashHandler = function () {
             if (representation.initialization) {
                 self.debug.log("Got an initialization.");
                 request = generateInitRequest.call(self, representation, type);
-                self = null;
                 deferred.resolve(request);
             } else {
                 // Go out and find the initialization.
@@ -107,11 +106,9 @@ Dash.dependencies.DashHandler = function () {
                         representation.range = theRange;
                         representation.initialization = url;
                         request = generateInitRequest.call(self, representation, type);
-                        self = null;
                         deferred.resolve(request);
                     },
                     function (httprequest) {
-                        self = null;
                         deferred.reject(httprequest);
                     }
                 );
@@ -401,7 +398,6 @@ Dash.dependencies.DashHandler = function () {
                         seg = null;
                         count += 1;
                     }
-                    self = null;
                     deferred.resolve(segments);
                 }
             );
@@ -596,7 +592,6 @@ Dash.dependencies.DashHandler = function () {
                 function (request) {
                     self.debug.log("Got a request.");
                     self.debug.log(request);
-                    self = null;
                     deferred.resolve(request);
                 }
             );
@@ -634,7 +629,6 @@ Dash.dependencies.DashHandler = function () {
                         request.index = index;
                         self.debug.log("Signal complete.");
                         self.debug.log(request);
-                        self = null;
                         deferred.resolve(request);
                     } else {
                         getSegments.call(self, representation).then(
@@ -651,7 +645,6 @@ Dash.dependencies.DashHandler = function () {
                             function (request) {
                                 self.debug.log("Got a request.");
                                 self.debug.log(request);
-                                self = null;
                                 deferred.resolve(request);
                             }
                         );
@@ -677,11 +670,9 @@ Dash.dependencies.DashHandler = function () {
                 function (segments) {
                     segmentDuration = segments[0].duration;
                     segmentCount = Math.ceil(remainingDuration/segmentDuration);
-                    self = null;
                     deferred.resolve(segmentCount);
                 },
                 function () {
-                    self = null;
                     deferred.resolve(0);
                 }
             );
@@ -709,11 +700,9 @@ Dash.dependencies.DashHandler = function () {
                         bufferedIndex = Math.min(segments.length - 1, bufferedIndex);
                         time = segments[bufferedIndex].presentationStartTime;
                     }
-                    self = null;
                     deferred.resolve(time);
                 },
                 function () {
-                    self = null;
                     deferred.reject();
                 }
             );

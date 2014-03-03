@@ -208,7 +208,6 @@ Mss.dependencies.MssFragmentController = function () {
                 var trafpositionInMoof = mp4lib.getBoxPositionByType(moof,"traf")+8;
                 var sencpositionInTraf = mp4lib.getBoxPositionByType(traf,"senc")+8;
                 // set offset from begin fragment to the first IV in senc box
-                // FIXME saio is out of scope, how it works ?.????
                 saio.offset[0] = moofpositionInFragment+trafpositionInMoof+sencpositionInTraf+8;//flags (3) + version (1) + sampleCount (4)
             }
 
@@ -277,7 +276,6 @@ Mss.dependencies.MssFragmentController = function () {
         // Note: request = 'undefined' in case of initialization segments
         if ((request === undefined) && (navigator.userAgent.indexOf("Chrome") >= 0) && (manifest.type === "dynamic")) {
             var init_segment = mp4lib.deserialize(result);
-            // FIXME unused variables ?
             var moov = mp4lib.getBoxByType(init_segment, "moov");
             var mvhd = mp4lib.getBoxByType(moov, "mvhd");
             var trak = mp4lib.getBoxByType(moov, "trak");

@@ -180,8 +180,24 @@ Dash.dependencies.DashMetricsExtensions = function () {
         },
 
         getCurrentBufferLevel = function (metrics) {
-            // ORANGE improve varaible utilisation
-            return (metrics === null || metrics.BufferLevel === null || metrics.BufferLevel.length <=0 ) ? null :  metrics.BufferLevel[metrics.BufferLevel.length -1];
+            if (metrics === null) {
+                return null;
+            }
+
+            var bufferLevel = metrics.BufferLevel,
+                bufferLevelLength,
+                bufferLevelLastIndex,
+                currentBufferLevel;
+
+            if (bufferLevel === null || bufferLevel.length <= 0) {
+                return null;
+            }
+
+            bufferLevelLength = bufferLevel.length;
+            bufferLevelLastIndex = bufferLevelLength - 1;
+
+            currentBufferLevel = bufferLevel[bufferLevelLastIndex];
+            return currentBufferLevel;
         },
 
         getCurrentHttpRequest = function (metrics) {

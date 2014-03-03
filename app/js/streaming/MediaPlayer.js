@@ -198,7 +198,6 @@ MediaPlayer = function (aContext) {
 
         // ORANGE: add function to set manually representation boundaries for a media
         setQualityBoundariesFor: function (type, min, max) {
-            // ORANGE unnecessary metrics
             this.metricsModel.addRepresentationBoundaries(type, new Date(), min, max);
         },
 

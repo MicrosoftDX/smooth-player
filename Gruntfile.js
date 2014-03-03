@@ -16,14 +16,18 @@ module.exports = function(grunt) {
           compress:{
             pure_funcs: [
               'self.debug.log',   /* set this function « no side effects » so  you can remove it ! */
-              'this.debug.log'
+              'this.debug.log',
+              'rslt.debug.log'
             ],
+            global_defs: {
+              DEBUG: false        /* conditionned code by DEBUG will be remove at build */
+            },
             drop_console : true,  /* remove console statements */
             drop_debugger: true,  /* remove debugger statements */
             warnings: true       /* display compress warnings (lines removal for example) */
           }
           // ,
-          // beautify : {        /*  to debug purpose : code is more huma readable  */
+          // beautify : {        /* to debug purpose : code is more human readable  */
           //   beautify : true
           // },
           // mangle: false       /* to debug purpose : variable names are unchanged */
