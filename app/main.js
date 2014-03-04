@@ -1,5 +1,5 @@
 'use strict';
-// don'yt disable metrics...
+// don't disable metrics...
 var DEBUG = true;
 
 angular.module('DashSourcesService', ['ngResource']).
@@ -51,17 +51,7 @@ app.directive('chart', function() {
         restrict: 'E',
         link: function (scope, elem, attrs) {
             var chartBuffer = null,
-                optionsBuffer = {
-                    series: {
-                        shadowSize: 0
-                    },
-                    yaxis: {
-                        min: 0
-                    },
-                    xaxis: {
-                        show: false
-                    }
-                };
+                optionsBuffer = {series: {shadowSize: 0},yaxis: {min: 0},xaxis: {show: false}};
             
 
             // If the data changes somehow, update it in the chart
@@ -81,26 +71,51 @@ app.directive('chart', function() {
                 }
             });
 
-            scope.$watch('bandwidthData', function(v) {
-                if (v === null || v === undefined) {
-                    return;
-                }
-                if (!scope.chartBandwidth &&  scope.optionsBandwidth.grid.markings.length >0) {
-                    scope.chartBandwidth = $.plot(elem, v , scope.optionsBandwidth);
-                    elem.show();
-                } else if (scope.chartBandwidth) {
-                    scope.chartBandwidth.setData(v);
-                    scope.chartBandwidth.setupGrid();
-                    scope.chartBandwidth.draw();
-                }
-            });
-
             scope.$watch('invalidateChartDisplay', function(v) {
                 if (v && chartBuffer) {
                     var data = scope[attrs.ngModel];
                     chartBuffer.setData(data);
                     chartBuffer.setupGrid();
                     chartBuffer.draw();
+                
+                    scope.invalidateDisplay(false);
+                }
+            });
+        }
+    };
+});
+
+app.directive('chart2', function() {
+    return {
+        restrict: 'E',
+        link: function (scope, elem, attrs) {
+             var chartBandwidth =  null,
+                optionsBandwidth = {series: {shadowSize: 0},yaxis: {ticks: [],color:"#FFF"},xaxis: {show: false},lines: {steps: true,},grid: {markings: [],borderWidth: 0}};
+            
+
+            // If the data changes somehow, update it in the chart
+            scope.$watch('bandwidthData', function(v) {
+                if (v === null || v === undefined) {
+                    return;
+                }
+                if (!chartBandwidth && scope.optionsBandwidthGrid) {
+                    // must do a mixin between optionsBandwidth and scope.optionsBandwidthGrid
+                    optionsBandwidth = angular.extend(optionsBandwidth,  scope.optionsBandwidthGrid);
+                    chartBandwidth = $.plot(elem, v , optionsBandwidth);
+                    elem.show();
+                } else if (chartBandwidth) {
+                    chartBandwidth.setData(v);
+                    chartBandwidth.setupGrid();
+                    chartBandwidth.draw();
+                }
+            });
+
+            scope.$watch('invalidateChartDisplay', function(v) {
+                if (v && chartBandwidth) {
+                    var data = scope[attrs.ngModel];
+                    chartBandwidth.setData(data);
+                    chartBandwidth.setupGrid();
+                    chartBandwidth.draw();
                     scope.invalidateDisplay(false);
                 }
             });
@@ -149,30 +164,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
         $scope.audioDroppedFrames = 0;
         $scope.audioCodecs = "-";
 
-        $scope.optionsBandwidth = {
-            series: {
-                shadowSize: 0
-            },
-            yaxis: {
-                min: 0,
-                ticks: [],
-                color:"#b0b0b0"
-            },
-            xaxis: {
-                 mode: "time",
-                 show: false
-            },
-            lines: {
-                steps: true,
-            },
-            grid: {
-                markings: [],
-                borderWidth: 0
-            },
-            legend: {
-                show: false
-            }
-        };
+        $scope.optionsBandwidthGrid = null;
 
         $('#sliderBitrate').labeledslider({
             max: 0,
@@ -192,6 +184,14 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
             range:false,
             tickLabels: [],
         });
+
+        // reinit charts
+        // assign an empty array is not working... why ? reference in bufferData ?
+        videoSeries.splice(0, videoSeries.length);
+        audioSeries.splice(0, audioSeries.length);
+        dlSeries.splice(0, dlSeries.length);
+        playSeries.splice(0, playSeries.length);
+
         firstAccess=true;
     }
 
@@ -343,8 +343,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
             $scope.videoHeight = metrics.videoHeightValue;
 
             // initialisation of bitrates slider
-            if ($('#sliderBitrate').labeledslider( "option", "max" ) == 0)
-            {
+            if ($('#sliderBitrate').labeledslider( "option", "max" ) == 0) {
                 var labels = [];
                 for (var i = 0; i < metrics.bitrateValues.length; i++) {
                     labels.push(Math.round(metrics.bitrateValues[i] / 1000) + "k");
@@ -355,11 +354,6 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
                     player.setQualityBoundariesFor("video", ui.values[0], ui.values[1]);
                 }});
             }
-
-
-            
-            
-            
 
             if (metrics.bandwidthValue != previousDownloadedQuality) {
                 qualityChangements.push([video.currentTime+parseFloat(metrics.bufferLengthValue), metrics.bandwidthValue]);
@@ -380,7 +374,6 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
 
 
             playSeries.push(playPoint);
-            
             videoSeries.push([parseFloat(video.currentTime), Math.round(parseFloat(metrics.bufferLengthValue))]);
 
             if (videoSeries.length > maxGraphPoints) {
@@ -389,26 +382,21 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
 
             if (dlSeries.length > maxGraphPoints) {
                 dlSeries.splice(0, 1);
-            }
-            if (playSeries.length > maxGraphPoints) {
                 playSeries.splice(0, 1);
             }
 
             //initialisation of bandwidth chart
-            if ($scope.optionsBandwidth.grid.markings.length <=0) {
+            if (!$scope.optionsBandwidthGrid) {
                 // $scope.optionsBandwidth.xaxis.min = video.currentTime;
+                $scope.optionsBandwidthGrid = {};
+                $scope.optionsBandwidthGrid.grid = {markings:[]};
+                $scope.optionsBandwidthGrid.yaxis = {ticks: []};
                 for (var idx in metrics.bitrateValues) {
-                    $scope.optionsBandwidth.grid.markings.push({yaxis: { from: metrics.bitrateValues[idx]/1000, to: metrics.bitrateValues[idx]/1000 },color:"#b0b0b0"});
-                    $scope.optionsBandwidth.yaxis.ticks.push([metrics.bitrateValues[idx]/1000, ""+metrics.bitrateValues[idx]/1000+"k"]);
+                    $scope.optionsBandwidthGrid.grid.markings.push({yaxis: { from: metrics.bitrateValues[idx]/1000, to: metrics.bitrateValues[idx]/1000 },color:"#b0b0b0"});
+                    $scope.optionsBandwidthGrid.yaxis.ticks.push([metrics.bitrateValues[idx]/1000, ""+metrics.bitrateValues[idx]/1000+"k"]);
                 }
-                $scope.optionsBandwidth.yaxis.min = Math.min.apply(null,metrics.bitrateValues)/1000;
-                $scope.optionsBandwidth.yaxis.max = Math.max.apply(null,metrics.bitrateValues)/1000;
-
-                $scope.chartBandwidth = $.plot($("#chartBandwidth"), $scope.bandwidthData , $scope.optionsBandwidth);
-            } else {
-                $scope.chartBandwidth.setData($scope.bandwidthData);
-                $scope.chartBandwidth.setupGrid();
-                $scope.chartBandwidth.draw();
+                $scope.optionsBandwidthGrid.yaxis.min = Math.min.apply(null,metrics.bitrateValues)/1000;
+                $scope.optionsBandwidthGrid.yaxis.max = Math.max.apply(null,metrics.bitrateValues)/1000;
             }
         }
 
@@ -491,6 +479,12 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
     $scope.showCharts = false;
     $scope.setCharts = function (show) {
         $scope.showCharts = show;
+    };
+
+    $scope.switchCharts = false;
+    $scope.setSwitchCharts = function (firstOrSecond) {
+        $scope.setCharts(true);
+        $scope.switchCharts = firstOrSecond;
     };
 
     $scope.showDebug = false;
@@ -632,7 +626,6 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
     };
 
     $scope.doLoad = function () {
-
         initMetrics();
         // ORANGE: add licenser backUrl parameter
         player.attachSource($scope.selectedItem.url, $scope.selectedItem.backUrl);
@@ -640,10 +633,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
     };
 
     $scope.hasLogo = function (item) {
-        return (item.hasOwnProperty("logo")
-                && item.logo !== null
-                && item.logo !== undefined
-                && item.logo !== "");
+        return (item.hasOwnProperty("logo") && item.logo !== null && item.logo !== undefined && item.logo !== "");
     };
 
     // Get initial stream if it was passed in.

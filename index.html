@@ -211,9 +211,6 @@
 
         <div class="row">
             <div class="dash-video-player col-md-9">
-                <div class="chartBackground">
-                    <div id="chartBandwidth" class="overlayChart col-md-9" ng-model="bandwidthData"></div>
-                </div>
                 <video controls="true"></video>
             </div>
             <div class="col-md-3">
@@ -316,15 +313,29 @@
                         <button
                             type="button"
                             class="btn btn-default"
-                            ng-class="{active:showCharts == true}"
-                            ng-click="setCharts(true)">
-                            Show
+                            ng-class="{active: (switchCharts == false && showCharts == true)}"
+                            ng-click="setSwitchCharts(false)">
+                            Buffer Chart
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-default"
+                            ng-class="{active: (switchCharts == true && showCharts == true)}"
+                            ng-click="setSwitchCharts(true)">
+                            Bandwidth Chart
                         </button>
                     </div>
                 </div>
                 <div ng-switch on="showCharts">
                     <div class="panel-body panel-stats" ng-switch-when="true">
-                        <chart ng-model="bufferData"></chart>
+                        <div ng-switch on="switchCharts">
+                            <div ng-switch-when="false">
+                                <chart ng-model="bufferData"></chart>
+                            </div>
+                            <div ng-switch-when="true">
+                                <chart2 id="chartBandwidth" class="overlayChart" ng-model="bandwidthData"></chart2>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
