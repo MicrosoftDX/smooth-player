@@ -1,4 +1,6 @@
 'use strict';
+// don'yt disable metrics...
+var DEBUG = true;
 
 angular.module('DashSourcesService', ['ngResource']).
     factory('Sources', function($resource){
