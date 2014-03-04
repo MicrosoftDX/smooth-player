@@ -18,7 +18,7 @@ var previousPlayedQuality = 0,
     dlSeries = [],
     playSeries = [],
     qualityChangements = [],
-    chartOptions = {series: {shadowSize: 0},yaxis: {ticks: [],color:"#FFF"},xaxis: {show: true},lines: {steps: true,},grid: {markings: [],borderWidth: 0},legend: {show: false}},
+    chartOptions = {series: {shadowSize: 0},yaxis: {ticks: [],color:"#FFF"},xaxis: {show: false},lines: {steps: true,},grid: {markings: [],borderWidth: 0},legend: {show: false}},
     video,
     player,
     currentIdToToggle = 0;
