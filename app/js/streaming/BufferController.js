@@ -48,8 +48,6 @@ MediaPlayer.dependencies.BufferController = function () {
         fragmentsToLoad = 0,
         fragmentModel = null,
         bufferLevel = 0,
-        // ORANGE : add fast start capability
-        fastStartTime = 2,
         isQuotaExceeded = false,
         rejectedBytes = null,
         fragmentDuration = 0,
@@ -787,8 +785,8 @@ MediaPlayer.dependencies.BufferController = function () {
 
         checkIfSufficientBuffer = function () {
             if (waitingForBuffer) {
-                // ORANGE : replace minBufferTime by FastStartTime
-                if (bufferLevel < fastStartTime) {
+                // ORANGE : replace minBufferTime by MediaPlayer.dependencies.BufferExtensions.START_TIME 
+                if (bufferLevel < MediaPlayer.dependencies.BufferExtensions.START_TIME) {
                     if (!stalled) {
                         this.debug.log("Waiting for more " + type + " buffer before starting playback.");
                         stalled = true;
