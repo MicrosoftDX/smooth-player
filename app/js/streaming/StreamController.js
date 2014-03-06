@@ -372,8 +372,7 @@
             self.manifestLoader.load(url).then(
                 function(manifest) {
                     // ORANGE: add licenser backUrl parameter
-                    if (self.backUrl !== undefined) 
-                    {
+                    if (self.backUrl) {
                         manifest.backUrl = self.backUrl;
                     }
                     self.manifestModel.setValue(manifest);
