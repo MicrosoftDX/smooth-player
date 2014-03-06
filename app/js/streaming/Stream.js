@@ -132,8 +132,7 @@ MediaPlayer.dependencies.Stream = function () {
             
             // ORANGE: if backUrl is defined, override laURL
             var manifest = self.manifestModel.getValue();
-            if(manifest.backUrl !== undefined)
-            {
+            if(manifest.backUrl) {
                 laURL = manifest.backUrl;
             }
 
