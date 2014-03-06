@@ -35,7 +35,6 @@ MediaPlayer.dependencies.FragmentLoader = function () {
 
                 if (currentQuality != request.quality) {
                     currentQuality = request.quality;
-                    console.log("currentQuality for "+request.streamType + " " + currentQuality);
                     this.metricsModel.addDownloadSwitch(request.streamType, request.startTime, request.requestStartDate, request.quality);
                 }
 
