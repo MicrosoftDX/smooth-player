@@ -334,7 +334,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
         var metrics;
 
         metrics = getCribbedMetricsFor("video");
-        if (metrics) {
+        if (metrics && metrics.dwnldSwitch) {
             $scope.videoBitrate = metrics.bandwidthValue;
             $scope.videoIndex = metrics.bitrateIndexValue;
             $scope.videoPendingIndex = metrics.pendingIndex;
