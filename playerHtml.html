@@ -15,7 +15,18 @@
             font-family: Helvetica,Arial;
         }
 
-        /* slider */
+        .videoContainer {
+            width: 100%;
+            height: 100%;
+        }
+        video {
+            width: 100%;
+            height: 100%;
+        }
+/* ********************************************************* */
+/* ****************  SLIDER (JQUERY UI) ******************** */
+/* ********************************************************* */
+
         .ui-widget {font-family: Trebuchet MS,Tahoma,Verdana,Arial,sans-serif;}
         .ui-widget-header {border: 1px solid #e78f08;background: #2980B9 50% 50% repeat-x;color: #fff;font-weight: bold;}
         .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {border: 1px solid #ccc;background: #f6f6f6 50% 50% repeat-x;font-weight: bold;color: #1c94c4;}
@@ -41,6 +52,9 @@
         .vertical .ui-slider-label-ticks span { position: relative; display: inline-block; margin-left: 1em; top: .6em; }
 
 
+/* ********************************************************* */
+/* **********************  METRICS ************************* */
+/* ********************************************************* */
         .container {
             background-color: rgba(0,0,0,0.5);
             -webkit-border-radius: 5px;
@@ -91,26 +105,189 @@
             text-shadow: 1px 1px #333232;
         }
 
+/* ******************************************************** */
+/* ************  CONTROL BAR AND BUTTONS ****************** */
+/* ******************************************************** */
 
-        video {
-            width: 100%;
-            height: 100%;
+        .controlBar {
+            display: block;
+            background-color: rgba(0,0,0,0.8);
+            -webkit-border-radius: 5px;
+            border-radius: 5px;
+            height: 40px;
+            width: 300px;
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            margin: 0 -150px;
+            text-align: center;
+            overflow: hidden;
         }
 
+        .playPauseButton {
+            display: inline-block;
+            height: 0;
+            width: 0;
+            border-top: 12px solid transparent;
+            border-bottom: 12px solid transparent;
+            border-left: 18px solid #FFF;
+            margin: 8px 11px;
+        }
+        .playPauseButton.playing {
+            width:24px;
+            height:24px;
+            margin: 8px;
+            position:relative;
+            border: none;
+        }
+
+        .playPauseButton.playing::before,
+        .playPauseButton.playing::after {
+            position: absolute;
+            background: #FFF;
+            content: "";
+            top: 0;
+            width: 6px;
+            height: 100%;
+        }
+        .playPauseButton.playing::before {
+            left: 3px;
+        }
+        .playPauseButton.playing::after {
+            right: 3px;
+        }
+
+        #audioTracksSelect {
+            display: inline-block;
+            display: none;
+            height: 24px;
+            margin: 0 5px;
+            position: relative;
+            top: -15px;
+        }
+
+        .volumeButton{
+            display: inline-block;
+            width:15px;
+            height:15px;
+            margin: 8px 16px 8px 8px;
+            border: solid 0.25em transparent;
+        }
+
+        .speaker{
+            width: 7px;
+            height: 7px;
+            background: #FFF;
+            position:relative;
+            top:3px;
+            
+        }
+        
+        .muted .speaker::before {
+            content: ' ';
+            font-size: 10px;
+            width: 0.4em;
+            height: 3em;
+            background: #FFF;
+            -moz-transform: rotate(45deg);
+            -webkit-transform: rotate(45deg);
+            -o-transform: rotate(45deg);
+            transform: rotate(45deg);
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            color: rgba(0,0,0,0.8);
+            border: 1px solid;
+            z-index: 2;
+        }
+
+        .speaker::before{
+            content: '';
+            position: absolute;
+            width: 0.313em;
+            height: 0.313em;
+            border-style: double;
+            border-color: #FFF;
+            border-width: 0.500em 0.500em 0 0;
+            -webkit-border-radius: 0 3.125em 0 0;
+            -moz-border-radius: 0 3.125em 0 0;
+            border-radius: 0 3.125em 0 0;
+            -webkit-transform: rotate(45deg);
+            -moz-transform: rotate(45deg);
+            -ms-transform: rotate(45deg);
+            -o-transform: rotate(45deg);
+            -webkit-transform: rotate(45deg);
+            left: 1em;
+            top: -0.1em;
+        }
+       
+        .speaker::after{
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-color: transparent #FFF transparent transparent;
+            border-width: 0.750em 1em 0.750em 0.938em;
+            left: -0.9em;
+            margin-top: -0.5em;
+        }
+        
+        .fullscreenButton{
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            margin: 8px;
+            border: 3px #FFF dashed;
+            position: relative;
+        }
+
+        .fullscreenButton:before{
+            content: '';
+            position:absolute;
+            background: #FFF;
+            top: 5px;
+            left: 5px;
+            width: 8px;
+            height: 8px;
+        }
+
+        .videoContainer:-webkit-full-screen{
+            width:100%;
+            height:100%;
+        }
+
+        .videoContainer:-ms-fullscreen{
+            position:absolute;
+            left:0px;
+            top:0px;
+            width: 100%;
+            height: 100%;        
+        }
     </style>
 </head>
-<div id="chartToToggle" class="chartContainer container"> 
-    <div id="chartBandwidth" class="overlayChart" ng-model="bandwidthData"></div>
-</div>
-<div id="sliderToToggle" class="sliderContainer container">
-    <div id="sliderBitrate"></div>
-</div>
-<div id="infosToToggle" class="infosContainer container">
-    <div id="playingInfos" class="infos"></div>
-    <div id="downloadingInfos" class="infos"></div>
-</div>
+<div id="videoContainer" class="videoContainer">
+    <div id="chartToToggle" class="chartContainer container"> 
+        <div id="chartBandwidth" class="overlayChart" ng-model="bandwidthData"></div>
+    </div>
+    <div id="sliderToToggle" class="sliderContainer container">
+        <div id="sliderBitrate"></div>
+    </div>
+    <div id="infosToToggle" class="infosContainer container">
+        <div id="playingInfos" class="infos"></div>
+        <div id="downloadingInfos" class="infos"></div>
+    </div>
 
-<video controls="true"></video>
+    <video id="videoPlayer"></video>
+    <div id="controlBar" class="controlBar">
+        <div id="playPauseButton" class="playPauseButton"></div>
+        <div id="volumeButton" class="volumeButton">
+            <div class="speaker"></div>
+        </div>
+        <select id="audioTracksSelect"></select>
+        <div id="fullscreenButton" class="fullscreenButton"></div>
+    </div>
+</div>
 </body>
 <script src="playerHtml.js"></script>
 <script type="text/javascript">
