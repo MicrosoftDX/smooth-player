@@ -245,7 +245,8 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
             droppedFramesValue = 0,
             videoWidthValue = 0,
             videoHeightValue = 0,
-            codecsValue;
+            codecsValue,
+            dwnldSwitch;
 
         if (metrics && metricsExt) {
             repSwitch = metricsExt.getCurrentRepresentationSwitch(metrics);
@@ -253,6 +254,7 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
             httpRequest = metricsExt.getCurrentHttpRequest(metrics);
             droppedFramesMetrics = metricsExt.getCurrentDroppedFrames(metrics);
 
+            dwnldSwitch = metricsExt.getCurrentDownloadSwitch(metrics);
             if (repSwitch !== null) {
                 bitrateIndexValue = metricsExt.getIndexForRepresentation(repSwitch.to);
                 bandwidthValue = metricsExt.getBandwidthForRepresentation(repSwitch.to);
@@ -317,7 +319,8 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
                 droppedFramesValue: droppedFramesValue,
                 videoWidthValue: videoWidthValue,
                 videoHeightValue: videoHeightValue,
-                codecsValue: codecsValue
+                codecsValue: codecsValue,
+                dwnldSwitch: dwnldSwitch
             };
         }
         else {
@@ -355,25 +358,36 @@ app.controller('DashController', function($scope, Sources, Notes, Contributors, 
                 }});
             }
 
-            if (metrics.bandwidthValue != previousDownloadedQuality) {
-                qualityChangements.push([video.currentTime+parseFloat(metrics.bufferLengthValue), metrics.bandwidthValue]);
-                previousDownloadedQuality = metrics.bandwidthValue;
+            // case of downloaded quality changmement
+            if (metrics.bitrateValues[metrics.dwnldSwitch.quality] != previousDownloadedQuality) {
+                // save quality changement for later when video currentTime = mediaStartTime
+                qualityChangements.push({
+                    mediaStartTime : metrics.dwnldSwitch.mediaStartTime,
+                    switchedQuality : metrics.bitrateValues[metrics.dwnldSwitch.quality],
+                    downloadStartTime : metrics.dwnldSwitch.downloadStartTime
+                });
+                previousDownloadedQuality = metrics.bitrateValues[metrics.dwnldSwitch.quality];
             }
             
-            var dlPoint = [video.currentTime, metrics.bandwidthValue];
-            dlSeries.push(dlPoint);
-
-
             for (var p in qualityChangements) {
-                if (qualityChangements[p][0] <= video.currentTime) {
-                    previousPlayedQuality = qualityChangements[p][1];
+                var currentQualityChangement = qualityChangements[p];
+                //time of downloaded quality changement !
+                if (currentQualityChangement.downloadStartTime <= video.currentTime) {
+                    previousDownloadedQuality = currentQualityChangement.switchedQuality;
+                }
+
+                // time of played quality changement !
+                if (currentQualityChangement.mediaStartTime <= video.currentTime) {
+                    previousPlayedQuality = currentQualityChangement.switchedQuality;
                     qualityChangements.splice(p,1);
                 }
             }
-            var playPoint = [video.currentTime, previousPlayedQuality];
 
-
+            var dlPoint = [video.currentTime, Math.round(previousDownloadedQuality/1000)];
+            dlSeries.push(dlPoint);
+            var playPoint = [video.currentTime, Math.round(previousPlayedQuality / 1000)];
             playSeries.push(playPoint);
+            
             videoSeries.push([parseFloat(video.currentTime), Math.round(parseFloat(metrics.bufferLengthValue))]);
 
             if (videoSeries.length > maxGraphPoints) {

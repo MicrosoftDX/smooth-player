@@ -14,6 +14,18 @@ Custom.models.CustomMetricsModel = function () {
         return vo;
     };
 
+    rslt.addDownloadSwitch = function (streamType, startTime, downloadTime, quality) {
+        var ds = new Custom.vo.metrics.DownloadSwitch();
+
+        ds.type = streamType;
+        ds.mediaStartTime = startTime;
+        ds.downloadStartTime = downloadTime;
+        ds.quality = quality;
+
+        this.parent.getMetricsFor(streamType).DwnldSwitchList = [ds];
+        return ds;
+    };
+
     return rslt;
 };
 

@@ -8,6 +8,9 @@ Custom = (function () {
         models: {},
         modules: {},
         utils: {},
-        rules: {}
+        rules: {},
+        vo: {
+			metrics: {}
+        }
     };
 }());

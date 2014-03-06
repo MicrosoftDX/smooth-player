@@ -17,6 +17,7 @@ MediaPlayer.dependencies.FragmentLoader = function () {
     var RETRY_ATTEMPTS = 3,
         RETRY_INTERVAL = 500,
         xhrs = [],
+        currentQuality =null,
 
         doLoad = function (request, remainingAttempts) {
             var req = new XMLHttpRequest(),
@@ -31,6 +32,13 @@ MediaPlayer.dependencies.FragmentLoader = function () {
 
                 req.open("GET", request.url, true);
                 req.responseType = "arraybuffer";
+
+                if (currentQuality != request.quality) {
+                    currentQuality = request.quality;
+                    console.log("currentQuality for "+request.streamType + " " + currentQuality);
+                    this.metricsModel.addDownloadSwitch(request.streamType, request.startTime, request.requestStartDate, request.quality);
+                }
+
 /*
                 req.setRequestHeader("Cache-Control", "no-cache");
                 req.setRequestHeader("Pragma", "no-cache");

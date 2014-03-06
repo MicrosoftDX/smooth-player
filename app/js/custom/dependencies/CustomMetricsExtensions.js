@@ -176,6 +176,19 @@ Custom.dependencies.CustomMetricsExtensions = function () {
         return repBoundaries[repBoundaries.length - 1];
     };
 
+    rslt.getCurrentDownloadSwitch = function (metrics) {
+        if (metrics === null) {
+            return null;
+        }
+
+        var dwnldSwitch = metrics.DwnldSwitchList;
+
+        if (dwnldSwitch === null || dwnldSwitch.length <= 0) {
+            return null;
+        }
+        return dwnldSwitch[dwnldSwitch.length-1];
+    };
+
     return rslt;
 };
 

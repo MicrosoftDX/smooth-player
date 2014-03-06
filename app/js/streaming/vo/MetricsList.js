@@ -20,6 +20,8 @@ MediaPlayer.models.MetricsList = function () {
         RepSwitchList: [],
         // ORANGE: add representation boundaries in metrcis
         RepBoundariesList: [],
+        // ORANGE: add download switch in metrics
+        DwnldSwitchList: [],
         BufferLevel: [],
         PlayList: [],
         DroppedFrames: []
