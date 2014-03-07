@@ -1,7 +1,7 @@
 // customizable settings
 //
 // hideMetricsAtStart :	if true all metrics are hidden at start and ctrl+i show them one by one else all metrics are shown at start and ctrl+i hide them one by one
-var hideMetricsAtStart = false;
+var hideMetricsAtStart = true;
 // idsToToggle : ids of the metrics to toggle, metrics are hided (or shown) in the array order
 var idsToToggle = ["#chartToToggle", "#sliderToToggle", "#infosToToggle"];
 // updateInterval : the intervals on how often the metrics are updated in milliseconds
@@ -38,15 +38,15 @@ function update() {
         codecsValue,
         dwnldSwitch;
         
-    // update seek slider
-    // if (!isSeeking) {
-    //     $("#seekBar").slider('value',video.currentTime);
-    // }
-        
     if(videoDuration === 0 && video.duration >0) {
-        videoDuration = video.duration;
-        $("#seekBar").attr('max', video.duration);
-        //$("#seekBar").slider( "option", "max", video.duration);
+        if( video.duration == Infinity) {
+            $("#seekBar").hide();
+        } else {
+            $("#seekBar").show();
+            videoDuration = video.duration;
+            $("#seekBar").attr('max', video.duration);
+            $("#videoPlayer").on('timeupdate', updateSeekBar);
+        }
     }
 
 
@@ -292,8 +292,6 @@ function initControlBar () {
         video.currentTime = event.offsetX * videoDuration / $("#seekBar").width();
         updateSeekBar();
     });
-
-    $("#videoPlayer").on('timeupdate', updateSeekBar);
 }
 
 
