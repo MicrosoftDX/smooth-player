@@ -28,28 +28,47 @@
 /* ********************************************************* */
 
         .ui-widget {font-family: Trebuchet MS,Tahoma,Verdana,Arial,sans-serif;}
-        .ui-widget-header {border: 1px solid #e78f08;background: #2980B9 50% 50% repeat-x;color: #fff;font-weight: bold;}
+        .ui-widget-header {border: 1px solid #e78f08;background: #2980B9 ;color: #fff;font-weight: bold;}
         .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {border: 1px solid #ccc;background: #f6f6f6 50% 50% repeat-x;font-weight: bold;color: #1c94c4;}
-        .ui-slider-vertical .ui-slider-handle {left: -.3em;margin-left: 0;margin-bottom: -.6em;}
-        .ui-slider .ui-slider-handle {position: absolute;z-index: 2;width: 1.2em;height: 1.2em;cursor: default;}
+        
+        .ui-slider .ui-slider-handle {
+            position: absolute;
+            z-index: 2;
+            cursor: default;
+            width: 11px;
+            height: 4px;
+            left: -4px;
+        }
+        .ui-slider-vertical .ui-slider-handle {
+            margin:0;
+        }
+
         .ui-corner-all, .ui-corner-bottom, .ui-corner-right, .ui-corner-br {border-bottom-right-radius: 4px;}
         .ui-corner-all, .ui-corner-bottom, .ui-corner-left, .ui-corner-bl {border-bottom-left-radius: 4px;}
         .ui-corner-all, .ui-corner-top, .ui-corner-right, .ui-corner-tr {border-top-right-radius: 4px;}
         .ui-corner-all, .ui-corner-top, .ui-corner-left, .ui-corner-tl {border-top-left-radius: 4px;}
-        .ui-widget-content {border: 1px solid #ddd;background: #eee 50% top repeat-x;color: #333;}
+        .ui-widget-content {background: #eee 50% top repeat-x;color: #333;}
         .ui-slider {position: relative;text-align: left;}
-        .ui-slider .ui-slider-range {position: absolute;z-index: 1;font-size: .7em;display: block;border: 0;background-position: 0 0;}
-        .ui-slider-vertical {width: .8em;height: 100px;}
+        .ui-slider .ui-slider-range {
+            position: absolute;
+            z-index: 1;
+            font-size: .7em;
+            display: block;
+            border: 0;
+            border-top-left-radius:0;
+            border-top-right-radius:0;
+            background-position: 0 0;
+        }
+        .ui-slider-vertical {width: 5px;height: 100px;}
         .ui-slider-vertical .ui-slider-range {left: 0;width: 100%;}
         .ui-slider-wrapper { position: relative; }
-        .ui-slider-wrapper .ui-slider-horizontal { width: 100%; }
         .ui-slider-labels { position: absolute; border: 1px solid transparent; }
         .ui-slider-label-ticks { border: 1px solid transparent; position: absolute; white-space: nowrap; }
         .ui-slider-label-ticks span { font-size: 0.9em; min-width: 1.2em; }
-        .ui-slider-wrapper.vertical { width: 4.5em; }
+        .ui-slider-wrapper.vertical { width: 56px; }
         .vertical .ui-slider-labels { top: 1px; bottom: 0; left: 0.7em; }
-        .vertical .ui-slider-label-ticks { height: 1.2em; width: 0.8em; border-bottom: 1px solid #999; }
-        .vertical .ui-slider-label-ticks span { position: relative; display: inline-block; margin-left: 1em; top: .6em; }
+        .vertical .ui-slider-label-ticks { height: 1.2em; width: 5px; border-bottom: 1px solid #999; }
+        .vertical .ui-slider-label-ticks span { position: relative; display: inline-block; margin-left: 8px; top: .6em; }
 
 
 /* ********************************************************* */
@@ -115,11 +134,11 @@
             -webkit-border-radius: 5px;
             border-radius: 5px;
             height: 40px;
-            width: 300px;
+            width: 464px;
             position: absolute;
             bottom: 5px;
             left: 50%;
-            margin: 0 -150px;
+            margin: 0 -232px;
             text-align: center;
             overflow: hidden;
         }
@@ -170,7 +189,7 @@
             display: inline-block;
             width:15px;
             height:15px;
-            margin: 8px 16px 8px 8px;
+            margin: 8px 16px 8px 0;
             border: solid 0.25em transparent;
         }
 
@@ -232,6 +251,35 @@
             left: -0.9em;
             margin-top: -0.5em;
         }
+
+        .seekBar {
+            display: inline-block;
+            clear: left;
+            width: 300px;
+            margin: 12px;
+            position: relative;
+            top: -3px;
+        }
+
+        progress{
+            flex:1;
+            margin:0 4px;
+            display: block;
+            border-radius: 10px;
+            background-color: #BBB;
+            color:#FFF;
+        }
+
+        progress::-webkit-progress-bar{
+            border-radius: 10px;
+        }
+
+        progress::-webkit-progress-value{
+            background:#FFF !important;
+            opacity: 0.2;
+            border-radius:10px;
+        }
+
         
         .fullscreenButton{
             display: inline-block;
@@ -285,6 +333,8 @@
             <div class="speaker"></div>
         </div>
         <select id="audioTracksSelect"></select>
+        <!-- <div id="seekBar" class="seekBar"></div> -->
+        <progress id="seekBar" min="0" class="seekBar"></progress>
         <div id="fullscreenButton" class="fullscreenButton"></div>
     </div>
 </div>

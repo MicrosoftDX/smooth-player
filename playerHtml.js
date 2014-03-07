@@ -1,7 +1,7 @@
 // customizable settings
 //
 // hideMetricsAtStart :	if true all metrics are hidden at start and ctrl+i show them one by one else all metrics are shown at start and ctrl+i hide them one by one
-var hideMetricsAtStart = true;
+var hideMetricsAtStart = false;
 // idsToToggle : ids of the metrics to toggle, metrics are hided (or shown) in the array order
 var idsToToggle = ["#chartToToggle", "#sliderToToggle", "#infosToToggle"];
 // updateInterval : the intervals on how often the metrics are updated in milliseconds
@@ -22,7 +22,9 @@ var previousPlayedQuality = 0,
     video,
     player,
     currentIdToToggle = 0,
-    isPlaying = false;
+    isPlaying = false,
+    isSeeking = false,
+    videoDuration = 0;
 
 function update() {
     var repSwitch,
@@ -36,6 +38,17 @@ function update() {
         codecsValue,
         dwnldSwitch;
         
+    // update seek slider
+    // if (!isSeeking) {
+    //     $("#seekBar").slider('value',video.currentTime);
+    // }
+        
+    if(videoDuration === 0 && video.duration >0) {
+        videoDuration = video.duration;
+        $("#seekBar").attr('max', video.duration);
+        //$("#seekBar").slider( "option", "max", video.duration);
+    }
+
 
     repSwitch = metricsExt.getCurrentRepresentationSwitch(metricsVideo);
     dwnldSwitch = metricsExt.getCurrentDownloadSwitch(metricsVideo);
@@ -210,6 +223,17 @@ function hideMetrics() {
     }
 }
 
+function doSeek(event,ui) {
+    isSeeking = false;
+    // when video.readyState is null, we must not use video element
+    if (video.readyState) {
+        video.currentTime = ui.value;
+    }
+}
+function updateSeekBar() {
+    $("#seekBar").attr('value',video.currentTime);
+}
+
 function initControlBar () {
     $("#playPauseButton").click(function() {
         isPlaying ? video.pause() : video.play();
@@ -253,12 +277,23 @@ function initControlBar () {
         }
     });
 
-    $("#volumeBar").slider({
-        value: 1,
+    /*$("#seekBar").slider({
         orientation: "horizontal",
         range: "min",
-        animate: true
+        value: 0,
+        step: 0.01,
+        max: video.duration,
+        change: doSeek,
+        slide: function(){
+            isSeeking = true;
+        }
+    });*/
+    $("#seekBar").click(function(event) {
+        video.currentTime = event.offsetX * videoDuration / $("#seekBar").width();
+        updateSeekBar();
     });
+
+    $("#videoPlayer").on('timeupdate', updateSeekBar);
 }
 
 
@@ -296,9 +331,6 @@ function onLoaded () {
 		hideMetrics();
     }
 }
-
-
-
 
 
 // /!\ ALWAYS PUT DASH.ALL.JS IN FIRST POSITION /!\
