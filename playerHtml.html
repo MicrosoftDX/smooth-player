@@ -38,11 +38,9 @@
             width: 11px;
             height: 4px;
             left: -4px;
+            margin-bottom: -2px;
         }
-        .ui-slider-vertical .ui-slider-handle {
-            margin:0;
-        }
-
+      
         .ui-corner-all, .ui-corner-bottom, .ui-corner-right, .ui-corner-br {border-bottom-right-radius: 4px;}
         .ui-corner-all, .ui-corner-bottom, .ui-corner-left, .ui-corner-bl {border-bottom-left-radius: 4px;}
         .ui-corner-all, .ui-corner-top, .ui-corner-right, .ui-corner-tr {border-top-right-radius: 4px;}
@@ -128,17 +126,51 @@
 /* ************  CONTROL BAR AND BUTTONS ****************** */
 /* ******************************************************** */
 
+        .controlBarWithAudioTrackSelectAndSeek.controlBar {
+            width: 620px;
+            margin: 0 -310px;
+        }
+        
+        .controlBarWithAudioTrackSelectAndSeek.controlBar .audioTracksSelect,
+        .controlBarWithAudioTrackSelectAndSeek.controlBar .seekBar {
+            display: inline-block;
+        }
+
+        .controlBarWithSeek.controlBar {
+            width: 464px;
+            margin: 0 -232px;
+        }
+        
+        .controlBarWithSeek.controlBar .seekBar {
+            display: inline-block;
+        }
+
+
+        .controlBarWithAudioTrackSelect.controlBar {
+            width: 300px;
+            margin: 0 -150px;
+        }
+
+        .controlBarWithAudioTrackSelect.controlBar .audioTracksSelect {
+            display: inline-block;
+        }
+
+        .controlBar .audioTracksSelect,
+        .controlBar .seekBar{
+            display: none;
+        }
+
         .controlBar {
             display: block;
             background-color: rgba(0,0,0,0.8);
             -webkit-border-radius: 5px;
             border-radius: 5px;
             height: 40px;
-            width: 464px;
+            width: 130px;
             position: absolute;
             bottom: 5px;
             left: 50%;
-            margin: 0 -232px;
+            margin: 0 -65px;
             text-align: center;
             overflow: hidden;
         }
@@ -176,11 +208,9 @@
             right: 3px;
         }
 
-        #audioTracksSelect {
-            display: inline-block;
-            display: none;
+        .audioTracksSelect {
             height: 24px;
-            margin: 0 5px;
+            margin: 0 8px;
             position: relative;
             top: -15px;
         }
@@ -253,7 +283,6 @@
         }
 
         .seekBar {
-            display: inline-block;
             clear: left;
             width: 300px;
             margin: 12px;
@@ -332,10 +361,10 @@
         <div id="volumeButton" class="volumeButton">
             <div class="speaker"></div>
         </div>
-        <select id="audioTracksSelect"></select>
         <!-- <div id="seekBar" class="seekBar"></div> -->
-        <progress id="seekBar" min="0" class="seekBar" style="display:none;"></progress>
+        <progress id="seekBar" min="0" class="seekBar"></progress>
         <div id="fullscreenButton" class="fullscreenButton"></div>
+        <select id="audioTracksSelect" class="audioTracksSelect"></select>
     </div>
 </div>
 </body>

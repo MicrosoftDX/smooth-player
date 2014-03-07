@@ -1,5 +1,5 @@
 // customizable settings
-//
+//  
 // hideMetricsAtStart :	if true all metrics are hidden at start and ctrl+i show them one by one else all metrics are shown at start and ctrl+i hide them one by one
 var hideMetricsAtStart = true;
 // idsToToggle : ids of the metrics to toggle, metrics are hided (or shown) in the array order
@@ -24,7 +24,9 @@ var previousPlayedQuality = 0,
     currentIdToToggle = 0,
     isPlaying = false,
     isSeeking = false,
-    videoDuration = 0;
+    firstAccess = true,
+    seekBarIsPresent = false,
+    audioTracksSelectIsPresent = false;
 
 function update() {
     var repSwitch,
@@ -38,18 +40,6 @@ function update() {
         codecsValue,
         dwnldSwitch;
         
-    if(videoDuration === 0 && video.duration >0) {
-        if( video.duration == Infinity) {
-            $("#seekBar").hide();
-        } else {
-            $("#seekBar").show();
-            videoDuration = video.duration;
-            $("#seekBar").attr('max', video.duration);
-            $("#videoPlayer").on('timeupdate', updateSeekBar);
-        }
-    }
-
-
     repSwitch = metricsExt.getCurrentRepresentationSwitch(metricsVideo);
     dwnldSwitch = metricsExt.getCurrentDownloadSwitch(metricsVideo);
 
@@ -79,7 +69,7 @@ function update() {
 
 
 
-
+        // test if it's time of changement
         for (var p in qualityChangements) {
             var currentQualityChangement = qualityChangements[p];
             //time of downloaded quality changement !
@@ -93,6 +83,7 @@ function update() {
                 previousPlayedVideoWidth = currentQualityChangement.videoWidth;
                 previousPlayedVideoHeight = currentQualityChangement.videoHeight;
                 previousPlayedCodecs = currentQualityChangement.codecsValue;
+                // remove it when it's played 
                 qualityChangements.splice(p,1);
             }
         }
@@ -101,6 +92,7 @@ function update() {
         playSeries.push([video.currentTime, Math.round(previousPlayedQuality / 1000)]);
 
 
+        // remove older points for the x-axis move
         if (dlSeries.length > (chartXaxisWindow*1000)/updateInterval) {
             dlSeries.splice(0, 1);
             playSeries.splice(0, 1);
@@ -151,7 +143,8 @@ function update() {
                     selectOptions += '<option value="'+audioDatas[j].id+'">'+audioDatas[j].lang + ' - ' + audioDatas[j].id+'</option>';
                 }
                 $("#audioTracksSelect").html(selectOptions);
-                $("#audioTracksSelect").show();
+                audioTracksSelectIsPresent = true;
+
                 
                 $("#audioTracksSelect").change(function(track) {
                     var currentTrackId = $("select option:selected")[0].value;
@@ -161,13 +154,31 @@ function update() {
                         }
                     }
                 });
-            } else {
-                $("#audioTracksSelect").hide();
             }
+            
         } else {
             chartBandwidth.setData(bandwidthData);
             chartBandwidth.setupGrid();
             chartBandwidth.draw();
+        }
+
+        // control bar initialisation
+        if(firstAccess && video.duration >0) {
+            firstAccess = false;
+            if(video.duration !== Infinity) {
+                seekBarIsPresent = true;
+                videoDuration = video.duration;
+                $("#seekBar").attr('max', video.duration);
+                $("#videoPlayer").on('timeupdate', updateSeekBar);
+            }
+
+            if(audioTracksSelectIsPresent && seekBarIsPresent) {
+                $("#controlBar").addClass("controlBarWithAudioTrackSelectAndSeek");
+            } else if(audioTracksSelectIsPresent) {
+                $("#controlBar").addClass("controlBarWithAudioTrackSelect");
+            } else if (seekBarIsPresent) {
+                $("#controlBar").addClass("controlBarWithSeek");
+            }
         }
         
         previousPlayedVideoWidth = previousPlayedVideoWidth ? previousPlayedVideoWidth : "0";
@@ -289,7 +300,7 @@ function initControlBar () {
         }
     });*/
     $("#seekBar").click(function(event) {
-        video.currentTime = event.offsetX * videoDuration / $("#seekBar").width();
+        video.currentTime = event.offsetX * video.duration / $("#seekBar").width();
         updateSeekBar();
     });
 }
