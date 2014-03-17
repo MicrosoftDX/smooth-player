@@ -5,6 +5,11 @@
     <title>Orange Dash JavaScript Player</title>
     <meta name="description" content="" />
     <style type="text/css">
+        html {
+            height: 100%;
+            width: 100%;
+        }
+
         body {
             margin: 0;
             height: 100%;
@@ -285,14 +290,14 @@
         .seekBar {
             clear: left;
             width: 300px;
-            margin: 12px;
+            margin: 0 12px;
             position: relative;
-            top: -3px;
+            top: -17px;
+            height: 8px;
         }
 
         progress{
             flex:1;
-            margin:0 4px;
             display: block;
             border-radius: 10px;
             background-color: #BBB;
@@ -304,7 +309,7 @@
         }
 
         progress::-webkit-progress-value{
-            background: rgba(255,255,255,0.2) !important;
+            background: #FFF !important;
             border-top-left-radius: 10px;
             border-bottom-left-radius: 10px;
             border-right: 1px solid #000;
