@@ -23,7 +23,6 @@ var previousPlayedQuality = 0,
     player,
     currentIdToToggle = 0,
     isPlaying = false,
-    isSeeking = false,
     firstAccess = true,
     seekBarIsPresent = false,
     audioTracksSelectIsPresent = false;
@@ -234,13 +233,7 @@ function hideMetrics() {
     }
 }
 
-function doSeek(event,ui) {
-    isSeeking = false;
-    // when video.readyState is null, we must not use video element
-    if (video.readyState) {
-        video.currentTime = ui.value;
-    }
-}
+
 function updateSeekBar() {
     $("#seekBar").attr('value',video.currentTime);
 }
