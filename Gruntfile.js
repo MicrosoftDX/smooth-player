@@ -25,7 +25,8 @@ module.exports = function(grunt) {
             drop_console : true,  /* remove console statements */
             drop_debugger: true,  /* remove debugger statements */
             warnings: true       /* display compress warnings (lines removal for example) */
-          }
+          },
+          banner: '// Last build : @@TIMESTAMPTOREPLACE / git revision : @@REVISIONTOREPLACE\n' /* add this line at dash.all.js start */
           // ,
           // beautify : {        /* to debug purpose : code is more human readable  */
           //   beautify : true
@@ -116,8 +117,35 @@ module.exports = function(grunt) {
             report: 'reports/coverage'},
           junit: {
               path: grunt.option('jsunit-path'),
-              consolidate: true}
+              consolidate: true
+            }
         }
+      }
+    },
+    revision: {
+      options: {
+        property: 'meta.revision',
+        ref: 'development',
+        short: true
+      }
+    },
+    replace: {
+      dist: {
+        options: {
+          patterns: [
+            {
+              match: 'REVISIONTOREPLACE',
+              replacement: '<%= meta.revision %>'
+            },
+            {
+              match: 'TIMESTAMPTOREPLACE',
+              replacement: '<%= (new Date().getDate())+"."+(new Date().getMonth()+1)+"."+(new Date().getFullYear())+"_"+(new Date().getHours())+":"+(new Date().getMinutes())+":"+(new Date().getSeconds()) %>'
+            }
+          ]
+        },
+        files: [
+          {expand: true, flatten: true, src: ['dash.all.js'], dest: ''}
+        ]
       }
     }
   });
@@ -128,8 +156,11 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jasmine');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-git-revision');
+  grunt.loadNpmTasks('grunt-replace');
 
 
   // Define tasks
-  grunt.registerTask('default', ['jshint','connect','jasmine','uglify']);
+  grunt.registerTask('default', ['jshint','connect','jasmine','uglify','revision','replace']);
+  grunt.registerTask('build', ['uglify','revision','replace']);
 };
