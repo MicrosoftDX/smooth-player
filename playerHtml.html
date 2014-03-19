@@ -27,6 +27,7 @@
         video {
             width: 100%;
             height: 100%;
+            background: #000;
         }
 /* ********************************************************* */
 /* ****************  SLIDER (JQUERY UI) ******************** */
@@ -137,7 +138,8 @@
         }
         
         .controlBarWithAudioTrackSelectAndSeek.controlBar .audioTracksSelect,
-        .controlBarWithAudioTrackSelectAndSeek.controlBar .seekBar {
+        .controlBarWithAudioTrackSelectAndSeek.controlBar .seekBar,
+        .controlBarWithAudioTrackSelectAndSeek.controlBar .playPauseButton {
             display: inline-block;
         }
 
@@ -146,13 +148,14 @@
             margin: 0 -232px;
         }
         
-        .controlBarWithSeek.controlBar .seekBar {
+        .controlBarWithSeek.controlBar .seekBar,
+        .controlBarWithSeek.controlBar .playPauseButton {
             display: inline-block;
         }
 
 
         .controlBarWithAudioTrackSelect.controlBar {
-            width: 300px;
+            width: 260px;
             margin: 0 -150px;
         }
 
@@ -161,7 +164,8 @@
         }
 
         .controlBar .audioTracksSelect,
-        .controlBar .seekBar{
+        .controlBar .seekBar,
+        .controlBar .playPauseButton{
             display: none;
         }
 
@@ -171,7 +175,7 @@
             -webkit-border-radius: 5px;
             border-radius: 5px;
             height: 40px;
-            width: 130px;
+            width: 90px;
             position: absolute;
             bottom: 5px;
             left: 50%;

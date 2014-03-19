@@ -1,6 +1,5 @@
 // customizable settings
-//  
-// hideMetricsAtStart :	if true all metrics are hidden at start and ctrl+i show them one by one else all metrics are shown at start and ctrl+i hide them one by one
+// hideMetricsAtStart :	if true all metrics are hidden at start and ctrl+i show them one by one; else all metrics are shown at start and ctrl+i hide them one by one
 var hideMetricsAtStart = true;
 // idsToToggle : ids of the metrics to toggle, metrics are hided (or shown) in the array order
 var idsToToggle = ["#chartToToggle", "#sliderToToggle", "#infosToToggle"];
@@ -164,7 +163,8 @@ function update() {
         // control bar initialisation
         if(firstAccess && video.duration >0) {
             firstAccess = false;
-            if(video.duration !== Infinity) {
+            // in dynamic mode, don't diplay seekbar and pause button
+            if(!player.metricsExt.manifestExt.getIsDynamic(player.metricsExt.manifestModel.getValue())) {
                 seekBarIsPresent = true;
                 videoDuration = video.duration;
                 $("#seekBar").attr('max', video.duration);
