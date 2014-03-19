@@ -26,7 +26,7 @@ module.exports = function(grunt) {
             drop_debugger: true,  /* remove debugger statements */
             warnings: true       /* display compress warnings (lines removal for example) */
           },
-          banner: '// Last build : @@TIMESTAMPTOREPLACE / git revision : @@REVISIONTOREPLACE\n' /* add this line at dash.all.js start */
+          banner: '/* Last build : @@TIMESTAMPTOREPLACE / git revision : @@REVISIONTOREPLACE */\n' /* add this line at dash.all.js start */
           // ,
           // beautify : {        /* to debug purpose : code is more human readable  */
           //   beautify : true
