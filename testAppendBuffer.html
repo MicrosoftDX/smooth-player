@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body>
+	<video id="video"></video>
+	<div id="canPlay"></div>
+<script type="text/javascript">
+	var video,
+		buffer,
+		codec,
+		mediaSource,
+		bytesArray = [];
+
+	window.onload= function() {
+		video = document.getElementById("video");
+		
+		mediaSource = new MediaSource();
+		video.src = window.URL.createObjectURL(mediaSource)
+
+		mediaSource.addEventListener('sourceopen', mediaSourceReady, false);
+		mediaSource.addEventListener('webkitsourceopen', mediaSourceReady, false);
+
+		codec = 'video/webm;codecs="vorbis,vp8"';
+
+		var mediaSourceReady = function() {
+			document.getElementById("canPlay").innerHTML = "Can Play ? "+ video.canPlayType(codec);
+			mediaSource.addSourceBuffer(codec)
+
+		};
+
+		for (var i = 0; i < bytesArray.length; i++) {
+			var bytes = bytesArray[i];
+			if ("append" in buffer) {
+	            buffer.append(bytes);
+	        } else if ("appendBuffer" in buffer) {
+	            buffer.appendBuffer(bytes);
+	        }
+		};
+
+
+
+	};
+</script>
+</body>
+</html>
