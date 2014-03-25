@@ -191,6 +191,13 @@ Mss.dependencies.MssParser = function () {
         return period;
     };
 
+
+
+    // compare quality to order the representation by quality
+    var compareQuality = function(repA,repB){
+            return repA.bandwidth - repB.bandwidth;
+    };
+
     var getBaseUrlValuesMap = function () {
 
         //the first mapping get tis Map, so we can also make some transformations...
@@ -320,10 +327,13 @@ Mss.dependencies.MssParser = function () {
                 maxHeight: node.MaxHeight,
                 BaseURL: node.BaseURL,
                 Representation: node.QualityLevel,
-                Representation_asArray: node.QualityLevel_asArray,
+                Representation_asArray: node.QualityLevel_asArray.sort(compareQuality),
                 SegmentTemplate : node,
                 SegmentTemplate_asArray : [node]
             };
+
+            
+            
 
             if (node.Type === "audio") {
                 adaptTransformed.AudioChannelConfiguration = adaptTransformed;
@@ -585,6 +595,7 @@ Mss.dependencies.MssParser = function () {
         processManifest.call(this, manifest);
 
         this.debug.log("[MssParser]", "Parsing complete.");
+        //console.info("manifest",JSON.stringify(manifest) );
         return Q.when(manifest);
     };
 
