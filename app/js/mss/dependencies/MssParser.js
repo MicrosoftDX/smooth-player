@@ -195,7 +195,7 @@ Mss.dependencies.MssParser = function () {
 
     // compare quality to order the representation by quality
     var compareQuality = function(repA,repB){
-            return repA.bandwidth - repB.bandwidth;
+            return parseInt(repA.Bitrate) - parseInt(repB. Bitrate);
     };
 
     var getBaseUrlValuesMap = function () {
@@ -333,7 +333,7 @@ Mss.dependencies.MssParser = function () {
             };
 
             
-            
+            console.info("representation as array :",adaptTransformed.Representation_asArray);
 
             if (node.Type === "audio") {
                 adaptTransformed.AudioChannelConfiguration = adaptTransformed;
