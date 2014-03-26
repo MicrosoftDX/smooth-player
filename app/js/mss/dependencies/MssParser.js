@@ -332,8 +332,6 @@ Mss.dependencies.MssParser = function () {
                 SegmentTemplate_asArray : [node]
             };
 
-            
-            console.info("representation as array :",adaptTransformed.Representation_asArray);
 
             if (node.Type === "audio") {
                 adaptTransformed.AudioChannelConfiguration = adaptTransformed;
