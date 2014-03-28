@@ -195,7 +195,7 @@ Mss.dependencies.MssParser = function () {
 
     // compare quality to order the representation by quality
     var compareQuality = function(repA,repB){
-            return parseInt(repA.Bitrate) - parseInt(repB. Bitrate);
+            return parseInt(repA.Bitrate) - parseInt(repB.Bitrate);
     };
 
     var getBaseUrlValuesMap = function () {
