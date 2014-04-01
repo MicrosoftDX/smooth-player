@@ -58,7 +58,7 @@ function update() {
     repSwitch = metricsExt.getCurrentRepresentationSwitch(metricsVideo);
     dwnldSwitch = metricsExt.getCurrentDownloadSwitch(metricsVideo);
 
-    if (repSwitch && dwnldSwitch) {
+    if (repSwitch && dwnldSwitch && !video.paused) {
         
         bufferLevel = metricsExt.getCurrentBufferLevel(metricsVideo);
         bufferLengthValue = bufferLevel ? bufferLevel.level.toPrecision(5) : 0;
@@ -105,7 +105,6 @@ function update() {
 
         dlSeries.push([video.currentTime, previousDownloadedQuality]);
         playSeries.push([video.currentTime, previousPlayedQuality]);
-
 
         // remove older points for the x-axis move
         if (dlSeries.length > (chartXaxisWindow*1000)/updateInterval) {
@@ -172,6 +171,11 @@ function update() {
                     }
                 });
             }
+            // push false data in dlSeries to have a coherent chart
+            while (dlSeries.length < (chartXaxisWindow*1000)/updateInterval) {
+                dlSeries.unshift([dlSeries[0][0]-updateInterval/1000, previousDownloadedQuality]);
+                playSeries.unshift([dlSeries[0][0]-updateInterval/1000, previousPlayedQuality]);
+            }
             
         } else {
             chartBandwidth.setData(bandwidthData);
@@ -187,7 +191,7 @@ function update() {
         $("#playingInfos").html("<p class='playingTitle'>Playing</p><p>"+ Math.round(bitrateValues[previousPlayedQuality]/100000)/10 + " Mbps</p><p>"+ previousPlayedVideoWidth +"x"+previousPlayedVideoHeight + "</p><p>"+ previousPlayedCodecs + "</p><p>"+ bufferLengthValue + "s</p>");
         //$("#downloadingInfos").html("<span class='downloadingTitle'>Downloading</span><br>" + Math.round(previousDownloadedQuality/1000) + " kbps<br>"+ videoWidthValue +"x"+videoHeightValue + "<br>"+ codecsValue + "<br>"+ bufferLengthValue + "s");
     }
-    setTimeout(update, updateInterval);   
+    setTimeout(update, updateInterval);
 }
 
 
@@ -274,7 +278,6 @@ function openStream(idx) {
         currentStream = videoStreams[idx];
         url = currentStream.url;
         updateVideoStreamInfos(currentStream);
-        // erase bandwidth value
         open();
     }
 }
@@ -294,7 +297,7 @@ function initVideoStreams () {
         listItem += '<div class="text-video-item"><p>' + videoStreams[i].name + '</p></div></li>';
         list.append(listItem);
     }
-    openStream(0);
+    openStream(2);
 }
 
 function onLoaded () {
@@ -311,9 +314,9 @@ function onLoaded () {
     });
 
     // catch fullscreen event and hide fullscreenContainer at start
-    $("#fullScreenContainer").hide();
+    //$("#metricsContainer").hide();
     $('#video-player').bind('webkitfullscreenchange fullscreenchange', function(e) {
-        $("#fullScreenContainer").toggle();
+        //$("#metricsContainer").toggle();
         return false;
     });
     

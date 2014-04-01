@@ -26,24 +26,12 @@
             flex-direction: column;
         }
 
-        div {
-            border-style:solid;
-            border-width:0px;
-        }
-        img {
-            border-style:solid;
-            border-width:0px;
-        }
-
         /* reset css */
         ul {
             list-style: none;
         }
 
-        .logo {
-            height: 50px;
-        }
-
+/* HEADER CSS */
         .header {
             padding: 20px;
             width: 100%;
@@ -83,40 +71,142 @@
             content: ' ';
             height: 1em;
         }
-
+/* MAIN CSS */
         .main {
-            width: 80%;
+            width: 95%;
             height: 100%;
             margin: 0 auto;
             padding: 10px;
-            background-color: rgba(232,232,232, 0.1);
-            border-radius:5px;
+            
 
+            /* flexbox */
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .main-video {
+            background-color: #bdc3c7;
+            /*box-shadow: -1px 2px 5px 1px rgba(163, 163, 163, 0.7); */
+            /*background-color: rgba(71, 71, 71, 0.9);
+    box-shadow: -1px 2px 5px 1px rgba(255, 255, 255, 0.7); 
+    border: 1px black;*/
+
+            width: 80%;
+            border-radius:5px;
             /* flexbox */
             display: flex;
             flex-direction: row;
             align-items: center;
+            overflow: hidden;
         }
 
         .video-info {
             text-align: center;
-
             /* flexbox */
             flex:1;
         }
 
+        .text-video-title {
+            font-size: 26px;
+            color: #3498db;
+            text-shadow: 1px 1px #333232;
+        }
+
+        .text-video-info {
+            font-size: 16px;
+            color: #FFF;
+            text-shadow: 1px 1px #333232;
+        }
+
         .video-container {
             /* flexbox */
-            flex:2;       
-            padding-right: 20px;     
+            flex:3;       
+            padding: 20px;     
             position: relative;
         }
 
+        video {
+            width: 100%;
+            height: 100%;
+            background: #000; 
+            /*background-image: url('app/img/HTML5.png');
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;*/
+        }
 
+        .video-background {
+            width: 100%; 
+            height: 100%; 
+            position: absolute; 
+            left: 0px; 
+            top: 0px; 
+            z-index: 0;
+        }
+
+        /* animation at fullscreen start */
+        @-webkit-keyframes bounceIn {
+          0% {
+           /* opacity: 0;
+            -webkit-transform: scale(.3);
+            transform: scale(.3);*/
+         /*   -webkit-transform: rotateY(0deg);*/
+          }
+
+          /*50% {
+            opacity: 1;
+            -webkit-transform: scale(1.05);
+            transform: scale(1.05);
+            -webkit-transform: rotateY(180deg);
+          }
+
+          70% {
+            -webkit-transform: scale(.9);
+            transform: scale(.9);
+            -webkit-transform: rotateY(250deg);
+          }*/
+
+          100% {
+           /* opacity: 1;
+            -webkit-transform: scale(1);
+            transform: scale(1);*/
+            -webkit-transform: rotateY(360deg);
+          }
+        }
+            
+        #video-player:-webkit-full-screen{
+            -webkit-animation-name: bounceIn;
+            -webkit-animation-duration: 3.5s;
+        }
+
+        /* inforamtions about demo */
+        .main-infos {
+            width: 15%;
+            border-radius:5px;
+            background-color: rgb(163,163,163);
+            text-align: center;
+        }
+
+        .main-infos-title {
+            padding-top: 150px;
+            font-size: 26px;
+            color: #3498db;
+            text-shadow: 1px 1px #333232;
+        }
+
+        .main-infos-infos {
+            font-size: 16px;
+            color: #FFF;
+            text-shadow: 1px 1px #333232;
+            margin: 10px;
+        }
+
+        /* list of videos */
         .video-list {
             margin: 20px;
             padding: 10px;
-            background-color: rgba(232,232,232, 0.1);
+            background-color: rgba(100,100,100,0.5);
             border-radius:5px;
 
             /* flexbox */
@@ -173,22 +263,14 @@
             box-align:center;
         }
 
-        .text-video-title {
-            font-size: 26px;
-            color: #428bca;
-        }
-
-        .text-video-info {
-            font-size: 16px;
-            color: #FFFFFF;
-        }
 
 
+/* BANNER CSS */
         .banner {
             padding: 20px;
             width: 100%;
             height: 70px;
-            background-color: rgb(224,224,224);
+            background-color: rgb(252,252,252);
 
             /* flexbox */
             display: flex;
@@ -196,29 +278,106 @@
             justify-content: space-around;
         }
 
-        video {
-            width: 100%;
-            height: 100%;
-            background: #000; 
-            /*background-image: url('app/img/HTML5.png');
-            -webkit-background-size: cover;
-            -moz-background-size: cover;
-            -o-background-size: cover;
-            background-size: cover;*/
+        .logo {
+            height: 50px;
         }
 
-        .video-background {
-            width: 100%; 
-            height: 100%; 
-            position: absolute; 
-            left: 0px; 
-            top: 0px; 
-            z-index: 0;
+/* ********************************************************* */
+/* **********************  METRICS ************************* */
+/* ********************************************************* */
+        .metricsContainer {
+            z-index: 2147483647;
+            position: absolute;
+            bottom: 50px;
+            left: 20px;
         }
 
-        .stretch {
-            width:100%;
-            height:100%;
+        .container {
+            background-color: rgba(0,0,0,0.5);
+            -webkit-border-radius: 5px;
+            border-radius: 5px;
+            margin: 10px;
+            float: left;
+            /* hack to display it over the player */
+            z-index: 2147483647;
+        }
+
+        .infos {
+            float: left;
+        }
+
+        .infos p {
+            margin: 0;
+        }
+
+        .playingTitle {
+            font-weight: bold;
+            color: #E74C3C;
+            text-shadow: 1px 1px #333232;
+        }
+
+/* BIG SCREEN  width > 2000px */
+        @media screen and (min-width: 2000px) {
+            .metricsContainer {
+                font-size: 28px;
+            }
+
+            .container {
+                margin: 20px;
+            }
+
+            .infos {
+                padding: 20px;
+                width: 240px;
+                height: 240px;
+            }
+
+            .playingTitle {
+                padding: 10px 0 20px 0;
+            }
+
+            .overlayChart {
+                width: 1000px;
+                height: 240px;
+                margin: 20px;
+            }
+
+            .sliderContainer {
+                width: 180px;
+                padding: 40px 20px;
+                height: 200px;
+            }
+        }
+
+        /* MEDIUM SCREEN  width < 2000px */
+        @media screen and (max-width: 2000px) {
+            .metricsContainer {
+                font-size: 14px;
+            }
+
+            .infos {
+                float: left;
+                padding: 10px;
+                width: 120px;
+                height: 120px;
+            }
+            
+            .playingTitle {
+                padding: 5px 0 10px 0;
+            }
+            
+            .overlayChart {
+                width: 500px;
+                height: 120px;
+                margin: 10px;
+            }
+
+            .sliderContainer {
+                width: 90px;
+                padding: 20px 10px;
+                height: 100px;
+            }
+
         }
 
 /* ********************************************************* */
@@ -267,100 +426,7 @@
         .vertical .ui-slider-label-ticks span { position: relative; display: inline-block; margin-left: 8px; top: .6em; }
 
 
-/* ********************************************************* */
-/* **********************  METRICS ************************* */
-/* ********************************************************* */
-        .container {
-            background-color: rgba(0,0,0,0.5);
-            -webkit-border-radius: 5px;
-            border-radius: 5px;
-            position: absolute;
 
-            /* hack to display it over the player */
-            z-index: 2147483647;
-        }
-
-        .infosContainer {
-            left: 10px;
-            top: 10px;
-        }
-
-        .infos {
-            float: left;
-            padding: 10px;
-            width: 120px;
-            height: 120px;
-        }
-
-        .infos p {
-            margin: 0;
-        }
-
-        .playingTitle {
-            font-weight: bold;
-            color: #E74C3C;
-            text-shadow: 1px 1px #333232;
-            padding: 5px 0 10px 0;
-        }
-
-        .chartContainer {
-            left: 160px;
-            top: 10px;
-        }
-
-        .overlayChart {
-            width: 500px;
-            height: 120px;
-            margin: 10px;
-        }
-
-        .sliderContainer {
-            width: 90px;
-            left: 690px;
-            top: 10px;
-            padding: 20px 10px;
-            height: 100px;
-        }
-
-        .downloadingTitle {
-            font-weight: bold;
-            color: #2980B9;
-            text-shadow: 1px 1px #333232;
-        }
-
-/* ******************************************************** */
-/* ************  CONTROL BAR AND BUTTONS ****************** */
-/* ******************************************************** */
-
-@-webkit-keyframes bounceIn {
-  0% {
-    opacity: 0;
-    -webkit-transform: scale(.3);
-    transform: scale(.3);
-  }
-
-  50% {
-    opacity: 1;
-    -webkit-transform: scale(1.05);
-    transform: scale(1.05);
-  }
-
-  70% {
-    -webkit-transform: scale(.9);
-    transform: scale(.9);
-  }
-
-  100% {
-    opacity: 1;
-    -webkit-transform: scale(1);
-    transform: scale(1);
-  }
-}
-    
-#video-player:-webkit-full-screen{
-    -webkit-animation-name: bounceIn;
-    -webkit-animation-duration: 1.5s;
-}
 
     </style>
 </head>
@@ -375,25 +441,27 @@
     </div>
 
     <div class="main">
-
-        <div id="video-info" class="video-info"></div>
-
-        <div class="video-container">
-            <video id="video-player" controls="true" muted></video>
-            <div id="fullScreenContainer" class="fullScreenContainer">
-                <div id="chartToToggle" class="chartContainer container"> 
-                    <div id="chartBandwidth" class="overlayChart" ng-model="bandwidthData"></div>
-                </div>
-                <div id="sliderToToggle" class="sliderContainer container">
-                    <div id="sliderBitrate"></div>
-                </div>
-                <div id="infosToToggle" class="infosContainer container">
-                    <div id="playingInfos" class="infos"></div>
-                    <!-- <div id="downloadingInfos" class="infos"></div> -->
+        <div class="main-video">
+            <div id="video-info" class="video-info"></div>
+            <div class="video-container">
+                <video id="video-player" controls="true" muted></video>
+                <div id="metricsContainer" class="metricsContainer">
+                    <div id="infosToToggle" class="infosContainer container">
+                        <div id="playingInfos" class="infos"></div>
+                    </div>
+                    <div id="chartToToggle" class="chartContainer container"> 
+                        <div id="chartBandwidth" class="overlayChart" ng-model="bandwidthData"></div>
+                    </div>
+                    <div id="sliderToToggle" class="sliderContainer container">
+                        <div id="sliderBitrate"></div>
+                    </div>
                 </div>
             </div>
         </div>
-
+        <div class="main-infos">
+            <div class="main-infos-title">About this demo</div>
+            <div class="main-infos-infos">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</div>
+        </div>
     </div>
 
     <ul id="video-list" class="video-list"></ul>
