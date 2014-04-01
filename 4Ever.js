@@ -194,38 +194,7 @@ function update() {
     setTimeout(update, updateInterval);
 }
 
-
-function toggleFullScreen() {
-
-
-
-  if (!document.fullscreenElement &&    // alternative standard method
-      !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement ) {  // current working methods
-
-    if (document.getElementById("videoContainer").requestFullscreen) {
-      document.getElementById("videoContainer").requestFullscreen();
-    } else if (document.getElementById("videoContainer").msRequestFullscreen) {
-      document.getElementById("videoContainer").msRequestFullscreen();
-    } else if (document.getElementById("videoContainer").mozRequestFullScreen) {
-      document.getElementById("videoContainer").mozRequestFullScreen();
-    } else if (document.getElementById("videoContainer").webkitRequestFullscreen) {
-      document.getElementById("videoContainer").webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-    }
-
-  } else {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    } else if (document.msExitFullscreen) {
-      document.msExitFullscreen();
-    } else if (document.mozCancelFullScreen) {
-      document.mozCancelFullScreen();
-    } else if (document.webkitExitFullscreen) {
-      document.webkitExitFullscreen();
-    }
-  }
-}
-
-function hideMetrics() {
+function toggleMetrics() {
     // hide or show chart 
     if (currentIdToToggle < idsToToggle.length) {
         // Toggle current id (toggle switch between display: none and display: block)
@@ -239,8 +208,6 @@ function hideMetrics() {
         currentIdToToggle = 0;
     }
 }
-
-
 
 function open() {
 
@@ -283,6 +250,12 @@ function openStream(idx) {
 }
 
 
+function initTextInfos () {
+    $("#page-title").html(pageTitle);
+    $("#infos-title").html(infosTitle);
+    $("#infos-content").html(infosContent);
+}
+
 function initVideoStreams () {
     var list = $("#video-list");
     list.html("");
@@ -297,33 +270,39 @@ function initVideoStreams () {
         listItem += '<div class="text-video-item"><p>' + videoStreams[i].name + '</p></div></li>';
         list.append(listItem);
     }
-    openStream(2);
+
+    // open the first stream by default
+    openStream(0);
 }
 
+// when the DOM is loaded, onLoaded is called !
 function onLoaded () {
     
+    // init title and text infos
+    initTextInfos();
+
     // parse videoStreamObjects
     initVideoStreams();
 
 	// catch ctrl+i key stoke    
     $(document).keydown(function(e) {
         if(e.keyCode == 73 && e.ctrlKey) {
-            hideMetrics();
+            toggleMetrics();
             return false;
         }
     });
 
-    // catch fullscreen event and hide fullscreenContainer at start
-    //$("#metricsContainer").hide();
+    // hide fullscreenContainer at start and catch fullscreen event
+    $("#metricsContainer").hide();
     $('#video-player').bind('webkitfullscreenchange fullscreenchange', function(e) {
-        //$("#metricsContainer").toggle();
+        $("#metricsContainer").toggle();
         return false;
     });
     
     // force hide of all metrics  
     if (hideMetricsAtStart) {
 		currentIdToToggle = idsToToggle.length;
-		hideMetrics();
+		toggleMetrics();
     }
 }
 

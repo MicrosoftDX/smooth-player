@@ -58,7 +58,7 @@
             right: 0;
         }
         .reflected:before {
-            content: 'Ultra High Definition HEVC DASH';
+            content: 'Ultra High Definition HEVC DASH'; /* to modify with the page Title
             opacity: .3;
             /* This is how the text is flipped vertically */
             -webkit-transform: scaleY(-1);
@@ -74,7 +74,6 @@
 /* MAIN CSS */
         .main {
             width: 95%;
-            height: 100%;
             margin: 0 auto;
             padding: 10px;
             
@@ -126,8 +125,8 @@
         }
 
         video {
-            width: 100%;
-            height: 100%;
+            height: 540px;
+            width: 1080px;
             background: #000; 
             /*background-image: url('app/img/HTML5.png');
             -webkit-background-size: cover;
@@ -366,6 +365,11 @@
                 padding: 40px;
             }
 
+            video {
+                width: 2128px;
+                height: 1190px;
+            }
+
             .video-item {
                 height: 200px;
                 width: 356px; 
@@ -467,9 +471,6 @@
         .vertical .ui-slider-label-ticks { height: 1.2em; width: 5px; border-bottom: 1px solid #999; }
         .vertical .ui-slider-label-ticks span { position: relative; display: inline-block; margin-left: 8px; top: .6em; }
 
-
-
-
     </style>
 </head>
 
@@ -479,14 +480,14 @@
         <a href="http://www.4ever-project.com/">
             <img class="image" src="app/img/4Ever/4everproject.png"/>
         </a>
-        <div class="title reflected">Ultra High Definition HEVC DASH</div>
+        <div id="page-title" class="title reflected"></div>
     </div>
 
     <div class="main">
         <div class="main-video">
             <div id="video-info" class="video-info"></div>
             <div class="video-container">
-                <video id="video-player" controls="true" muted></video>
+                <video id="video-player" controls="true" muted loop></video>
                 <div id="metricsContainer" class="metricsContainer">
                     <div id="infosToToggle" class="infosContainer container">
                         <div id="playingInfos" class="infos"></div>
@@ -501,8 +502,8 @@
             </div>
         </div>
         <div class="main-infos">
-            <div class="main-infos-title">About this demo</div>
-            <div class="main-infos-infos">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</div>
+            <div id="infos-title" class="main-infos-title"></div>
+            <div id="infos-content" class="main-infos-infos"></div>
         </div>
     </div>
 
@@ -514,121 +515,7 @@
         <img class="logo" src="app/img/4Ever/HTML5_logo.png"/>
         <img class="logo" src="app/img/if.jpg"/>
     </div>
-
-
-    
-
 </body>
-
-<script>
-/* maximum 9 streams */
-var videoStreams = [
-    {
-        "name": "DASH HEVC UHD",
-        "url": "http://10.194.60.47/orange3s/UHD/dashevc-live-2s/dashevc-live-2s-4k.mpd",
-        "image": "app/img/dashevc-live-2s.jpg",
-        /*"representations" : [
-            {
-                "resolution": "3840x2160",
-                "frameRate": "60 Hz",
-                "bandwidth": "10.6 Mbps"
-            },
-            {
-                "resolution": "3840x2160",
-                "frameRate": "60 Hz",
-                "bandwidth": "13.5 Mbps"
-            },
-            {
-                "resolution": "3840x2160",
-                "frameRate": "60 Hz",
-                "bandwidth": "18.4 Mbps"
-            }
-        ]*/
-        "representations": [
-            "3840x2160 - 60 Hz - 10.6 Mbps",
-            "3840x2160 - 60 Hz - 13.5 Mbps",
-            "3840x2160 - 60 Hz - 18.4 Mbps"
-        ]
-    },
-    {
-        "name": "DASH HEVC HD",
-        "url": "http://10.194.60.47/orange3s/UHD/dashevc-live-2s/dashevc-live-2s-p60.mpd",
-        "image": "app/img/dashevc-live-2s.jpg",
-        "representations" : [
-            "ceci est une info qui ne sert à rien ...."
-        ]
-    },
-    {
-        "name": "DASH HEVC HD",
-        "url": "http://2is7server1.rd.francetelecom.com/VOD/BBB-SD/big_buck_bunny_1080p_stereo.ism/Manifest",
-        "image": "",
-        "representations": [
-            "Coucou Bertrand",
-            "Comment ça va ?",
-            "Tu t'en sors avec la 4K ?"
-        ]
-    },
-    {
-        "name": "DASH HEVC HD",
-        "url": "http://2is7server1.rd.francetelecom.com/C4/C4-46_S2.isml/Manifest",
-        "image": "app/img/dashevc-live-2s.jpg"
-    },
-    {
-        "name": "DASH HEVC HD",
-        "url": "http://10.194.60.47/orange3s/UHD/dashevc-live-2s/dashevc-live-2s-p60.mpd",
-        "image": "app/img/dashevc-live-2s.jpg"
-    },
-    {
-        "name": "DASH HEVC HD",
-        "url": "http://10.194.60.47/orange3s/UHD/dashevc-live-2s/dashevc-live-2s-p60.mpd",
-        "image": "app/img/dashevc-live-2s.jpg"
-    },
-    {
-        "name": "DASH HEVC HD",
-        "url": "http://10.194.60.47/orange3s/UHD/dashevc-live-2s/dashevc-live-2s-p60.mpd",
-        "image": "app/img/dashevc-live-2s.jpg"
-    },
-    {
-        "name": "DASH HEVC HD",
-        "url": "http://10.194.60.47/orange3s/UHD/dashevc-live-2s/dashevc-live-2s-p60.mpd",
-        "image": "app/img/dashevc-live-2s.jpg"
-    },
-    {
-        "name": "DASH HEVC UHD/HD",
-        "url": "http://10.194.60.47/orange3s/UHD/dashevc-live-2s/dashevc-live-2s.mpd",
-        "image": ""
-    }
-];
-
-</script>
-
+<script src="4EverConf.js"></script>
 <script src="4Ever.js"></script>
-
 </html>
-
-
-<!--p class="text-video">HEVC HD</p>
-<p class="text-video">DASH Live Profile</p>
-<p class="text-video-infos">1280x720 - 60Hz - 2.750 Mbps</p>
-<p class="text-video-infos">1280x720 - 60Hz - 3.710 Mbps</p>
-<p class="text-video-infos">1920x1080 - 60Hz - 5.480 Mbps</p>
-<p class="text-video-infos">1920x1080 - 60Hz - 7.450 Mbps</p>
-<a href="player.html?file=http://10.194.60.47/orange3s/UHD/dashevc-live-2s/dashevc-live-2s-p60.mpd">
-
-<p class="text-video">HEVC UHD</p>
-<p class="text-video">DASH Live Profile</p>
-<p class="text-video-infos">3840x2160 - 60Hz - 10.600 Mbps</p>
-<p class="text-video-infos">3840x2160 - 60Hz - 13.540 Mbps</p>
-<p class="text-video-infos">3840x2160 - 60Hz - 18.360 Mbps</p>
-<a href="player.html?file=http://download.tsi.telecom-paristech.fr/gpac/dataset/dash/uhd/dashevc-live-2s/dashevc-live-2s-4k.mpd">
-
-<p class="text-video">HEVC HD/UHD</p>
-<p class="text-video">DASH Live Profile</p>
-<p class="text-video-infos"> 1280x720 - 60Hz - 2.750 Mbps</p>
-<p class="text-video-infos"> 1280x720 - 60Hz - 3.710 Mbps</p>
-<p class="text-video-infos">1920x1080 - 60Hz - 5.480 Mbps</p>
-<p class="text-video-infos">1920x1080 - 60Hz - 7.450 Mbps</p>
-<p class="text-video-infos">3840x2160 - 60Hz - 10.600 Mbps</p>
-<p class="text-video-infos">3840x2160 - 60Hz - 13.540 Mbps</p>
-<p class="text-video-infos">3840x2160 - 60Hz - 18.360 Mbps</p>
-<a href="player.html?file=http://download.tsi.telecom-paristech.fr/gpac/dataset/dash/uhd/dashevc-live-2s/dashevc-live-2s.mpd"-->
