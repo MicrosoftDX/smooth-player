@@ -19,7 +19,7 @@
             overflow: hidden;
             background-color: black;
             color: #FFF;
-            font-family: Helvetica,Arial;
+            font-family: Helvetica, sans-serif;
 
             /* flexbox */
             display: flex;
@@ -35,15 +35,18 @@
             border-width:0px;
         }
 
+        /* reset css */
+        ul {
+            list-style: none;
+        }
+
         .logo {
             height: 50px;
         }
 
         .header {
             padding: 20px;
-            margin-bottom: 20px;
             width: 100%;
-            font-size: 36px;
 
             /* flexbox */
             display: flex;
@@ -52,17 +55,40 @@
             align-items: center;
         }
 
-        /*.header img:last-child {
-            margin-left: auto
-        }*/
+        .header .title {
+            font-size: 36px;
+        }
+        /* reflect title like the logo... */
+        .reflected {
+            position: relative;
+        }
+        .reflected:before, .reflected:after {
+            display: block;
+            position: absolute;
+            bottom: -.8em; /* You should change this value to fit your font */
+            left: 0;
+            right: 0;
+        }
+        .reflected:before {
+            content: 'Ultra High Definition HEVC DASH';
+            opacity: .3;
+            /* This is how the text is flipped vertically */
+            -webkit-transform: scaleY(-1);
+            transform: scaleY(-1);
+        }
+        .reflected:after {
+            /* Fading using CSS gradient */
+            background: -webkit-gradient(linear, left top, left center, color-stop(0%,rgba(0,0,0,0)), color-stop(100%,rgba(0,0,0,0.57)));
+            background: -ms-linear-gradient(top,rgba(0,0,0,0) 0%, rgba(0,0,0,0.57) 100%);
+            content: ' ';
+            height: 1em;
+        }
 
         .main {
-            margin-left: 10%;
-            margin-right: 10%;
-            margin-bottom: 20px;
-            padding: 10px;
-            width: 100%;
+            width: 80%;
             height: 100%;
+            margin: 0 auto;
+            padding: 10px;
             background-color: rgba(232,232,232, 0.1);
             border-radius:5px;
 
@@ -80,18 +106,16 @@
         }
 
         .video-container {
-
             /* flexbox */
-            flex:2;            
+            flex:2;       
+            padding-right: 20px;     
+            position: relative;
         }
 
 
         .video-list {
-            margin-left: 20px;
-            margin-right: 20px;
-            margin-bottom: 20px;
+            margin: 20px;
             padding: 10px;
-            width: 100%;
             background-color: rgba(232,232,232, 0.1);
             border-radius:5px;
 
@@ -100,6 +124,53 @@
             flex-direction: row;
             justify-content: space-around;
             align-items: center;
+        }
+
+        .video-item {
+            height: 100px;
+            width: 178px;
+            position: relative;
+            transform: scale(1);
+            transition-duration: 500ms;
+            -webkit-transform: scale(1);
+            -webkit-transition-duration: 500ms;
+        }
+
+        .video-item:hover {
+            cursor: pointer;
+            -webkit-transform: scale(1.3);
+            -webkit-transition-duration: 500ms;
+            transform: scale(1.3);
+            transition-duration: 500ms;
+        }
+
+        .img-video-item {
+            background-color: rgb(68,68,68);
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 100%;
+        }
+        .text-video-item {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 100%;
+            font-weight: bold;
+            text-align: center;
+            text-shadow: 0 0 0.2em #000, 0 0 0.2em #000, 0 0 0.2em #000;
+            /* Internet Explorer 10 */
+            display:-ms-flexbox;
+            -ms-flex-pack:center;
+            -ms-flex-align:center;
+            /* Safari, Chrome, and Opera */
+            display:-webkit-box;
+            -webkit-box-pack:center;
+            -webkit-box-align:center;
+            /* W3C */
+            display:box;
+            box-pack:center;
+            box-align:center;
         }
 
         .text-video-title {
@@ -111,6 +182,7 @@
             font-size: 16px;
             color: #FFFFFF;
         }
+
 
         .banner {
             padding: 20px;
@@ -203,12 +275,37 @@
             -webkit-border-radius: 5px;
             border-radius: 5px;
             position: absolute;
+
+            /* hack to display it over the player */
+            z-index: 2147483647;
+        }
+
+        .infosContainer {
+            left: 10px;
+            top: 10px;
+        }
+
+        .infos {
+            float: left;
+            padding: 10px;
+            width: 120px;
+            height: 120px;
+        }
+
+        .infos p {
+            margin: 0;
+        }
+
+        .playingTitle {
+            font-weight: bold;
+            color: #E74C3C;
+            text-shadow: 1px 1px #333232;
+            padding: 5px 0 10px 0;
         }
 
         .chartContainer {
-            left: 10px;
+            left: 160px;
             top: 10px;
-            z-index: 2;
         }
 
         .overlayChart {
@@ -218,28 +315,11 @@
         }
 
         .sliderContainer {
-            left: 540px;
+            width: 90px;
+            left: 690px;
             top: 10px;
-            z-index: 2;
             padding: 20px 10px;
             height: 100px;
-        }
-
-        .infosContainer {
-            top: 160px;
-            left: 10px;
-            z-index: 2;
-        }
-
-        .infos {
-            float: left;
-            padding: 10px;
-        }
-
-        .playingTitle {
-            font-weight: bold;
-            color: #E74C3C;
-            text-shadow: 1px 1px #333232;
         }
 
         .downloadingTitle {
@@ -252,266 +332,53 @@
 /* ************  CONTROL BAR AND BUTTONS ****************** */
 /* ******************************************************** */
 
-        .controlBarWithAudioTrackSelectAndSeek.controlBar {
-            width: 620px;
-            margin: 0 -310px;
-        }
-        
-        .controlBarWithAudioTrackSelectAndSeek.controlBar .audioTracksSelect,
-        .controlBarWithAudioTrackSelectAndSeek.controlBar .seekBar,
-        .controlBarWithAudioTrackSelectAndSeek.controlBar .playPauseButton {
-            display: inline-block;
-        }
+/*    #video-player:-webkit-full-screen{
+        width:100%;
+        height:100%;
+        background-color: black;
+        -webkit-transform: scale(1.3);
+        -webkit-transition-duration: 500ms;
+        transform: scale(1.3);
+        transition-duration: 500ms;
+    }
 
-        .controlBarWithSeek.controlBar {
-            width: 464px;
-            margin: 0 -232px;
-        }
-        
-        .controlBarWithSeek.controlBar .seekBar,
-        .controlBarWithSeek.controlBar .playPauseButton {
-            display: inline-block;
-        }
-
-
-        .controlBarWithAudioTrackSelect.controlBar {
-            width: 260px;
-            margin: 0 -150px;
-        }
-
-        .controlBarWithAudioTrackSelect.controlBar .audioTracksSelect {
-            display: inline-block;
-        }
-
-        .controlBar .audioTracksSelect,
-        .controlBar .seekBar,
-        .controlBar .playPauseButton{
-            display: none;
-        }
-
-        .controlBar {
-            display: block;
-            background-color: rgba(0,0,0,0.8);
-            -webkit-border-radius: 5px;
-            border-radius: 5px;
-            height: 40px;
-            width: 90px;
-            position: absolute;
-            bottom: 5px;
-            left: 50%;
-            margin: 0 -65px;
-            text-align: center;
-            overflow: hidden;
-        }
-
-        .playPauseButton {
-            display: inline-block;
-            height: 0;
-            width: 0;
-            border-top: 12px solid transparent;
-            border-bottom: 12px solid transparent;
-            border-left: 18px solid #FFF;
-            margin: 8px 11px;
-        }
-        .playPauseButton.playing {
-            width:24px;
-            height:24px;
-            margin: 8px;
-            position:relative;
-            border: none;
-        }
-
-        .playPauseButton.playing::before,
-        .playPauseButton.playing::after {
-            position: absolute;
-            background: #FFF;
-            content: "";
-            top: 0;
-            width: 6px;
-            height: 100%;
-        }
-        .playPauseButton.playing::before {
-            left: 3px;
-        }
-        .playPauseButton.playing::after {
-            right: 3px;
-        }
-
-        .audioTracksSelect {
-            height: 24px;
-            margin: 0 8px;
-            position: relative;
-            top: -15px;
-        }
-
-        .volumeButton{
-            display: inline-block;
-            width:15px;
-            height:15px;
-            margin: 8px 16px 8px 0;
-            border: solid 0.25em transparent;
-        }
-
-        .speaker{
-            width: 7px;
-            height: 7px;
-            background: #FFF;
-            position:relative;
-            top:3px;
-            
-        }
-        
-        .muted .speaker::before {
-            content: ' ';
-            font-size: 10px;
-            width: 0.4em;
-            height: 3em;
-            background: #FFF;
-            -moz-transform: rotate(45deg);
-            -webkit-transform: rotate(45deg);
-            -o-transform: rotate(45deg);
-            transform: rotate(45deg);
-            position: absolute;
-            top: -10px;
-            left: 10px;
-            color: rgba(0,0,0,0.8);
-            border: 1px solid;
-            z-index: 2;
-        }
-
-        .speaker::before{
-            content: '';
-            position: absolute;
-            width: 0.313em;
-            height: 0.313em;
-            border-style: double;
-            border-color: #FFF;
-            border-width: 0.500em 0.500em 0 0;
-            -webkit-border-radius: 0 3.125em 0 0;
-            -moz-border-radius: 0 3.125em 0 0;
-            border-radius: 0 3.125em 0 0;
-            -webkit-transform: rotate(45deg);
-            -moz-transform: rotate(45deg);
-            -ms-transform: rotate(45deg);
-            -o-transform: rotate(45deg);
-            -webkit-transform: rotate(45deg);
-            left: 1em;
-            top: -0.1em;
-        }
-       
-        .speaker::after{
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 0;
-            border-style: solid;
-            border-color: transparent #FFF transparent transparent;
-            border-width: 0.750em 1em 0.750em 0.938em;
-            left: -0.9em;
-            margin-top: -0.5em;
-        }
-
-        .seekBar {
-            clear: left;
-            width: 300px;
-            margin: 0 12px;
-            position: relative;
-            top: -17px;
-            height: 8px;
-        }
-
-        progress{
-            flex:1;
-            display: block;
-            border-radius: 10px;
-            background-color: #BBB;
-            color:#FFF;
-        }
-
-        progress::-webkit-progress-bar{
-            border-radius: 10px;
-        }
-
-        progress::-webkit-progress-value{
-            background: #FFF !important;
-            border-top-left-radius: 10px;
-            border-bottom-left-radius: 10px;
-            border-right: 1px solid #000;
-            /*border-radius:10px;*/
-        }
-
-        
-        .fullscreenButton{
-            display: inline-block;
-            width: 18px;
-            height: 18px;
-            margin: 8px;
-            border: 3px #FFF dashed;
-            position: relative;
-        }
-
-        .fullscreenButton:before{
-            content: '';
-            position:absolute;
-            background: #FFF;
-            top: 5px;
-            left: 5px;
-            width: 8px;
-            height: 8px;
-        }
-
-        .videoContainer:-webkit-full-screen{
-            width:100%;
-            height:100%;
-        }
-
-        .videoContainer:-ms-fullscreen{
-            position:absolute;
-            left:0px;
-            top:0px;
-            width: 100%;
-            height: 100%;        
-        }
+    From:rotate(0deg) scale(1)To:rotate(360deg) scale(0)*/
 
     </style>
 </head>
 
-<body onload="onLoaded()">
+<body>
 
     <div class="header">
-        <a href="http://www.4ever-project.com/"><img class="image" src="app/img/4Ever/4everproject.png"/></a>
-        <p>Ultra High Definition HEVC DASH</p>
-        <!--img class="image" width="50" src="app/img/HTML5.png"/-->
+        <a href="http://www.4ever-project.com/">
+            <img class="image" src="app/img/4Ever/4everproject.png"/>
+        </a>
+        <div class="title reflected">Ultra High Definition HEVC DASH</div>
     </div>
 
     <div class="main">
 
-        <div class="video-info">
-            <p class="text-video-title">HEVC HD</p>
-            <p class="text-video-title">DASH Live Profile</p>
-            <p class="text-video-info">1920x1080 - 60Hz - 7.450 Mbps</p>
-            <p class="text-video-info">1920x1080 - 60Hz - 5.480 Mbps</p>
-            <p class="text-video-info">1280x720 - 60Hz - 3.710 Mbps</p>
-            <p class="text-video-info">1280x720 - 60Hz - 2.750 Mbps</p>
-        </div>
+        <div id="video-info" class="video-info"></div>
 
         <div class="video-container">
-            <video controls="true"></video>
+            <video id="video-player" controls="true" muted></video>
+            <div id="fullScreenContainer" class="fullScreenContainer">
+                <div id="chartToToggle" class="chartContainer container"> 
+                    <div id="chartBandwidth" class="overlayChart" ng-model="bandwidthData"></div>
+                </div>
+                <div id="sliderToToggle" class="sliderContainer container">
+                    <div id="sliderBitrate"></div>
+                </div>
+                <div id="infosToToggle" class="infosContainer container">
+                    <div id="playingInfos" class="infos"></div>
+                    <!-- <div id="downloadingInfos" class="infos"></div> -->
+                </div>
+            </div>
         </div>
 
     </div>
 
-    <div class="video-list">
-        <div class="video-item">
-            <p class="text-stream-title">HEVC UHD</p>
-        </div>
-        <div class="video-item">
-            <p class="text-stream-title">HEVC HD</p>
-        </div>
-        <div class="video-item">
-            <p class="text-stream-title">HEVC UHD/HD</p>
-        </div>
-    </div>
+    <ul id="video-list" class="video-list"></ul>
 
     <div class="banner">
         <img class="logo" src="app/img/4Ever/hevc.jpg"/>
@@ -521,28 +388,18 @@
     </div>
 
 
-    <div id="fullScreenContainer" class="videoContainer">
-        <div id="chartToToggle" class="chartContainer container"> 
-            <div id="chartBandwidth" class="overlayChart" ng-model="bandwidthData"></div>
-        </div>
-        <div id="sliderToToggle" class="sliderContainer container">
-            <div id="sliderBitrate"></div>
-        </div>
-        <div id="infosToToggle" class="infosContainer container">
-            <div id="playingInfos" class="infos"></div>
-            <div id="downloadingInfos" class="infos"></div>
-        </div>
-    </div>
+    
 
 </body>
 
 <script>
+/* maximum 9 streams */
 var videoStreams = [
     {
         "name": "DASH HEVC UHD",
         "url": "http://10.194.60.47/orange3s/UHD/dashevc-live-2s/dashevc-live-2s-4k.mpd",
         "image": "app/img/dashevc-live-2s.jpg",
-        "representations" : [
+        /*"representations" : [
             {
                 "resolution": "3840x2160",
                 "frameRate": "60 Hz",
@@ -558,7 +415,50 @@ var videoStreams = [
                 "frameRate": "60 Hz",
                 "bandwidth": "18.4 Mbps"
             }
+        ]*/
+        "representations": [
+            "3840x2160 - 60 Hz - 10.6 Mbps",
+            "3840x2160 - 60 Hz - 13.5 Mbps",
+            "3840x2160 - 60 Hz - 18.4 Mbps"
         ]
+    },
+    {
+        "name": "DASH HEVC HD",
+        "url": "http://10.194.60.47/orange3s/UHD/dashevc-live-2s/dashevc-live-2s-p60.mpd",
+        "image": "app/img/dashevc-live-2s.jpg",
+        "representations" : [
+            "ceci est une info qui ne sert à rien ...."
+        ]
+    },
+    {
+        "name": "DASH HEVC HD",
+        "url": "http://2is7server1.rd.francetelecom.com/VOD/BBB-SD/big_buck_bunny_1080p_stereo.ism/Manifest",
+        "image": "",
+        "representations": [
+            "Coucou Bertrand",
+            "Comment ça va ?",
+            "Tu t'en sors avec la 4K ?"
+        ]
+    },
+    {
+        "name": "DASH HEVC HD",
+        "url": "http://2is7server1.rd.francetelecom.com/C4/C4-46_S2.isml/Manifest",
+        "image": "app/img/dashevc-live-2s.jpg"
+    },
+    {
+        "name": "DASH HEVC HD",
+        "url": "http://10.194.60.47/orange3s/UHD/dashevc-live-2s/dashevc-live-2s-p60.mpd",
+        "image": "app/img/dashevc-live-2s.jpg"
+    },
+    {
+        "name": "DASH HEVC HD",
+        "url": "http://10.194.60.47/orange3s/UHD/dashevc-live-2s/dashevc-live-2s-p60.mpd",
+        "image": "app/img/dashevc-live-2s.jpg"
+    },
+    {
+        "name": "DASH HEVC HD",
+        "url": "http://10.194.60.47/orange3s/UHD/dashevc-live-2s/dashevc-live-2s-p60.mpd",
+        "image": "app/img/dashevc-live-2s.jpg"
     },
     {
         "name": "DASH HEVC HD",
@@ -568,7 +468,7 @@ var videoStreams = [
     {
         "name": "DASH HEVC UHD/HD",
         "url": "http://10.194.60.47/orange3s/UHD/dashevc-live-2s/dashevc-live-2s.mpd",
-        "image": "app/img/dashevc-live-2s.jpg"
+        "image": ""
     }
 ];
 

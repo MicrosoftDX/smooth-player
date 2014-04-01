@@ -8,24 +8,40 @@ var updateInterval = 333;
 // chartXaxisWindow : the display window on the x-axis in seconds
 var chartXaxisWindow = 30;
 
-var previousPlayedQuality = 0,
-    previousDownloadedQuality= 0,
+var previousPlayedQuality,
+    previousDownloadedQuality,
     previousPlayedVideoHeight,
     previousPlayedVideoWidth,
     previousPlayedCodecs,
     chartBandwidth,
-    dlSeries = [],
-    playSeries = [],
-    qualityChangements = [],
-    chartOptions = {series: {shadowSize: 0},yaxis: {ticks: [],color:"#FFF"},xaxis: {show: false},lines: {steps: true,},grid: {markings: [],borderWidth: 0},legend: {show: false}},
+    dlSeries,
+    playSeries,
+    qualityChangements,
+    chartOptions,
     video,
     player,
-    currentIdToToggle = 0,
-    isPlaying = false,
-    firstAccess = true,
-    seekBarIsPresent = false,
-    audioTracksSelectIsPresent = false,
+    currentIdToToggle,
+    isPlaying,
+    firstAccess,
+    seekBarIsPresent,
+    audioTracksSelectIsPresent,
+    url;
+
+function initDefaultValue () {
+    previousPlayedQuality = -1;
+    previousDownloadedQuality= -1;
+    chartBandwidth = null;
+    dlSeries = [];
+    playSeries = [];
+    qualityChangements = [];
+    chartOptions = {series: {shadowSize: 0},yaxis: {ticks: [],color:"#FFF"},xaxis: {show: false},lines: {steps: true,},grid: {markings: [],borderWidth: 0},legend: {show: false}};
+    currentIdToToggle = 0;
+    isPlaying = false;
+    firstAccess = true;
+    seekBarIsPresent = false;
+    audioTracksSelectIsPresent = false;
     url = null;
+}
 
 function update() {
     var repSwitch,
@@ -53,17 +69,17 @@ function update() {
 
 
         // case of downloaded quality changmement
-        if (bitrateValues[dwnldSwitch.quality] != previousDownloadedQuality) {
+        if (dwnldSwitch.quality != previousDownloadedQuality) {
             // save quality changement for later when video currentTime = mediaStartTime
             qualityChangements.push({
                 'mediaStartTime':dwnldSwitch.mediaStartTime,
-                'switchedQuality': bitrateValues[dwnldSwitch.quality],
+                'switchedQuality': dwnldSwitch.quality,
                 'downloadStartTime': dwnldSwitch.downloadStartTime,
                 'videoWidth': videoWidthValue,
                 'videoHeight': videoHeightValue,
                 'codecsValue': codecsValue
             });
-            previousDownloadedQuality = bitrateValues[dwnldSwitch.quality];
+            previousDownloadedQuality = dwnldSwitch.quality;
         }
 
 
@@ -87,8 +103,8 @@ function update() {
             }
         }
 
-        dlSeries.push([video.currentTime, Math.round(previousDownloadedQuality/1000)]);
-        playSeries.push([video.currentTime, Math.round(previousPlayedQuality / 1000)]);
+        dlSeries.push([video.currentTime, previousDownloadedQuality]);
+        playSeries.push([video.currentTime, previousPlayedQuality]);
 
 
         // remove older points for the x-axis move
@@ -109,18 +125,20 @@ function update() {
 
         //initialisation of bandwidth chart , sliders
         if (!chartBandwidth) {
+            var bdw;
             for (var idx in bitrateValues) {
-                chartOptions.grid.markings.push({yaxis: { from: bitrateValues[idx]/1000, to: bitrateValues[idx]/1000 },color:"#b0b0b0"});
-                chartOptions.yaxis.ticks.push([bitrateValues[idx]/1000, ""+bitrateValues[idx]/1000+"k"]);
+                bdw = Math.round(bitrateValues[idx]/100000)/10;
+                chartOptions.grid.markings.push({yaxis: { from: idx, to: idx},color:"#b0b0b0"});
+                chartOptions.yaxis.ticks.push([idx, bdw]);
             }
-            chartOptions.yaxis.min = Math.min.apply(null,bitrateValues)/1000;
-            chartOptions.yaxis.max = Math.max.apply(null,bitrateValues)/1000;
-
+            chartOptions.yaxis.min = 0;
+            chartOptions.yaxis.max = bitrateValues.length-1;
             chartBandwidth = $.plot($("#chartBandwidth"), bandwidthData , chartOptions);
 
             var labels = [];
             for (var i = 0; i < bitrateValues.length; i++) {
-                labels.push(Math.round(bitrateValues[i] / 1000) + "k");
+                bdw = Math.round(bitrateValues[i]/100000)/10;
+                labels.push(bdw+" Mbps/s");
             }
 
             $('#sliderBitrate').labeledslider({
@@ -166,11 +184,10 @@ function update() {
         previousPlayedCodecs = previousPlayedCodecs ? previousPlayedCodecs : "-";
         bufferLengthValue = bufferLengthValue ? bufferLengthValue : 0;
 
-        $("#playingInfos").html("<span class='playingTitle'>Playing</span><br>"+ Math.round(previousPlayedQuality/1000) + " kbps<br>"+ previousPlayedVideoWidth +"x"+previousPlayedVideoHeight + "<br>"+ previousPlayedCodecs + "<br>"+ bufferLengthValue + "s");
-        $("#downloadingInfos").html("<span class='downloadingTitle'>Downloading</span><br>" + Math.round(previousDownloadedQuality/1000) + " kbps<br>"+ videoWidthValue +"x"+videoHeightValue + "<br>"+ codecsValue + "<br>"+ bufferLengthValue + "s");
+        $("#playingInfos").html("<p class='playingTitle'>Playing</p><p>"+ Math.round(bitrateValues[previousPlayedQuality]/100000)/10 + " Mbps</p><p>"+ previousPlayedVideoWidth +"x"+previousPlayedVideoHeight + "</p><p>"+ previousPlayedCodecs + "</p><p>"+ bufferLengthValue + "s</p>");
+        //$("#downloadingInfos").html("<span class='downloadingTitle'>Downloading</span><br>" + Math.round(previousDownloadedQuality/1000) + " kbps<br>"+ videoWidthValue +"x"+videoHeightValue + "<br>"+ codecsValue + "<br>"+ bufferLengthValue + "s");
     }
-
-   
+    setTimeout(update, updateInterval);   
 }
 
 
@@ -231,45 +248,73 @@ function open() {
     player.setAutoPlay(true);
 
     player.attachSource(url);
+    setTimeout(update, updateInterval);
+}
 
 
-    $('video').bind('webkitfullscreenchange mozfullscreenchange fullscreenchange', function(e) {
-        var state = document.fullScreen || document.mozFullScreen || document.webkitIsFullScreen;
-        var event = state ? 'FullscreenOn' : 'FullscreenOff';
+function updateVideoStreamInfos(infos) {
+    var container = $("#video-info");
+// reset infos
+    container.html("");
+    if(infos.name) {
+        container.append('<p class="text-video-title">'+infos.name+'</p>');
+    }
 
-        // Now do something interesting
-        //alert('Event: ' + event);
-
-        if (state) {
-            $("#fullScreenContainer").toggle();
+    if(infos.representations) {
+        for (var i = 0; i < infos.representations.length; i++) {
+            container.append('<p class="text-video-info">'+infos.representations[i]+'</p>');
         }
-        else {
-            $("#fullScreenContainer").toggle();
-        }
+    }
+}
 
-    });
+function openStream(idx) {
+    var currentStream;
+    initDefaultValue();
+    if(videoStreams.length > idx && videoStreams[idx]) {
+        currentStream = videoStreams[idx];
+        url = currentStream.url;
+        updateVideoStreamInfos(currentStream);
+        // erase bandwidth value
+        open();
+    }
+}
+
+
+function initVideoStreams () {
+    var list = $("#video-list");
+    list.html("");
+    var listItem;
+    for (var i = 0; i < videoStreams.length; i++) {
+        listItem = '<li class="video-item" onclick="openStream('+i+')">';
+        if (videoStreams[i].image) {
+            listItem += '<img class="img-video-item" src="'+ videoStreams[i].image + '">';
+        } else {
+            listItem += '<div class="img-video-item empty">';
+        }
+        listItem += '<div class="text-video-item"><p>' + videoStreams[i].name + '</p></div></li>';
+        list.append(listItem);
+    }
+    openStream(0);
 }
 
 function onLoaded () {
     
-    // get url
-    var query = window.location.search;
-    if (query) {
-        query = query.substring(query.indexOf("?file=")+6);
-        if (query) {
-            url = query;
-            open();
-            setInterval(update, updateInterval);
-        }
-    }
+    // parse videoStreamObjects
+    initVideoStreams();
 
 	// catch ctrl+i key stoke    
     $(document).keydown(function(e) {
         if(e.keyCode == 73 && e.ctrlKey) {
-            alert("INFO");
             hideMetrics();
             return false;
         }
+    });
+
+    // catch fullscreen event and hide fullscreenContainer at start
+    $("#fullScreenContainer").hide();
+    $('#video-player').bind('webkitfullscreenchange fullscreenchange', function(e) {
+        $("#fullScreenContainer").toggle();
+        return false;
     });
     
     // force hide of all metrics  
