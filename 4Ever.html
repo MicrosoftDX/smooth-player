@@ -91,7 +91,7 @@
     box-shadow: -1px 2px 5px 1px rgba(255, 255, 255, 0.7); 
     border: 1px black;*/
 
-            width: 80%;
+            width: 70%;
             border-radius:5px;
             /* flexbox */
             display: flex;
@@ -113,7 +113,7 @@
         }
 
         .text-video-info {
-            font-size: 40px;
+            font-size: 20px;
             color: #FFF;
             text-shadow: 1px 1px #333232;
         }
@@ -126,8 +126,8 @@
         }
 
         video {
-            height: 540px;
-            width: 1080px;
+            height: 518px;
+            width: 920px;
             background: #000; 
             /*background-image: url('app/img/HTML5.png');
             -webkit-background-size: cover;
@@ -180,7 +180,7 @@
 
         /* inforamtions about demo */
         .main-infos {
-            width: 15%;
+            width: 25%;
             border-radius:5px;
             background-color: rgb(163,163,163);
             text-align: center;
@@ -206,8 +206,8 @@
 
         /* list of videos */
         .video-list {
-            margin: 20px;
-            padding: 10px;
+            margin: 30px 20px;
+            height: 80px;
             background-color: rgba(100,100,100,0.5);
             border-radius:5px;
 
@@ -250,6 +250,7 @@
             height: 100%;
             width: 100%;
             font-weight: bold;
+            font-size: 20px;
             text-align: center;
             text-shadow: 0 0 0.2em #000, 0 0 0.2em #000, 0 0 0.2em #000;
             /* Internet Explorer 10 */
@@ -277,6 +278,7 @@
             display: flex;
             flex-direction: row;
             justify-content: space-around;
+            align-items: center;
         }
 
         .logo {
@@ -291,6 +293,7 @@
             position: absolute;
             bottom: 50px;
             left: 20px;
+            font-size: 14px;
         }
 
         .container {
@@ -303,8 +306,23 @@
             z-index: 2147483647;
         }
 
+        .overlayChart {
+            width: 500px;
+            height: 120px;
+            margin: 10px;
+        }
+
+        .sliderContainer {
+            width: 90px;
+            padding: 20px 10px;
+            height: 100px;
+        }
+
         .infos {
             float: left;
+            padding: 10px;
+            width: 120px;
+            height: 120px;
         }
 
         .infos p {
@@ -315,10 +333,15 @@
             font-weight: bold;
             color: #E74C3C;
             text-shadow: 1px 1px #333232;
+            padding: 5px 0 10px 0;
         }
 
 /* BIG SCREEN  width > 2000px */
         @media screen and (min-width: 2000px) {
+            .header .title {
+                font-size: 72px;
+            }
+
             .metricsContainer {
                 font-size: 28px;
             }
@@ -370,13 +393,22 @@
             }
 
             video {
-                width: 2128px;
-                height: 1190px;
+                width: 1840px;
+                height: 1035px;
+            }
+
+            .video-list {
+                margin: 60px 40px;
+                height: 160px;
             }
 
             .video-item {
                 height: 200px;
                 width: 356px; 
+            }
+
+            .text-video-item {
+                font-size: 40px;
             }
 
             /* BANNER CSS */
@@ -395,39 +427,6 @@
             .logo {
                 height: 100px;
             }
-
-            .ui-slider-vertical {width: 10px;height: 200px;}
-        }
-
-        /* MEDIUM SCREEN  width < 2000px */
-        @media screen and (max-width: 2000px) {
-            .metricsContainer {
-                font-size: 14px;
-            }
-
-            .infos {
-                float: left;
-                padding: 10px;
-                width: 120px;
-                height: 120px;
-            }
-            
-            .playingTitle {
-                padding: 5px 0 10px 0;
-            }
-            
-            .overlayChart {
-                width: 500px;
-                height: 120px;
-                margin: 10px;
-            }
-
-            .sliderContainer {
-                width: 90px;
-                padding: 20px 10px;
-                height: 100px;
-            }
-
         }
 
 /* ********************************************************* */
@@ -465,6 +464,10 @@
             background-position: 0 0;
         }
         .ui-slider-vertical {width: 5px;height: 100px;}
+        @media screen and (min-width: 2000px) {
+            .ui-slider-vertical {width: 5px;height: 200px;}
+        }
+
         .ui-slider-vertical .ui-slider-range {left: 0;width: 100%;}
         .ui-slider-wrapper { position: relative; }
         .ui-slider-labels { position: absolute; border: 1px solid transparent; }
