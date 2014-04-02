@@ -59,7 +59,7 @@
             right: 0;
         }
         .reflected:before {
-            content: 'Ultra High Definition HEVC DASH'; /* to modify with the page Title
+            content: 'UHDTV in an HTML5 browser with DASH-HEVC content adaptation'; /* to modify with the page Title */
             opacity: .3;
             /* This is how the text is flipped vertically */
             -webkit-transform: scaleY(-1);
@@ -184,10 +184,12 @@
             border-radius:5px;
             background-color: rgb(163,163,163);
             text-align: center;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
         }
-
+        
         .main-infos-title {
-            padding-top: 150px;
             font-size: 30px;
             color: #3498db;
             text-shadow: 1px 1px #333232;
@@ -197,6 +199,8 @@
             font-size: 20px;
             color: #FFF;
             text-shadow: 1px 1px #333232;
+            font-style: italic;
+            text-align: left;
             margin: 10px;
         }
 
@@ -354,7 +358,6 @@
             }
             .main-infos-title {
                 font-size: 60px;
-                padding-top: 300px;
             }
 
             .main-infos-infos {
@@ -503,8 +506,10 @@
             </div>
         </div>
         <div class="main-infos">
-            <div id="infos-title" class="main-infos-title"></div>
-            <div id="infos-content" class="main-infos-infos"></div>
+            <div class="main-infos-container">
+                <div id="infos-title" class="main-infos-title"></div>
+                <div id="infos-content" class="main-infos-infos"></div>
+            </div>
         </div>
     </div>
 
