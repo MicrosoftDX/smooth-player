@@ -209,10 +209,24 @@ function toggleMetrics() {
     }
 }
 
-function open() {
+function startPlayHandler() {
+    console.log("play has begun");
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'http://updates.html5rocks.com/', true);
 
+    xhr.onload = function(e) {
+    if (this.status == 200) {
+            console.log("ResponseText : "+this.responseText);
+        }
+    };
+
+    xhr.send();
+}
+
+function open() {
     player = new MediaPlayer(new Custom.di.CustomContext());
     video = document.querySelector("video");
+    video.addEventListener("playing", startPlayHandler);
 
     player.startup();
     player.attachView(video);
