@@ -22,6 +22,8 @@ MediaPlayer.models.MetricsList = function () {
         RepBoundariesList: [],
         // ORANGE: add download switch in metrics
         DwnldSwitchList: [],
+        // ORANGE : add calculate bandwidth value
+        BandwidthValue: null,
         BufferLevel: [],
         PlayList: [],
         DroppedFrames: []

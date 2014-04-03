@@ -14,5 +14,5 @@ Custom.vo.metrics.DownloadSwitch = function () {
 };
 
 Custom.vo.metrics.DownloadSwitch.prototype = {
-    constructor: MediaPlayer.vo.metrics.RepresentationSwitch
+    constructor: Custom.vo.metrics.DownloadSwitch
 };

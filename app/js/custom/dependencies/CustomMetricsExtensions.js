@@ -189,6 +189,14 @@ Custom.dependencies.CustomMetricsExtensions = function () {
         return dwnldSwitch[dwnldSwitch.length-1];
     };
 
+    rslt.getCurrentBandwidth = function(metrics) {
+        if (metrics === null) {
+            return null;
+        }
+
+        return metrics.BandwidthValue;
+    };
+
     return rslt;
 };
 

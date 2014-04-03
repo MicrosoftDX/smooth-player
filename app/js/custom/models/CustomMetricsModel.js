@@ -26,6 +26,15 @@ Custom.models.CustomMetricsModel = function () {
         return ds;
     };
 
+    rslt.setBandwidthValue = function (streamType, value) {
+        var bwv = new Custom.vo.metrics.BandwidthValue();
+
+        bwv.value = value;
+        
+        this.parent.getMetricsFor(streamType).BandwidthValue = bwv;
+        return bwv;
+    };
+
     return rslt;
 };
 

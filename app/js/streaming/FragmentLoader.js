@@ -90,6 +90,8 @@ MediaPlayer.dependencies.FragmentLoader = function () {
                                                       currentTime,
                                                       new Date().getTime() - currentTime.getTime(),
                                                       [bytes.byteLength]);
+                    
+                    self.metricsModel.setBandwidthValue(request.streamType,(bytes.byteLength*8)/total);
 
                     request.deferred.resolve({
                         data: bytes,
