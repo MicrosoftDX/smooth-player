@@ -7,6 +7,8 @@ var idsToToggle = ["#chartToToggle", "#sliderToToggle", "#infosToToggle"];
 var updateInterval = 333;
 // chartXaxisWindow : the display window on the x-axis in seconds
 var chartXaxisWindow = 30;
+// loopVideo : true if at the end of video, the video must replay
+var loopVideo = true;
 
 var previousPlayedQuality,
     previousDownloadedQuality,
@@ -25,7 +27,10 @@ var previousPlayedQuality,
     firstAccess,
     seekBarIsPresent,
     audioTracksSelectIsPresent,
-    url;
+    url,
+    currentVideoIdx,
+    timeoutID,
+    callbackEndedVideoHandler;
 
 function initDefaultValue () {
     previousPlayedQuality = -1;
@@ -106,10 +111,14 @@ function update() {
         dlSeries.push([video.currentTime, previousDownloadedQuality]);
         playSeries.push([video.currentTime, previousPlayedQuality]);
 
-        // remove older points for the x-axis move
+        // remove older points for the x-axis move and move xaxis maximum value
         if (dlSeries.length > (chartXaxisWindow*1000)/updateInterval) {
             dlSeries.splice(0, 1);
             playSeries.splice(0, 1);
+            if (chartBandwidth) {
+                chartBandwidth.getAxes().xaxis.options.max = null;
+                //chartBandwidth.getAxes().xaxis.options.min = video.currentTime;
+            }
         }
 
         var bandwidthData = [{
@@ -172,11 +181,11 @@ function update() {
                 });
             }
             // push false data in dlSeries to have a coherent chart
-            while (dlSeries.length < (chartXaxisWindow*1000)/updateInterval) {
-                dlSeries.unshift([dlSeries[0][0]-updateInterval/1000, previousDownloadedQuality]);
-                playSeries.unshift([dlSeries[0][0]-updateInterval/1000, previousPlayedQuality]);
-            }
-            
+            // while (dlSeries.length < (chartXaxisWindow*1000)/updateInterval) {
+            //     dlSeries.unshift([dlSeries[0][0]-updateInterval/1000, previousDownloadedQuality]);
+            //     playSeries.unshift([dlSeries[0][0]-updateInterval/1000, previousPlayedQuality]);
+            // }
+            chartBandwidth.getAxes().xaxis.options.max = video.currentTime + chartXaxisWindow;
         } else {
             chartBandwidth.setData(bandwidthData);
             chartBandwidth.setupGrid();
@@ -191,7 +200,8 @@ function update() {
         $("#playingInfos").html("<p class='playingTitle'>Playing</p><p>"+ Math.round(bitrateValues[previousPlayedQuality]/100000)/10 + " Mbps</p><p>"+ previousPlayedVideoWidth +"x"+previousPlayedVideoHeight + "</p><p>"+ previousPlayedCodecs + "</p><p>"+ bufferLengthValue + "s</p>");
         //$("#downloadingInfos").html("<span class='downloadingTitle'>Downloading</span><br>" + Math.round(previousDownloadedQuality/1000) + " kbps<br>"+ videoWidthValue +"x"+videoHeightValue + "<br>"+ codecsValue + "<br>"+ bufferLengthValue + "s");
     }
-    setTimeout(update, updateInterval);
+    clearTimeout(timeoutID);
+    timeoutID = setTimeout(update, updateInterval);
 }
 
 function toggleMetrics() {
@@ -209,31 +219,45 @@ function toggleMetrics() {
     }
 }
 
-function startPlayHandler() {
-    console.log("play has begun");
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'http://updates.html5rocks.com/', true);
+function endedVideoHandler() {
+    console.log("video is finished ");
+    if (loopVideo) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'http://updates.html5rocks.com/', true);
 
-    xhr.onload = function(e) {
-    if (this.status == 200) {
-            console.log("ResponseText : "+this.responseText);
-        }
-    };
+        xhr.onload = function(e) {
+            if (this.status == 200) {
+                console.log("Request response received !");
+            }
+        };
 
-    xhr.send();
+        xhr.send();
+        // save the url to reinit all attributes
+        var backupUrl = url;
+        // restart the video
+        initDefaultValue();
+        url = backupUrl;
+        callbackEndedVideoHandler();
+    }
 }
 
 function open() {
     player = new MediaPlayer(new Custom.di.CustomContext());
     video = document.querySelector("video");
-    video.addEventListener("playing", startPlayHandler);
+    
+    callbackEndedVideoHandler = open; // save the open method to call it after.
+
+    // do an other open if loopVIdeo is true
+    video.addEventListener("ended", endedVideoHandler);
+    // video.addEventListener
 
     player.startup();
     player.attachView(video);
     player.setAutoPlay(true);
 
     player.attachSource(url);
-    setTimeout(update, updateInterval);
+    clearTimeout(timeoutID);
+    timeoutID = setTimeout(update, updateInterval);
 }
 
 
