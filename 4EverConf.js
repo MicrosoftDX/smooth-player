@@ -16,7 +16,7 @@ var videoStreams = [
     {
         "name": "DASH-HEVC UHD",
         "url": "http://10.194.60.47/orange3s/UHD/dashevc-live-2s/dashevc-live-2s-4k.mpd",
-        "image": "app/img/dashevc-live-2s.jpg",
+        "image": "app/img/4Ever/dashevc-live-2s.jpg",
         "representations": [
             "3840x2160 - 60 Hz - 18.4 Mbps",
             "3840x2160 - 60 Hz - 13.5 Mbps",
@@ -26,7 +26,7 @@ var videoStreams = [
     {
         "name": "DASH-HEVC HD",
         "url": "http://10.194.60.47/orange3s/UHD/dashevc-live-2s/dashevc-live-2s-p60.mpd",
-        "image": "app/img/dashevc-live-2s.jpg",
+        "image": "app/img/4Ever/dashevc-live-2s.jpg",
         "representations": [
             "1920x1080 - 60 Hz - 7.5 Mbps",
             "1920x1080 - 60 Hz - 5.5 Mbps",
@@ -37,7 +37,7 @@ var videoStreams = [
     {
         "name": "DASH-HEVC UHD/HD",
         "url": "http://10.194.60.47/orange3s/UHD/dashevc-live-2s/dashevc-live-2s.mpd",
-        "image": "app/img/dashevc-live-2s.jpg",
+        "image": "app/img/4Ever/dashevc-live-2s.jpg",
         "representations": [
             "3840x2160 - 60 Hz - 18.4 Mbps",
             "3840x2160 - 60 Hz - 13.5 Mbps",
