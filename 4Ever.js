@@ -30,7 +30,8 @@ var previousPlayedQuality,
     url,
     currentVideoIdx,
     timeoutID,
-    callbackEndedVideoHandler;
+    callbackEndedVideoHandler,
+    hasSeeked;
 
 function initDefaultValue () {
     previousPlayedQuality = -1;
@@ -117,8 +118,12 @@ function update() {
             playSeries.splice(0, 1);
             if (chartBandwidth) {
                 chartBandwidth.getAxes().xaxis.options.max = null;
-                //chartBandwidth.getAxes().xaxis.options.min = video.currentTime;
             }
+        }
+
+        if (hasSeeked && chartBandwidth) {
+            hasSeeked = false;
+            chartBandwidth.getAxes().xaxis.options.max = video.currentTime + chartXaxisWindow;
         }
 
         var bandwidthData = [{
@@ -219,6 +224,16 @@ function toggleMetrics() {
     }
 }
 
+function seekedVideoHandler() {
+    previousPlayedQuality = -1;
+    previousDownloadedQuality= -1;
+    // chartBandwidth = null;
+    dlSeries = [];
+    playSeries = [];
+    qualityChangements = [];
+    hasSeeked = true;
+}
+
 function endedVideoHandler() {
     console.log("video is finished ");
     if (loopVideo) {
@@ -249,7 +264,7 @@ function open() {
 
     // do an other open if loopVIdeo is true
     video.addEventListener("ended", endedVideoHandler);
-    // video.addEventListener
+    video.addEventListener("seeked",seekedVideoHandler);
 
     player.startup();
     player.attachView(video);
@@ -331,7 +346,7 @@ function onLoaded () {
     });
 
     // hide fullscreenContainer at start and catch fullscreen event
-    $("#metricsContainer").hide();
+    //$("#metricsContainer").hide();
     $('#video-player').bind('webkitfullscreenchange fullscreenchange', function(e) {
         $("#metricsContainer").toggle();
         return false;
