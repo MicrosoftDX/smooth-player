@@ -33,7 +33,7 @@ var previousPlayedQuality,
     hasSeeked;
 
 function initDefaultValue () {
-    previousPlayedQuality = -1;
+    previousPlayedQuality = 0;
     previousDownloadedQuality= -1;
     chartBandwidth = null;
     dlSeries = [];
@@ -109,6 +109,12 @@ function update() {
             }
         }
 
+        if (hasSeeked && chartBandwidth) {
+            hasSeeked = false;
+            chartBandwidth.getAxes().xaxis.options.max = video.currentTime + chartXaxisWindow;
+            previousPlayedQuality = previousDownloadedQuality;
+        }
+        
         dlSeries.push([video.currentTime, previousDownloadedQuality]);
         playSeries.push([video.currentTime, previousPlayedQuality]);
 
@@ -121,10 +127,6 @@ function update() {
             }
         }
 
-        if (hasSeeked && chartBandwidth) {
-            hasSeeked = false;
-            chartBandwidth.getAxes().xaxis.options.max = video.currentTime + chartXaxisWindow;
-        }
 
         var bandwidthData = [{
             data: dlSeries,
