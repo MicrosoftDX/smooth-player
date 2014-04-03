@@ -346,7 +346,7 @@ function onLoaded () {
     });
 
     // hide fullscreenContainer at start and catch fullscreen event
-    //$("#metricsContainer").hide();
+    $("#metricsContainer").hide();
     $('#video-player').bind('webkitfullscreenchange fullscreenchange', function(e) {
         $("#metricsContainer").toggle();
         return false;
