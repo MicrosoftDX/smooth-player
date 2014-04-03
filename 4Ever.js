@@ -2,7 +2,7 @@
 // hideMetricsAtStart :	if true all metrics are hidden at start and ctrl+i show them one by one; else all metrics are shown at start and ctrl+i hide them one by one
 var hideMetricsAtStart = false;
 // idsToToggle : ids of the metrics to toggle, metrics are hided (or shown) in the array order
-var idsToToggle = ["#chartToToggle", "#sliderToToggle", "#infosToToggle"];
+var idsToToggle = ["#sliderToToggle", "#chartToToggle", "#infosToToggle"];
 // updateInterval : the intervals on how often the metrics are updated in milliseconds
 var updateInterval = 333;
 // chartXaxisWindow : the display window on the x-axis in seconds
@@ -109,6 +109,7 @@ function update() {
             }
         }
 
+        // set the xaxis maximum when we have seeked to avoid strange beahvior of the chart
         if (hasSeeked && chartBandwidth) {
             hasSeeked = false;
             chartBandwidth.getAxes().xaxis.options.max = video.currentTime + chartXaxisWindow;
@@ -187,11 +188,8 @@ function update() {
                     }
                 });
             }
-            // push false data in dlSeries to have a coherent chart
-            // while (dlSeries.length < (chartXaxisWindow*1000)/updateInterval) {
-            //     dlSeries.unshift([dlSeries[0][0]-updateInterval/1000, previousDownloadedQuality]);
-            //     playSeries.unshift([dlSeries[0][0]-updateInterval/1000, previousPlayedQuality]);
-            // }
+
+            // set the chartbandwidth maximum to have a pretty chart
             chartBandwidth.getAxes().xaxis.options.max = video.currentTime + chartXaxisWindow;
         } else {
             chartBandwidth.setData(bandwidthData);
@@ -212,6 +210,7 @@ function update() {
     timeoutID = setTimeout(update, updateInterval);
 }
 
+// show or display metrics
 function toggleMetrics() {
     // hide or show chart 
     if (currentIdToToggle < idsToToggle.length) {
@@ -227,6 +226,7 @@ function toggleMetrics() {
     }
 }
 
+// handler fired by the end of the seek action
 function seekedVideoHandler() {
     previousPlayedQuality = -1;
     previousDownloadedQuality= -1;
@@ -237,6 +237,7 @@ function seekedVideoHandler() {
     hasSeeked = true;
 }
 
+// handler fired by the end of the video play
 function endedVideoHandler() {
     console.log("video is finished ");
     if (loopVideo) {
@@ -259,6 +260,7 @@ function endedVideoHandler() {
     }
 }
 
+// play a stream defined by "url"
 function open() {
     player = new MediaPlayer(new Custom.di.CustomContext());
     video = document.querySelector("video");
@@ -278,7 +280,7 @@ function open() {
     timeoutID = setTimeout(update, updateInterval);
 }
 
-
+// upadte stream infos (left of the player)
 function updateVideoStreamInfos(infos) {
     var container = $("#video-info");
 // reset infos
@@ -304,7 +306,6 @@ function openStream(idx) {
         open();
     }
 }
-
 
 function initTextInfos () {
     $("#page-title").html(pageTitle);
@@ -340,13 +341,17 @@ function onLoaded () {
     // parse videoStreamObjects
     initVideoStreams();
 
-	// catch ctrl+i key stoke    
+	// catch ctrl+² key stoke    
     $(document).keydown(function(e) {
-        if(e.keyCode == 73 && e.ctrlKey) {
+        // key code are available here : 
+        // http://css-tricks.com/snippets/javascript/javascript-keycodes/
+        // i was 73 but doesn't work on fullscreen...
+        if(e.keyCode == 222 && e.ctrlKey) {
             toggleMetrics();
             return false;
         }
     });
+
 
     // hide fullscreenContainer at start and catch fullscreen event
     $("#metricsContainer").hide();
