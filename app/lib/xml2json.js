@@ -330,8 +330,20 @@ function X2JS(matchers, attrPrefix, ignoreRoot) {
 	this.parseXmlString = function(xmlDocStr) {
 		var xmlDoc;
 		if (window.DOMParser) {
-			var parser=new window.DOMParser();			
-			xmlDoc = parser.parseFromString( xmlDocStr, "text/xml" );
+                        // BBE: gestion erreur de parsing XML
+			try
+			{
+				var parser=new window.DOMParser();
+				// var parsererrorNS = parser.parseFromString('INVALID', 'text/xml').childNodes[0].namespaceURI;
+				xmlDoc = parser.parseFromString( xmlDocStr, "text/xml" );
+			    // if(xmlDoc.getElementsByTagNameNS(parsererrorNS, 'parsererror').length > 0) {
+			    //     throw new Error('Error parsing XML');
+			    // }		
+			}
+			catch (e)
+			{
+				return null;
+			}
 		}
 		else {
 			// IE :(
@@ -341,6 +353,10 @@ function X2JS(matchers, attrPrefix, ignoreRoot) {
 			xmlDoc=new ActiveXObject("Microsoft.XMLDOM");
 			xmlDoc.async="false";
 			xmlDoc.loadXML(xmlDocStr);
+			if (xmlDoc.parseError.errorCode != 0)
+			{
+				return null;
+			}
 		}
 		return xmlDoc;
 	}

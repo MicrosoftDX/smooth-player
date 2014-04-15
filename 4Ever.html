@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8"/>
+    <title>UHD HEVC DASH</title>
+    <meta name="description" content="" />
+    <link rel="icon" type="image/png" href="app/img/4everproject_ico.png" />
+    <meta name="viewport" content="width=device-width, height=device-height, user-scalable=no">
+
+    <style type="text/css">
+        html {
+            height: 100%;
+            width: 100%;
+        }
+
+        body {
+            margin: 0px;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background-color: black;
+            color: #FFF;
+            font-family: Helvetica, sans-serif;
+
+            /* flexbox */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* reset css */
+        ul {
+            list-style: none;
+        }
+
+/* HEADER CSS */
+        .header {
+            padding: 20px;
+            width: 100%;
+
+            /* flexbox */
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .header .title {
+            font-size: 36px;
+        }
+        /* reflect title like the logo... */
+        .reflected {
+            position: relative;
+        }
+        .reflected:before, .reflected:after {
+            display: block;
+            position: absolute;
+            bottom: -.8em; /* You should change this value to fit your font */
+            left: 0;
+            right: 0;
+        }
+        .reflected:before {
+            content: 'UHDTV in an HTML5 browser with DASH-HEVC content adaptation'; /* to modify with the page Title */
+            opacity: .3;
+            /* This is how the text is flipped vertically */
+            -webkit-transform: scaleY(-1);
+            transform: scaleY(-1);
+        }
+        .reflected:after {
+            /* Fading using CSS gradient */
+            background: -webkit-gradient(linear, left top, left center, color-stop(0%,rgba(0,0,0,0)), color-stop(100%,rgba(0,0,0,0.57)));
+            background: -ms-linear-gradient(top,rgba(0,0,0,0) 0%, rgba(0,0,0,0.57) 100%);
+            content: ' ';
+            height: 1em;
+        }
+/* MAIN CSS */
+        .main {
+            width: 95%;
+            margin: 0 auto;
+            padding: 10px;
+            
+
+            /* flexbox */
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .main-video {
+            background-color: rgb(90,90,90);
+            /*box-shadow: -1px 2px 5px 1px rgba(163, 163, 163, 0.7); */
+            /*background-color: rgba(71, 71, 71, 0.9);
+    box-shadow: -1px 2px 5px 1px rgba(255, 255, 255, 0.7); 
+    border: 1px black;*/
+
+            width: 70%;
+            border-radius:5px;
+            /* flexbox */
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .video-info {
+            text-align: center;
+            /* flexbox */
+            flex:1;
+        }
+
+        .text-video-title {
+            font-size: 30px;
+            color: #3498db;
+            text-shadow: 1px 1px #333232;
+        }
+
+        .text-video-info {
+            font-size: 20px;
+            color: #FFF;
+            text-shadow: 1px 1px #333232;
+        }
+
+        .text-video-info-selected {
+            font-size: 20px;
+            color: #F07878;
+            text-shadow: 1px 1px #333232;
+        }
+
+        .video-container {
+            margin: 0 40px;
+            padding: 20px;
+            float: left;
+            position: relative;
+        }
+
+        video {
+            height: 470px;
+            width: 836px;
+            background: #000; 
+        }
+
+        .video-background {
+            width: 100%; 
+            height: 100%; 
+            position: absolute; 
+            left: 0px; 
+            top: 0px; 
+            z-index: 0;
+        }
+
+        /* animation at fullscreen start */
+        @-webkit-keyframes fadeIn {
+          0% {
+            opacity: 0;
+          }
+
+          100% {
+            opacity: 1;
+          }
+        }
+
+        @-webkit-keyframes extension {
+          0% {
+            -webkit-transform: scale(0);
+            transform: scale(0);
+          }
+
+          100% {
+            -webkit-transform: scale(1);
+            transform: scale(1);
+          }
+        }
+        
+        #video-player:-webkit-full-screen{
+            -webkit-animation-name: extension;
+            -webkit-animation-duration: 1s;
+        }
+
+        /* inforamtions about demo */
+        .main-infos {
+            width: 25%;
+            border-radius:5px;
+            background-color: rgb(163,163,163);
+            text-align: center;
+        }
+        
+        .main-infos-title {
+            font-size: 30px;
+            color: #3498db;
+            text-shadow: 1px 1px #333232;
+            padding: 1em 0;
+        }
+
+        .main-infos-infos {
+            font-size: 20px;
+            color: #FFF;
+            text-shadow: 1px 1px #333232;
+            font-style: italic;
+            text-align: left;
+            margin: 0.75em;
+        }
+
+        /* list of videos */
+        .video-list {
+            margin: 30px 20px;
+            height: 80px;
+            background-color: rgba(100,100,100,0.5);
+            border-radius:5px;
+
+            /* flexbox */
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .video-item {
+            height: 100px;
+            width: 178px;
+            position: relative;
+            transform: scale(1);
+            transition-duration: 500ms;
+            -webkit-transform: scale(1);
+            -webkit-transition-duration: 500ms;
+        }
+
+        .video-item:hover {
+            cursor: pointer;
+            -webkit-transform: scale(1.3);
+            -webkit-transition-duration: 500ms;
+            transform: scale(1.3);
+            transition-duration: 500ms;
+        }
+
+        .img-video-item {
+            background-color: rgb(68,68,68);
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+        .text-video-item {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 100%;
+            font-weight: bold;
+            font-size: 20px;
+            text-align: center;
+            text-shadow: 0 0 0.2em #000, 0 0 0.2em #000, 0 0 0.2em #000;
+            /* Internet Explorer 10 */
+            display:-ms-flexbox;
+            -ms-flex-pack:center;
+            -ms-flex-align:center;
+            /* Safari, Chrome, and Opera */
+            display:-webkit-box;
+            -webkit-box-pack:center;
+            -webkit-box-align:center;
+            /* W3C */
+            display:box;
+            box-pack:center;
+            box-align:center;
+        }
+
+/* BANNER CSS */
+        .banner {
+            padding: 20px;
+            width: 100%;
+            height: 70px;
+            background-color: rgb(252,252,252);
+
+            /* flexbox */
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .logo {
+            height: 50px;
+        }
+
+/* ********************************************************* */
+/* **********************  METRICS ************************* */
+/* ********************************************************* */
+        .metricsContainer {
+            z-index: 2147483647;
+            position: absolute;
+            bottom: 50px;
+            left: 20px;
+            font-size: 14px;
+        }
+
+        .container {
+            background-color: rgba(0,0,0,0.5);
+            -webkit-border-radius: 5px;
+            border-radius: 5px;
+            margin: 10px;
+            float: left;
+            /* hack to display it over the player */
+            z-index: 2147483647;
+        }
+
+        .overlayChart {
+            width: 500px;
+            height: 120px;
+            margin: 10px;
+        }
+
+        .sliderContainer {
+            width: 90px;
+            padding: 20px 10px;
+            height: 100px;
+        }
+
+        .infos {
+            float: left;
+            padding: 10px;
+            width: 120px;
+            height: 120px;
+        }
+
+        .infos p {
+            margin: 0;
+        }
+
+        .infos p.bandwidthValue {
+            font-size: 11px;
+            padding-top: 5px;
+        }
+
+
+        .playingTitle {
+            font-weight: bold;
+            color: #E74C3C;
+            text-shadow: 1px 1px #333232;
+            padding: 5px 0 10px 0;
+        }
+
+/* BIG SCREEN  width > 2000px */
+        @media screen and (min-width: 2000px) {
+            .header .title {
+                font-size: 72px;
+            }
+
+            .metricsContainer {
+                font-size: 28px;
+            }
+
+            .container {
+                margin: 20px;
+            }
+
+            .infos {
+                padding: 20px;
+                width: 240px;
+                height: 240px;
+            }
+
+            .infos p.bandwidthValue {
+                font-size: 22px;
+                padding-top: 10px;
+            }
+
+            .playingTitle {
+                padding: 10px 0 20px 0;
+            }
+
+            .overlayChart {
+                width: 1000px;
+                height: 240px;
+                margin: 20px;
+            }
+
+            .sliderContainer {
+                width: 180px;
+                padding: 40px 20px;
+                height: 200px;
+            }
+
+            .text-video-title {
+                font-size: 60px;
+            }
+
+            .text-video-info {
+                font-size: 40px;
+            }
+
+            .text-video-info-selected {
+                font-size: 40px;
+            }
+
+            .main-infos-title {
+                font-size: 60px;
+            }
+
+            .main-infos-infos {
+                font-size: 40px;
+            }
+
+            .video-container {
+                margin: 0;
+                padding: 40px;
+            }
+
+            video {
+                width: 1840px;
+                height: 1035px;
+            }
+
+            .video-info {
+                margin-right: 35px;
+                margin-left: 40px;
+            }
+
+            .video-list {
+                margin: 60px 40px;
+                height: 160px;
+            }
+
+            .video-item {
+                height: 200px;
+                width: 356px; 
+            }
+
+            .text-video-item {
+                font-size: 40px;
+            }
+
+            /* BANNER CSS */
+            .banner {
+                padding: 30px;
+                width: 100%;
+                height: 140px;
+                background-color: rgb(252,252,252);
+
+                /* flexbox */
+                display: flex;
+                flex-direction: row;
+                justify-content: space-around;
+            }
+
+            .logo {
+                height: 100px;
+            }
+        }
+
+/* ********************************************************* */
+/* ****************  SLIDER (JQUERY UI) ******************** */
+/* ********************************************************* */
+
+        .ui-widget {font-family: Trebuchet MS,Tahoma,Verdana,Arial,sans-serif;}
+        .ui-widget-header {border: 1px solid #e78f08;background: #2980B9 ;color: #fff;font-weight: bold;}
+        .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {border: 1px solid #ccc;background: #f6f6f6 50% 50% repeat-x;font-weight: bold;color: #1c94c4;}
+        
+        .ui-slider .ui-slider-handle {
+            position: absolute;
+            z-index: 2;
+            cursor: default;
+            width: 11px;
+            height: 4px;
+            left: -4px;
+            margin-bottom: -2px;
+        }
+      
+        .ui-corner-all, .ui-corner-bottom, .ui-corner-right, .ui-corner-br {border-bottom-right-radius: 4px;}
+        .ui-corner-all, .ui-corner-bottom, .ui-corner-left, .ui-corner-bl {border-bottom-left-radius: 4px;}
+        .ui-corner-all, .ui-corner-top, .ui-corner-right, .ui-corner-tr {border-top-right-radius: 4px;}
+        .ui-corner-all, .ui-corner-top, .ui-corner-left, .ui-corner-tl {border-top-left-radius: 4px;}
+        .ui-widget-content {background: #eee 50% top repeat-x;color: #333;}
+        .ui-slider {position: relative;text-align: left;}
+        .ui-slider .ui-slider-range {
+            position: absolute;
+            z-index: 1;
+            font-size: .7em;
+            display: block;
+            border: 0;
+            border-top-left-radius:0;
+            border-top-right-radius:0;
+            background-position: 0 0;
+        }
+        .ui-slider-vertical {width: 5px;height: 100px;}
+        @media screen and (min-width: 2000px) {
+            .ui-slider-vertical {width: 5px;height: 200px;}
+        }
+
+        .ui-slider-vertical .ui-slider-range {left: 0;width: 100%;}
+        .ui-slider-wrapper { position: relative; }
+        .ui-slider-labels { position: absolute; border: 1px solid transparent; }
+        .ui-slider-label-ticks { border: 1px solid transparent; position: absolute; white-space: nowrap; }
+        .ui-slider-label-ticks span { font-size: 0.9em; min-width: 1.2em; }
+        .ui-slider-wrapper.vertical { width: 56px; }
+        .vertical .ui-slider-labels { top: 1px; bottom: 0; left: 0.7em; }
+        .vertical .ui-slider-label-ticks { height: 1.2em; width: 5px; border-bottom: 1px solid #999; }
+        .vertical .ui-slider-label-ticks span { position: relative; display: inline-block; margin-left: 8px; top: .6em; }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <a href="http://www.4ever-project.com/">
+            <img class="image" src="app/img/4Ever/4everproject.png"/>
+        </a>
+        <div id="page-title" class="title reflected"></div>
+
+                        <div id="sliderBitrate2"></div>
+    </div>
+
+    <div class="main">
+        <div class="main-video">
+            <div id="video-info" class="video-info"></div>
+            <div class="video-container">
+                <video id="video-player" controls="true" muted></video>
+                <div id="metricsContainer" class="metricsContainer">
+                    <div id="infosToToggle" class="infosContainer container">
+                        <div id="playingInfos" class="infos"></div>
+                    </div>
+                    <div id="chartToToggle" class="chartContainer container"> 
+                        <div id="chartBandwidth" class="overlayChart" ng-model="bandwidthData"></div>
+                    </div>
+                    <div id="sliderToToggle" class="sliderContainer container">
+                        <div id="sliderBitrate"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="main-infos">
+            <div class="main-infos-container">
+                <div id="infos-title" class="main-infos-title"></div>
+                <div id="infos-content" class="main-infos-infos"></div>
+            </div>
+        </div>
+    </div>
+
+    <ul id="video-list" class="video-list"></ul>
+
+    <div class="banner">
+        <img class="logo" src="app/img/4Ever/hevc.jpg"/>
+        <img class="logo" src="app/img/4Ever/MPEG-DASH_Logo.jpg"/>
+        <img class="logo" src="app/img/4Ever/HTML5_logo.png"/>
+        <img class="logo" src="app/img/if.jpg"/>
+    </div>
+</body>
+<script src="4EverConf.js"></script>
+<script src="4Ever.js"></script>
+</html>

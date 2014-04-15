@@ -41,29 +41,43 @@ MediaPlayer = function (aContext) {
  * 6) Transform fragments.
  * 7) Push fragmemt bytes into SourceBuffer.
  */
-    var VERSION = "1.0.0",
+    var VERSION = "1.1.0",
         context = aContext,
         system,
         element,
         source,
-        model,
+        // ORANGE: licenser backUrl
+        sourceBackUrl,
         streamController,
+        videoModel,
         initialized = false,
         playing = false,
         autoPlay = true,
+        scheduleWhilePaused = false,
+        bufferMax = MediaPlayer.dependencies.BufferExtensions.BUFFER_SIZE_REQUIRED,
+        activeStream = null,
+       
 
         isReady = function () {
-            return (element !== undefined && source !== undefined);
+            return (!!element && !!source);
+        },
+
+        initLogger = function () {
+            this.logger.addAppender();
         },
 
         play = function () {
+
+            var self = this;
+            
+           // initLogger.call(this);
+            this.debug.log("[MediaPlayer]", "play", source);
             if (!initialized) {
                 throw "MediaPlayer not initialized!";
             }
 
             if (!this.capabilities.supportsMediaSource()) {
-                alert("Your browser does not support the MediaSource API.  Please try another browser, such as Chrome.");
-                //throw "Media Source not supported.";
+                this.errHandler.capabilityError("mediasource");
                 return;
             }
 
@@ -72,11 +86,16 @@ MediaPlayer = function (aContext) {
             }
 
             playing = true;
-            this.debug.log("Playback initiated!");
+            //this.debug.log("[MediaPlayer] Playback initiated!");
             streamController = system.getObject("streamController");
-            streamController.setVideoModel(this.videoModel);
+            streamController.setVideoModel(videoModel);
             streamController.setAutoPlay(autoPlay);
-            streamController.load(source);
+            // ORANGE: add licenser backUrl parameter
+            streamController.load(source, sourceBackUrl);
+            system.mapValue("scheduleWhilePaused", scheduleWhilePaused);
+            system.mapOutlet("scheduleWhilePaused", "stream");
+            system.mapValue("bufferMax", bufferMax);
+            system.injectInto(this.bufferExt, "bufferMax");
         },
 
         doAutoPlay = function () {
@@ -91,14 +110,15 @@ MediaPlayer = function (aContext) {
     system.mapOutlet("system");
     system.injectInto(context);
 
+
     return {
         debug: undefined,
         eventBus: undefined,
         capabilities: undefined,
-        videoModel: undefined,
         abrController: undefined,
         metricsModel: undefined,
         metricsExt: undefined,
+        bufferExt: undefined,
 
         addEventListener: function (type, listener, useCapture) {
             this.eventBus.addEventListener(type, listener, useCapture);
@@ -124,7 +144,7 @@ MediaPlayer = function (aContext) {
         },
 
         getVideoModel: function () {
-            return this.videoModel;
+            return videoModel;
         },
 
         setAutoPlay: function (value) {
@@ -133,6 +153,22 @@ MediaPlayer = function (aContext) {
 
         getAutoPlay: function () {
             return autoPlay;
+        },
+
+        setScheduleWhilePaused: function(value) {
+            scheduleWhilePaused = value;
+        },
+
+        getScheduleWhilePaused: function() {
+            return scheduleWhilePaused;
+        },
+
+        setBufferMax: function(value) {
+            bufferMax = value;
+        },
+
+        getBufferMax: function() {
+            return bufferMax;
         },
 
         getMetricsExt: function () {
@@ -160,6 +196,21 @@ MediaPlayer = function (aContext) {
             this.abrController.setAutoSwitchBitrate(value);
         },
 
+        // ORANGE: add function to set manually representation boundaries for a media
+        setQualityBoundariesFor: function (type, min, max) {
+            this.metricsModel.addRepresentationBoundaries(type, new Date(), min, max);
+        },
+
+        // ORANGE: add function to switch audioTracks for a media
+        setAudioTrack: function(audioTrack){
+            streamController.setAudioTrack(audioTrack);
+        },
+
+        // ORANGE: get the audio track list
+        getAudioTracks: function(){
+            return streamController.getAudioTracks();
+        },
+
         attachView: function (view) {
             if (!initialized) {
                 throw "MediaPlayer not initialized!";
@@ -167,34 +218,56 @@ MediaPlayer = function (aContext) {
 
             element = view;
 
-            model = new MediaPlayer.models.VideoModel(element);
-            this.videoModel.setElement(element);
+            videoModel = null;
+            if (element) {
+                videoModel = system.getObject("videoModel");
+                videoModel.setElement(element);
+            }
 
             // TODO : update
 
-            if (!playing) {
+            if (playing && streamController) {
+                streamController.reset();
+                streamController = null;
+                playing = false;
+            }
+
+            if (isReady.call(this)) {
+                doAutoPlay.call(this);
+            }
+        },
+        
+        // ORANGE: modify attachSource function to add licenser backUrl parameter
+        attachSource: function (url, backUrl) {
+            if (!initialized) {
+                throw "MediaPlayer not initialized!";
+            }
+            source = url;
+            // ORANGE: modify attachSource function to add licenser backUrl parameter
+            sourceBackUrl = backUrl;
+            this.setQualityFor('video', 0);
+            this.setQualityFor('audio', 0);
+
+            // TODO : update
+
+            if (playing && streamController) {
+                streamController.reset();
+                streamController = null;
+                playing = false;
+            }
+
+            if (isReady.call(this)) {
                 doAutoPlay.call(this);
             }
         },
 
-        attachSource: function (url) {
-            if (!initialized) {
-                throw "MediaPlayer not initialized!";
-            }
-
-            source = url;
-
-            // TODO : update
-
-            if (playing) {
-                streamController.reset();
-                streamController = null;
-            }
-
-            doAutoPlay.call(this);
+        reset: function() {
+            this.attachSource(null);
+            this.attachView(null);
         },
 
-        play: play
+        play: play,
+        isReady: isReady
     };
 };
 

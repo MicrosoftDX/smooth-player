@@ -21,6 +21,8 @@
         "utils",
         "MediaPlayer",
         "Dash",
+        "Mss",
+        "Custom",
         "WebKitMediaSource",
         "MediaSource",
         "WebKitMediaKeys",

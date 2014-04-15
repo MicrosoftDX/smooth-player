@@ -75,19 +75,28 @@ MediaPlayer.models.MetricsModel = function () {
             vo.interval = interval;
             vo.mediaduration = mediaduration;
 
-            this.getMetricsFor(streamType).HttpList.push(vo);
+            // ORANGE unnecessary metrics, when builded, DEBUG is false, saving the whole list is useless
+            if (DEBUG) {
+                this.getMetricsFor(streamType).HttpList.push(vo);
+            } else {
+                this.getMetricsFor(streamType).HttpList = [vo];
+            }
+
             return vo;
         },
 
         appendHttpTrace: function (httpRequest, s, d, b) {
-            var vo = new MediaPlayer.vo.metrics.HTTPRequest.Trace();
+            // ORANGE unnecessary metrics, when builded, DEBUG is false, the code is never called
+            if (DEBUG) {
+                var vo = new MediaPlayer.vo.metrics.HTTPRequest.Trace();
 
-            vo.s = s;
-            vo.d = d;
-            vo.b = b;
+                vo.s = s;
+                vo.d = d;
+                vo.b = b;
 
-            httpRequest.trace.push(vo);
-            return vo;
+                httpRequest.trace.push(vo);
+                return vo;
+            }
         },
 
         addRepresentationSwitch: function (streamType, t, mt, to, lto) {
@@ -107,35 +116,46 @@ MediaPlayer.models.MetricsModel = function () {
 
             vo.t = t;
             vo.level = level;
-
-            this.getMetricsFor(streamType).BufferLevel.push(vo);
+            
+            // ORANGE unnecessary metrics, when builded, DEBUG is false, saving the whole list is useless
+            if (DEBUG) {
+                this.getMetricsFor(streamType).BufferLevel.push(vo);
+            } else {
+                this.getMetricsFor(streamType).BufferLevel = [vo];
+            }
             return vo;
         },
 
         addPlayList: function (streamType, start, mstart, starttype) {
-            var vo = new MediaPlayer.vo.metrics.PlayList();
+            // ORANGE unnecessary metrics, when builded, DEBUG is false, the code is never called
+            if (DEBUG) {
+                var vo = new MediaPlayer.vo.metrics.PlayList();
 
-            vo.start = start;
-            vo.mstart = mstart;
-            vo.starttype = starttype;
+                vo.start = start;
+                vo.mstart = mstart;
+                vo.starttype = starttype;
 
-            this.getMetricsFor(streamType).PlayList.push(vo);
-            return vo;
+                this.getMetricsFor(streamType).PlayList.push(vo);
+                return vo;
+            }
         },
 
         appendPlayListTrace: function (playList, representationid, subreplevel, start, mstart, duration, playbackspeed, stopreason) {
-            var vo = new MediaPlayer.vo.metrics.PlayList.Trace();
+            // ORANGE unnecessary metrics, when builded, DEBUG is false, the code is never called
+            if (DEBUG) {    
+                var vo = new MediaPlayer.vo.metrics.PlayList.Trace();
 
-            vo.representationid = representationid;
-            vo.subreplevel = subreplevel;
-            vo.start = start;
-            vo.mstart = mstart;
-            vo.duration = duration;
-            vo.playbackspeed = playbackspeed;
-            vo.stopreason = stopreason;
+                vo.representationid = representationid;
+                vo.subreplevel = subreplevel;
+                vo.start = start;
+                vo.mstart = mstart;
+                vo.duration = duration;
+                vo.playbackspeed = playbackspeed;
+                vo.stopreason = stopreason;
 
-            playList.trace.push(vo);
-            return vo;
+                playList.trace.push(vo);
+                return vo;
+            }
         }
     };
 };

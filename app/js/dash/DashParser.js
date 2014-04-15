@@ -19,8 +19,10 @@ Dash.dependencies.DashParser = function () {
         SECONDS_IN_DAY = 24 * 60 * 60,
         SECONDS_IN_HOUR = 60 * 60,
         SECONDS_IN_MIN = 60,
-        durationRegex = /P(([\d.]*)Y)?(([\d.]*)M)?(([\d.]*)D)?T(([\d.]*)H)?(([\d.]*)M)?(([\d.]*)S)?/,
-        datetimeRegex = /^(\d{4}\-\d\d\-\d\d([tT][\d:\.]*)?)([zZ]|([+\-])(\d\d):(\d\d))?$/,
+        MINUTES_IN_HOUR = 60,
+        MILLISECONDS_IN_SECONDS = 1000,
+        durationRegex = /^P(([\d.]*)Y)?(([\d.]*)M)?(([\d.]*)D)?T(([\d.]*)H)?(([\d.]*)M)?(([\d.]*)S)?/,
+        datetimeRegex = /^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2})(?::([0-9]*)(\.[0-9]*)?)?(?:([+-])([0-9]{2})([0-9]{2}))?/,
         numericRegex = /^[-+]?[0-9]+[.]?[0-9]*([eE][-+]?[0-9]+)?$/,
         matchers = [
             {
@@ -45,7 +47,26 @@ Dash.dependencies.DashParser = function () {
                     return datetimeRegex.test(str);
                 },
                 converter: function (str) {
-                    return new Date(str);
+                    var match = datetimeRegex.exec(str),
+                        utcDate;
+                    // If the string does not contain a timezone offset different browsers can interpret it either
+                    // as UTC or as a local time so we have to parse the string manually to normalize the given date value for
+                    // all browsers
+                    utcDate = Date.UTC(
+                        parseInt(match[1], 10),
+                        parseInt(match[2], 10)-1, // months start from zero
+                        parseInt(match[3], 10),
+                        parseInt(match[4], 10),
+                        parseInt(match[5], 10),
+                        (match[6] && parseInt(match[6], 10) || 0),
+                        (match[7] && parseFloat(match[7]) * MILLISECONDS_IN_SECONDS) || 0);
+                    // If the date has timezone offset take it into account as well
+                    if (match[9] && match[10]) {
+                        var timezoneOffset = parseInt(match[9], 10) * MINUTES_IN_HOUR + parseInt(match[10], 10);
+                        utcDate += (match[8] === '+' ? -1 : +1) * timezoneOffset * SECONDS_IN_MIN * MILLISECONDS_IN_SECONDS;
+                    }
+
+                    return new Date(utcDate);
                 }
             },
             {
@@ -290,30 +311,44 @@ Dash.dependencies.DashParser = function () {
         },
 
         internalParse = function (data, baseUrl) {
-            this.debug.log("Doing parse.");
+            this.debug.log("[DashParser]", "Doing parse.");
 
             var manifest,
                 converter = new X2JS(matchers, '', true),
                 iron = new ObjectIron(getDashMap());
 
-            this.debug.log("Converting from XML.");
+            this.debug.log("[DashParser]", "Converting from XML.");
             manifest = converter.xml_str2json(data);
+            
+
+            // BBE: gestion erreur de parsing manifest
+            if (manifest == null)
+            {
+                this.debug.log("[DashParser]", "Failed to parse manifest!!");
+                return Q.when(null);
+            }
 
             if (!manifest.hasOwnProperty("BaseURL")) {
-                this.debug.log("Setting baseURL: " + baseUrl);
+                this.debug.log("[DashParser]", "Setting baseURL: " + baseUrl);
                 manifest.BaseURL = baseUrl;
             } else {
                 // Setting manifest's BaseURL to the first BaseURL
                 manifest.BaseURL = manifest.BaseURL_asArray[0];
-            }
-            if (manifest.BaseURL.indexOf("http") !== 0) {
-                manifest.BaseURL = baseUrl + manifest.BaseURL;
+
+                if (manifest.BaseURL.indexOf("http") !== 0) {
+                    manifest.BaseURL = baseUrl + manifest.BaseURL;
+                }
             }
 
-            this.debug.log("Flatten manifest properties.");
+            this.debug.log("[DashParser]", "Flatten manifest properties.");
             iron.run(manifest);
 
-            this.debug.log("Parsing complete.");
+            this.debug.log("[DashParser]", "Parsing complete.")
+            this.debug.log("[DashParser]", "Parsing complete.");
+
+
+
+
             return Q.when(manifest);
         };
 

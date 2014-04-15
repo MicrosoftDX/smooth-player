@@ -17,7 +17,7 @@ MediaPlayer.dependencies.TextController = function () {
          //LOADED = "LOADED",
          READY = "READY",
          initialized = false,
-         periodIndex = -1,
+         periodInfo = null,
          data,
          buffer,
          state = READY,
@@ -50,7 +50,9 @@ MediaPlayer.dependencies.TextController = function () {
          onBytesLoaded = function (request, response) {
              var self = this;
              self.debug.log(" Text track Bytes finished loading: " + request.url);
-             self.fragmentController.process(response.data).then(
+
+             //MBR : Modif orange pour ajouter la request afin de récupérer startTime et timescale
+             self.fragmentController.process(response.data,request).then(
                  function (data) {
                      if (data !== null) {
                          self.debug.log("Push text track bytes: " + data.byteLength);
@@ -60,8 +62,8 @@ MediaPlayer.dependencies.TextController = function () {
              );
          },
 
-         onBytesError = function (request) {
-             this.errHandler.downloadError("Error loading text track" + request.url);
+         onBytesError = function (/*request*/) {
+            console.error("Error on Byte");
          };
 
     return {
@@ -71,23 +73,23 @@ MediaPlayer.dependencies.TextController = function () {
         indexHandler: undefined,
         sourceBufferExt: undefined,
         debug: undefined,
-        initialize: function (periodIndex, data, buffer, videoModel) {
+        initialize: function (periodInfo, data, buffer, videoModel) {
             var self = this;
 
             self.setVideoModel(videoModel);
-            self.setPeriodIndex(periodIndex);
+            self.setPeriodInfo(periodInfo);
             self.setData(data);
             self.setBuffer(buffer);
 
             initialized = true;
         },
 
-        getPeriodIndex: function () {
-            return periodIndex;
+        setPeriodInfo: function(value) {
+            periodInfo = value;
         },
 
-        setPeriodIndex: function (value) {
-            periodIndex = value;
+        getPeriodIndex: function () {
+            return periodInfo.index;
         },
 
         getVideoModel: function () {
@@ -113,6 +115,14 @@ MediaPlayer.dependencies.TextController = function () {
         setBuffer: function (value) {
             buffer = value;
         },
+
+        reset: function (errored, source) {
+            if (!errored) {
+                this.sourceBufferExt.abort(source, buffer);
+                this.sourceBufferExt.removeSourceBuffer(source, buffer);
+            }
+        },
+
         start: doStart
     };
 };
