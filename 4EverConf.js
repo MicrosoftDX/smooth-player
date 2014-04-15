@@ -14,38 +14,51 @@ var infosContent =
 // maximum 9 streams
 var videoStreams = [
     {
-        "name": "DASH-HEVC UHD",
-        "url": "http://10.194.60.47/orange3s/UHD/dashevc-live-2s/dashevc-live-2s-4k.mpd",
+        "name": "DASH-HEVC HD/UHD 30Hz",
+        "url": "http://localhost/dash/demoDashNab2014_30Hz/demoDashNab2014_30Hz.mpd",
         "image": "app/img/4Ever/dashevc-live-2s.jpg",
         "representations": [
-            "3840x2160 - 60 Hz - 18.4 Mbps",
-            "3840x2160 - 60 Hz - 13.5 Mbps",
-            "3840x2160 - 60 Hz - 10.6 Mbps"
+            "3840x2160@14.5M",
+            "3840x2160@11.5M",
+            "1920x1080@5.8M",
+            "1920x1080@3.6M",
+            "1280x720@2.9M",
+            "1280x720@1.7M"
         ]
     },
     {
-        "name": "DASH-HEVC HD",
-        "url": "http://10.194.60.47/orange3s/UHD/dashevc-live-2s/dashevc-live-2s-p60.mpd",
+        "name": "DASH-HEVC UHD 60Hz",
+        "url": "http://localhost/dash/UHD/dashevc-live-2s/dashevc-live-2s-4k.mpd",
         "image": "app/img/4Ever/dashevc-live-2s.jpg",
         "representations": [
-            "1920x1080 - 60 Hz - 7.5 Mbps",
-            "1920x1080 - 60 Hz - 5.5 Mbps",
-            "1280x720  - 60 Hz - 3.7 Mbps",
-            "1280x720  - 60 Hz - 2.7 Mbps"
+            "3840x2160@18.4M",
+            "3840x2160@13.5M",
+            "3840x2160@10.6M"
         ]
     },
     {
-        "name": "DASH-HEVC UHD/HD",
-        "url": "http://10.194.60.47/orange3s/UHD/dashevc-live-2s/dashevc-live-2s.mpd",
+        "name": "DASH-HEVC HD 60Hz",
+        "url": "http://localhost/dash/UHD/dashevc-live-2s/dashevc-live-2s-p60.mpd",
         "image": "app/img/4Ever/dashevc-live-2s.jpg",
         "representations": [
-            "3840x2160 - 60 Hz - 18.4 Mbps",
-            "3840x2160 - 60 Hz - 13.5 Mbps",
-            "3840x2160 - 60 Hz - 10.6 Mbps",
-            "1920x1080 - 60 Hz - 7.5 Mbps",
-            "1920x1080 - 60 Hz - 5.5 Mbps",
-            "1280x720  - 60 Hz - 3.7 Mbps",
-            "1280x720  - 60 Hz - 2.7 Mbps"
+            "1920x1080@7.5M",
+            "1920x1080@5.5M",
+            "1280x720@3.7M",
+            "1280x720@2.7M"
+        ]
+    },
+    {
+        "name": "DASH-HEVC UHD/HD 60Hz",
+        "url": "http://localhost/dash/UHD/dashevc-live-2s/dashevc-live-2s.mpd",
+        "image": "app/img/4Ever/dashevc-live-2s.jpg",
+        "representations": [
+            "3840x2160@18.4M",
+            "3840x2160@13.5M",
+            "3840x2160@10.6M",
+            "1920x1080@7.5M",
+            "1920x1080@5.5M",
+            "1280x720@3.7M",
+            "1280x720@2.7M"
         ]
     }
 ];
