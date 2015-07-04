@@ -98,7 +98,7 @@ MediaPlayer.dependencies.protection.KeySystem_Widevine = function() {
         doGetInitData = function () {
 
             // Check if protection data contains the pssh
-            if (protData.pssh) {
+            if (protData && protData.pssh) {
                 return BASE64.decodeArray(protData.pssh).buffer;
             }
 
