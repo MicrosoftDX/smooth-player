@@ -130,6 +130,9 @@ MediaPlayer.dependencies.BufferController = function () {
                 return;
             }
 
+            // Notify ABR controller we start the buffering in order to adapt ABR rules
+            self.abrController.setPlayerState("buffering");
+
             if (seeking === false) {
                 currentTime = new Date();
                 clearPlayListTraceMetrics(currentTime, MediaPlayer.vo.metrics.PlayList.Trace.USER_REQUEST_STOP_REASON);
@@ -428,9 +431,9 @@ MediaPlayer.dependencies.BufferController = function () {
             while(i<data.length) {
                 identifier = String.fromCharCode(data[i+4],data[i+5],data[i+6],data[i+7]); // box identifier
                 size = data[i]*expThree + data[i+1]*expTwo + data[i+2]*256 + data[i+3]*1; // size of the box
-                if( identifier == "moov" || identifier == "moof") {
+                if( identifier === "moov" || identifier === "moof") {
                     break;
-                } else if(identifier == "emsg") {
+                } else if(identifier === "emsg") {
                     inbandEventFound = true;
                     var eventBox = ["","",0,0,0,0,""],
                         arrIndex = 0,
@@ -438,7 +441,7 @@ MediaPlayer.dependencies.BufferController = function () {
 
                     while(j < size+i) {
                         /* == string terminates with 0, this indicates end of attribute == */
-                        if(arrIndex === 0 || arrIndex == 1 || arrIndex == 6) {
+                        if(arrIndex === 0 || arrIndex === 1 || arrIndex === 6) {
                             if(data[j] !== 0) {
                                 eventBox[arrIndex] += String.fromCharCode(data[j]);
                             } else {
@@ -500,7 +503,7 @@ MediaPlayer.dependencies.BufferController = function () {
                 size = data[i]*expThree + data[i+1]*expTwo + data[i+2]*256 + data[i+3]*1;
 
 
-                if(identifier != "emsg" ) {
+                if(identifier !== "emsg" ) {
                     for(var l = i ; l < i + size; l++) {
                         modData[j] = data[l];
                         j += 1;
@@ -869,6 +872,8 @@ MediaPlayer.dependencies.BufferController = function () {
             if (stalled) {
                 if (bufferLevel > minBufferTimeAtStartup) {
                     setStalled.call(self, false);
+                    // Notify ABR controller we are no more buffering before playing
+                    this.abrController.setPlayerState("playing");
                 }
             }
 
