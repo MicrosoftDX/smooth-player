@@ -154,7 +154,7 @@
                 });
             };
 
-            req.onloadend = req.onerror = function () {
+            req.onerror = function () {
                 if (xhrs.indexOf(req) === -1) {
                     return;
                 } else {

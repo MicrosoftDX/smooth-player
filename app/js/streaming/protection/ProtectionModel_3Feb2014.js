@@ -95,15 +95,15 @@ MediaPlayer.models.ProtectionModel_3Feb2014 = function () {
                 // These events are translated into our API-independent versions of the
                 // same events
                 handleEvent: function(event) {
+                    self.debug.log("[DRM][3Feb2014] Session event type " + event.type);
                     switch (event.type) {
-
                         case api.error:
                             var errorStr = "KeyError"; // TODO: Make better string from event
                             var data = {};
-               
+
                             data.sessionToken = this;
                             data.systemCode = null;
-                
+
                             self.notify(MediaPlayer.models.ProtectionModel.eventList.ENAME_KEY_ERROR,
                                     new MediaPlayer.vo.Error(MediaPlayer.dependencies.ErrorHandler.prototype.MEDIA_KEYERR, errorStr, data));
                             break;
