@@ -98,10 +98,9 @@ MediaPlayer.dependencies.ProtectionController = function () {
             // Some browsers return initData as Uint8Array (IE), some as ArrayBuffer (Chrome).
             // Convert to ArrayBuffer
             var abInitData = event.data.initData;
-            //if (ArrayBuffer.isView(abInitData)) {
-            /*if (abInitData.buffer && abInitData.buffer instanceof ArrayBuffer && abInitData.byteLength !== undefined) {
+            if (ArrayBuffer.isView(abInitData)) {
                 abInitData = abInitData.buffer;
-            }*/
+            }
 
             //this.debug.log("[DRM] onNeedKey: " + this.protectionModel.keySystem.ks);
 
