@@ -1,20 +1,25 @@
-# hasplayer.js
+# SmoothStream.js
 
-hasplayer.js is a javascript implementation of a video player based on the W3C premium extensions, i.e. [MSE](https://dvcs.w3.org/hg/html-media/raw-file/tip/media-source/media-source.html) and [EME](https://dvcs.w3.org/hg/html-media/raw-file/tip/encrypted-media/encrypted-media.html).
+SmoothStream.js is a JavaScript library to allow playback of videos without the need of Flash, Silverlight or any other plugin.
+It is based on the W3C media premium extensions ([MSE](https://dvcs.w3.org/hg/html-media/raw-file/tip/media-source/media-source.html) and [EME] (https://dvcs.w3.org/hg/html-media/raw-file/tip/encrypted-media/encrypted-media.html).
+In this early first release focus has been about supporting playback of files encoded using **Microsoft Smooth Streaming** with support for PIFF1.1 and PIFF1.3. Also there is support for playback of *encrypted* (DRM) files using **Microsoft Playready**. Basic functionality is cross browser (tested with IE11, Edge, Chrome and FF Developer Edition) but playing encrypted files works only with Edge and IE11.
 
-hasplayer.js is an extension of the [dash.js](https://github.com/Dash-Industry-Forum/dash.js) project with the aim of supporting additional http adaptive streaming protocols such as Microsoft Smooth Streaming protocol and Apple Http Live Streaming.
+Library is based on *hasplayer.js* project and on *dashjs* project.
 
-If your intent is to use the player code without contributing back to this project, then use the MASTER branch which holds the approved and stable public releases.
+## System Requirements
+Windows 8.1 or Windows 10 with IE11 or Edge (Chrome and FF Developer also supported for non DRM videos).
 
-If your goal is to improve or extend the code and contribute back to this project, then you should make your changes in, and submit a pull request against, the DEVELOPMENT branch. 
+## Playing with library
+1. Download 'beta' branch.
+2. Use any kind of local web server (i. e. npm install -g local-web-server )
+3. Point local web server to the root folder
+4. Open Edge/IE11 and go to http://localhost:[port]/samples/dash-if
+5. Dash-if test player page should appear in browser.
+6. Use a preselected MSS video and click 'Load' *or* enter a manifest URL and click 'Load'
+7. Report any issue you found :)
 
-## Quick Start
-
-### Reference Player
-
-1. Download 'master', 'development' or latest tagged release.
-2. Extract hasplayer.js and move the entire folder to localhost (or run any http server instance at the root of the hasplayer.js folder).
-3. Open any sample from the samples folder in your MSE capable web browser.
+## Building the library
+Build process is using grunt.
 
 ### Install Dependencies
 
@@ -30,17 +35,7 @@ If your goal is to improve or extend the code and contribute back to this projec
     * npm install
 3. Run build task
     * grunt build
-4. You can also check for other available targter by running:
-    * grunt help
 
-The build task can be configured in order to select supported protocol(s) and to integrate or not EME support. For exemple:
-    * grunt build -protocol mss -no-protection ( = mss support only, no EME support)
-
-## Demo
-
-A builded version of the hasplayer.js and samples is available ah this address:
-
-http://orange-opensource.github.io/hasplayer.js
 
 ## License
 
@@ -53,14 +48,8 @@ Create a video element somewhere in your html. For our purposes, make sure to se
 ```
 <video id="videoPlayer" controls="true"></video>
 ```
-Add hasplayer.js to the end of the body.
-```
-<body>
-  ...
-  <script src="yourPathToHasplayer/hasplayer.js"></script>
-</body>
-```
-Now comes the good stuff. We need to create a context. Then from that context we create a media player, initialize it, attach it to our "videoPlayer" and then tell it where to get the video from. We will do this in an anonymous self executing function, that way it will run as soon as the page loads. So, here is how we do it:
+
+Following code shows how to create a MediaPlayer object associated to the video element. First step is to create a MediaPlayer.di.Context and then create a MediaPlayer associated to it. Once we have the MediaPlayer object need to init it (calling startup method) and attach to the video tag using attachView. Finally method attachSource is called to set the URL of the video (really, the URL of the manifest) to play.
 ``` js
 (function(){
     var url = "http://playready.directtaps.net/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest";
@@ -72,28 +61,28 @@ Now comes the good stuff. We need to create a context. Then from that context we
 })();
 ```
 
-When it is all done, it should look similar to this:
+### Change samples files for the dash-if page
+If you want to use your own test streams from the dash-if test page, and don't want to enter the manifest URL each time, you can edit the file *samples/DASH-IF/json/sources.json*. This is a JSON file with the following structure:
+```js
+{
+    "items": [
+        {
+            "type":"HLS",
+            "name":"Apple BipBop",
+            "url":"http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8",
+            "browsers":"cdsbi"
+        },
+        {
+        	//....
+        }
+    ]
+}
+
 ```
-<!doctype html>
-<html>
-    <head>
-        <title>Hasplayer.js Rocks</title>
-    </head>
-    <body>
-        <div>
-            <video id="videoPlayer" controls="true"></video>
-        </div>
-        <script src="yourPathToHasplayer/hasplayer.js"></script>
-        <script>
-            (function(){
-                var url = "http://playready.directtaps.net/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest";
-                var context = new MediaPlayer.di.Context();
-                var player = new MediaPlayer(context);
-                player.startup();
-                player.attachView(document.querySelector("#videoPlayer"));
-                player.attachSource(url);
-            })();
-        </script>
-    </body>
-</html>
-```
+Each item of the "items" array has following fields:
+1. *type* -> Type of the video. Valid values are HLS (for Apple HLS videos), MSS (for Microsoft smooth stream videos) and DASH for standard MPEG-DASH videos. Support from HLS is inherited from *hasplayer.js* but **has not been really tested and it is not in the current focus**. Support from DASH is inherited from *dashjs* althought **using dashjs itself is a better option for playing MPEGDASH videos**. Current scope is about support for MSS files only.
+2. *name* -> Name of stream
+3. *url* -> Manifest URL
+4. *browsers* -> Use 'cdsbi' value.
+
+
