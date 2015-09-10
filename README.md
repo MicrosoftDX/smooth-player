@@ -1,4 +1,4 @@
-# SmoothStream.js
+# Smooth Player
 
 SmoothStream.js is a JavaScript library to allow playback of videos without the need of Flash, Silverlight or any other plugin.
 It is based on the W3C media premium extensions ([MSE](https://dvcs.w3.org/hg/html-media/raw-file/tip/media-source/media-source.html) and [EME] (https://dvcs.w3.org/hg/html-media/raw-file/tip/encrypted-media/encrypted-media.html).
